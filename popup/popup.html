@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    :root {
+      --bg: #111827;
+      --fg: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #10b981;
+      --border: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 300px;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 16px;
+      color: #fff;
+      background: linear-gradient(135deg, #10b981, #0d9488);
+    }
+    .title { font-weight: 700; font-size: 14px; }
+    .subtitle { color: var(--muted); font-size: 11px; }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .rules { padding: 6px 0; }
+    .rule-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 14px;
+    }
+    .rule-row label { color: #d1d5db; }
+    .footer { padding: 10px 14px; color: var(--muted); font-size: 11px; }
+    input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">E</div>
+    <div>
+      <div class="title">Echo - Prompt Coach</div>
+      <div class="subtitle">Real-time prompt coaching</div>
+    </div>
+  </div>
+  <div class="toggle-row">
+    <span>Coaching enabled</span>
+    <input type="checkbox" id="enabled" />
+  </div>
+  <div class="rules" id="rules"></div>
+  <div class="footer">
+    Works on ChatGPT, Gemini & Claude. Everything runs locally in your browser.
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
