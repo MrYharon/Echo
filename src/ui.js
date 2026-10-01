@@ -70,6 +70,47 @@ Echo.ui = {
   background: #38bdf8;
   color: #082f49;
 }
+.echo-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+  max-width: 320px;
+}
+.echo-word-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #0b1120;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 9999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  color: #e2e8f0;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.echo-word-tag:hover {
+  background: #1e293b;
+  border-color: #38bdf8;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+  transform: translateY(-1px);
+}
+.echo-word-target {
+  text-decoration: underline wavy #f59e0b 1.5px;
+  font-weight: 600;
+  color: #fbbf24;
+}
+.echo-word-arrow {
+  color: #64748b;
+  font-size: 10px;
+}
+.echo-word-replacement {
+  color: #38bdf8;
+  font-weight: 700;
+}
 .echo-panel {
   display: none;
   margin-top: 8px;
@@ -348,6 +389,7 @@ Echo.ui = {
         <span class="echo-score-text">--</span>
         <button class="echo-pill-btn" type="button">Auto-correct</button>
       </div>
+      <div class="echo-strip" style="display:none;"></div>
       <div class="echo-panel">
         <div class="echo-panel-header">
           <div class="echo-brand-group">
@@ -381,6 +423,7 @@ Echo.ui = {
     `;
 
     Echo.ui.pill = Echo.ui.host.querySelector(".echo-pill");
+    Echo.ui.stripEl = Echo.ui.host.querySelector(".echo-strip");
     Echo.ui.panel = Echo.ui.host.querySelector(".echo-panel");
     Echo.ui.scoreTextEl = Echo.ui.host.querySelector(".echo-score-text");
     Echo.ui.pillBtn = Echo.ui.host.querySelector(".echo-pill-btn");
@@ -562,6 +605,34 @@ Echo.ui = {
 
     // Auto-correct banner visibility in drawer
     Echo.ui.actionBanner.style.display = canAutocorrect ? "block" : "none";
+
+    // Render inline squiggly word-fix tags
+    if (Echo.ui.stripEl) {
+      Echo.ui.stripEl.innerHTML = "";
+      const wordIssues = (result.issues || []).filter(
+        (i) => i.quickFix && i.quickFix.target && i.quickFix.replacement && !i.quickFix.append
+      );
+      if (wordIssues.length > 0 && !Echo.ui.open) {
+        Echo.ui.stripEl.style.display = "flex";
+        for (const wi of wordIssues.slice(0, 3)) {
+          const tag = document.createElement("div");
+          tag.className = "echo-word-tag";
+          tag.title = "Click to replace '" + wi.quickFix.target + "' with '" + wi.quickFix.replacement.trim() + "'";
+          tag.innerHTML = `
+            <span class="echo-word-target">${Echo.detector.escapeHtml(wi.quickFix.target)}</span>
+            <span class="echo-word-arrow">&rarr;</span>
+            <span class="echo-word-replacement">${Echo.detector.escapeHtml(wi.quickFix.replacement.trim())}</span>
+          `;
+          tag.addEventListener("click", (e) => {
+            e.stopPropagation();
+            Echo.ui.applyIndividualFix(wi.quickFix);
+          });
+          Echo.ui.stripEl.appendChild(tag);
+        }
+      } else {
+        Echo.ui.stripEl.style.display = "none";
+      }
+    }
 
     Echo.ui.bodyEl.innerHTML = "";
     const hasIssues = result.issues && result.issues.length > 0;
