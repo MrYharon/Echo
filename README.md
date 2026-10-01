@@ -1,58 +1,52 @@
 # Echo - Prompt Coach
 
-A browser extension that gives real-time prompt-quality feedback before you hit
-send on ChatGPT, Gemini, or Claude. Like Grammarly, but for the way you talk to AI.
+Echo is a browser extension that acts as a real-time Grammarly for AI prompting. It analyzes what you type in ChatGPT, Claude, and Gemini, flags prompt weaknesses, and provides one-click auto-correction directly in the input field.
 
-## What it does
+## Features
 
-While you type a prompt, Echo shows a live quality score (A-D) next to the input
-box and flags issues with concrete tips:
+- **One-Click Auto-Correct**: Instantly rewrite weak prompts into direct, structured instructions that optimize AI responses.
+- **Real-Time Quality Score**: Live score (0-100 and A-D grade) displayed in a lightweight floating pill next to the active input.
+- **Targeted Quick-Fixes**: One-click inline fixes for specific issues (filler removal, weak verbs, vague vocabulary).
+- **Format & Constraint Presets**: Rapidly inject output specifications (clean code, JSON, numbered steps, concise tone).
+- **Keyboard Shortcut**: Press `Alt+E` to auto-correct the current prompt immediately.
+- **Undo Support**: Easily revert to your original input if needed.
+- **100% Local & Private**: All evaluation and correction logic runs entirely in your browser. No external API calls, tracking, or network overhead.
 
-- **Concrete task** - very short prompts with no clear ask
-- **Vague language** - words like "help", "something", "stuff", "good"
-- **Action verb** - prompts that don't start with a clear instruction verb
-- **Constraints & format** - no output format, length, tone, or audience
-- **One ask at a time** - prompts bundling multiple questions
+## Core Rules
 
-Everything runs locally in your browser. No data leaves your machine, no API
-calls, no accounts, no cost.
+1. **Concrete Task**: Detects underspecified or overly brief prompts and guides you to define the goal and context.
+2. **Action Verbs**: Replaces conversational filler ("can you please help me with") with direct command verbs ("Build", "Draft", "Explain", "Analyze").
+3. **Clarity**: Flags ambiguous terms ("something good", "stuff", "things", "etc") and suggests precise technical criteria.
+4. **Constraints & Format**: Prompts for required output formats (code with comments, tables, JSON) and scope limits.
+5. **One Ask at a Time**: Identifies cluttered multi-part questions and advises sequential numbering or prompt splitting.
 
-## Install (development)
+## Installation
 
-1. Clone this repo.
-2. Open `chrome://extensions`.
-3. Enable **Developer mode** (top-right).
-4. Click **Load unpacked** and select this folder.
-5. Open ChatGPT, Gemini, or Claude and start typing.
+1. Open `chrome://extensions` in Google Chrome (or Edge / Brave).
+2. Enable **Developer mode** via the toggle in the top-right corner.
+3. Click **Load unpacked** and select the repository directory.
+4. Navigate to ChatGPT, Claude, or Gemini and begin typing in the prompt area.
 
-## Project structure
+## Project Structure
 
 ```
-manifest.json          MV3 manifest (content scripts + popup)
-src/detector.js        Finds the prompt input on each platform
-src/analyzer.js        Heuristic rule engine + scoring (0-100)
-src/ui.js              Floating score pill + suggestion panel
-src/content.js         Wiring, debounce, SPA re-detection
-popup/                 Toolbar popup (enable toggle + rule toggles)
-icons/                 Extension icons
-scripts/make-icons.ps1 Icon generator (Windows/PowerShell)
+manifest.json          MV3 extension manifest
+src/detector.js        Detects active input and provides DOM read/write methods
+src/autocorrect.js     Heuristic transformation engine for prompt auto-correction
+src/analyzer.js        Rule engine, scoring, and targeted quick-fix definitions
+src/ui.js              Light blue floating pill, suggestion panel, and controls
+src/content.js         Lifecycle coordination, debouncing, and keyboard listeners
+popup/                 Extension settings and rule toggles
+icons/                 Light blue brand icons and SVG asset
+scripts/make-icons.ps1 PowerShell script to regenerate extension icons
 ```
 
-## Supported platforms
+## Supported Platforms
 
 - ChatGPT (`chatgpt.com`, `chat.openai.com`)
 - Claude (`claude.ai`)
 - Gemini (`gemini.google.com`)
-
-A generic fallback detects large textareas/contenteditable boxes on other pages.
-
-## Roadmap
-
-- [ ] LLM-backed "Improve prompt" rewrite (phase 2)
-- [ ] Word-level inline highlighting in the input
-- [ ] Prompt history / before-after score tracking
-- [ ] Firefox + Edge packaging
-- [ ] Chrome Web Store listing
+- Generic fallback for web textareas and contenteditable inputs
 
 ## License
 

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Echo - Prompt Coach",
-  "version": "0.1.0",
-  "description": "Real-time prompt quality suggestions before you hit send on ChatGPT, Gemini, or Claude.",
+  "version": "0.2.0",
+  "description": "Grammarly for AI prompting. Real-time prompt autocorrect and quality coaching for ChatGPT, Claude, and Gemini.",
   "permissions": ["storage"],
   "host_permissions": [
     "https://chatgpt.com/*",
@@ -20,6 +20,7 @@
       ],
       "js": [
         "src/detector.js",
+        "src/autocorrect.js",
         "src/analyzer.js",
         "src/ui.js",
         "src/content.js"

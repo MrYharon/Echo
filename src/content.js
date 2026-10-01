@@ -27,11 +27,21 @@
     Echo.ui.update(result);
   }
 
+  function handleKeyDown(e) {
+    if (e.altKey && (e.key === "e" || e.key === "E")) {
+      if (Echo.ui && Echo.ui.triggerAutocorrect) {
+        e.preventDefault();
+        Echo.ui.triggerAutocorrect();
+      }
+    }
+  }
+
   function bindInput(input) {
     currentInput = input;
     Echo.ui.mount(input);
     input.addEventListener("input", scheduleAnalyze);
     input.addEventListener("keyup", scheduleAnalyze);
+    input.addEventListener("keydown", handleKeyDown);
     runAnalyze();
   }
 
@@ -50,6 +60,7 @@
     if (!settings) return;
     if (!settings.enabled) {
       if (currentInput) {
+        currentInput.removeEventListener("keydown", handleKeyDown);
         Echo.ui.cleanup();
         currentInput = null;
       }

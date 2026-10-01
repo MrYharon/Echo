@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="echoLightBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="waveGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.1" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#echoLightBlue)" />
+  
+  <!-- Subtle echo acoustic wave arcs -->
+  <path d="M 88 40 A 34 34 0 0 1 88 88" fill="none" stroke="url(#waveGlow)" stroke-width="5" stroke-linecap="round" />
+  <path d="M 98 30 A 48 48 0 0 1 98 98" fill="none" stroke="url(#waveGlow)" stroke-width="4" stroke-linecap="round" opacity="0.6" />
+
+  <!-- Clean geometric modern E -->
+  <path d="M 38 34 L 74 34 C 77.3 34 80 36.7 80 40 C 80 43.3 77.3 46 74 46 L 50 46 L 50 58 L 70 58 C 73.3 58 76 60.7 76 64 C 76 67.3 73.3 70 70 70 L 50 70 L 50 82 L 74 82 C 77.3 82 80 84.7 80 88 C 80 91.3 77.3 94 74 94 L 38 94 C 34.7 94 32 91.3 32 88 L 32 40 C 32 36.7 34.7 34 38 34 Z" fill="#ffffff" />
+</svg>
