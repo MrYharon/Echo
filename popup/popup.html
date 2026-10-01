@@ -7,6 +7,7 @@
     :root {
       --bg: #0b1120;
       --card-bg: #0f172a;
+      --surface: #1e293b;
       --fg: #f8fafc;
       --muted: #94a3b8;
       --accent: #38bdf8;
@@ -15,35 +16,158 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      width: 320px;
+      width: 340px;
       background: var(--bg);
       color: var(--fg);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: 13px;
+      line-height: 1.4;
     }
     .header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 14px 16px;
+      justify-content: space-between;
+      padding: 12px 16px;
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
     }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
     .logo {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 8px;
       display: grid;
       place-items: center;
       font-weight: 800;
-      font-size: 16px;
+      font-size: 15px;
       color: #fff;
       background: linear-gradient(135deg, var(--accent), var(--accent-deep));
       box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
     }
-    .title { font-weight: 700; font-size: 14px; color: #ffffff; }
-    .subtitle { color: var(--accent); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-    
+    .title { font-weight: 700; font-size: 13px; color: #ffffff; }
+    .subtitle { color: var(--accent); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .nav-tabs {
+      display: flex;
+      background: #090e1a;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px 0;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .nav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background: rgba(56, 189, 248, 0.04);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Sandbox Styles */
+    .sandbox-box {
+      padding: 12px 16px;
+    }
+    .sandbox-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .score-badge {
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--accent);
+    }
+    .sandbox-textarea {
+      width: 100%;
+      height: 90px;
+      background: var(--surface);
+      color: var(--fg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+    }
+    .sandbox-textarea:focus {
+      border-color: var(--accent);
+    }
+    .sandbox-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-action {
+      background: var(--accent);
+      color: #082f49;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-action:hover {
+      background: #7dd3fc;
+    }
+    .btn-subtle {
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-subtle:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .sandbox-feedback {
+      margin-top: 10px;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    .mini-issue {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      padding: 6px 8px;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+    .mini-issue-name {
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 2px;
+    }
+    .mini-issue-tip {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    /* Settings Styles */
     .status-banner {
       padding: 10px 16px;
       background: rgba(56, 189, 248, 0.08);
@@ -56,14 +180,13 @@
     }
     .status-banner span.key {
       font-family: ui-monospace, monospace;
-      padding: 2px 5px;
+      padding: 2px 6px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 4px;
       color: var(--accent);
       font-weight: 600;
       font-size: 11px;
     }
-
     .toggle-row {
       display: flex;
       align-items: center;
@@ -85,13 +208,10 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 7px 16px;
-      transition: background 0.15s ease;
-    }
-    .rule-row:hover {
-      background: rgba(255, 255, 255, 0.03);
+      padding: 6px 16px;
     }
     .rule-row label { color: #cbd5e1; cursor: pointer; font-size: 12px; }
+
     .footer {
       padding: 10px 16px;
       color: var(--muted);
@@ -102,33 +222,63 @@
     }
     input[type="checkbox"] {
       accent-color: var(--accent);
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="logo">E</div>
-    <div>
-      <div class="title">Echo - Prompt Coach</div>
-      <div class="subtitle">Grammarly for AI</div>
+    <div class="brand">
+      <div class="logo">E</div>
+      <div>
+        <div class="title">Echo - Prompt Coach</div>
+        <div class="subtitle">Grammarly for AI</div>
+      </div>
     </div>
   </div>
-  <div class="status-banner">
-    <span>Quick Auto-Correct</span>
-    <span class="key">Alt+E</span>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="sandbox">Playground</button>
+    <button class="nav-tab" data-tab="settings">Settings</button>
   </div>
-  <div class="toggle-row">
-    <span>Real-time Coaching</span>
-    <input type="checkbox" id="enabled" />
+
+  <div id="tab-sandbox" class="tab-content active">
+    <div class="sandbox-box">
+      <div class="sandbox-meta">
+        <span class="score-badge" id="sandbox-score">Ready</span>
+        <span style="font-size: 11px; color: var(--muted);" id="sandbox-count">0 issues</span>
+      </div>
+      <textarea id="sandbox-input" class="sandbox-textarea" placeholder="Type or paste a prompt to test autocorrect..."></textarea>
+      <div class="sandbox-actions">
+        <button id="sandbox-autocorrect" class="btn-action" type="button">Auto-correct</button>
+        <button id="sandbox-copy" class="btn-subtle" type="button">Copy</button>
+        <button id="sandbox-clear" class="btn-subtle" type="button">Clear</button>
+      </div>
+      <div class="sandbox-feedback" id="sandbox-feedback"></div>
+    </div>
   </div>
-  <div class="rules-header">Active Evaluation Rules</div>
-  <div class="rules" id="rules"></div>
+
+  <div id="tab-settings" class="tab-content">
+    <div class="status-banner">
+      <span>Auto-Correct Shortcut</span>
+      <span class="key">Alt+E</span>
+    </div>
+    <div class="toggle-row">
+      <span>Real-time Coaching</span>
+      <input type="checkbox" id="enabled" />
+    </div>
+    <div class="rules-header">Active Evaluation Rules</div>
+    <div class="rules" id="rules"></div>
+  </div>
+
   <div class="footer">
-    Works locally on ChatGPT, Gemini, and Claude. Zero data sent to external servers.
+    Works locally on ChatGPT, Gemini, and Claude. 100% private.
   </div>
+
+  <script src="../src/autocorrect.js"></script>
+  <script src="../src/analyzer.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
