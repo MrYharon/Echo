@@ -220,6 +220,35 @@
       background: #070b14;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
+    .stats-row {
+      display: flex;
+      gap: 8px;
+      padding: 10px 16px 8px;
+      background: #090e1a;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-card {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 10px;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 1px;
+    }
+
     input[type="checkbox"] {
       accent-color: var(--accent);
       width: 15px;
@@ -236,6 +265,17 @@
         <div class="title">Echo - Prompt Coach</div>
         <div class="subtitle">Grammarly for AI</div>
       </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-prompts">0</div>
+      <div class="stat-label">Prompts Enhanced</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-fixes">0</div>
+      <div class="stat-label">Fixes Applied</div>
     </div>
   </div>
 

@@ -129,17 +129,35 @@ if (btnClear) {
   });
 }
 
+const statPrompts = document.getElementById("stat-prompts");
+const statFixes = document.getElementById("stat-fixes");
+
+function renderStats(stats) {
+  if (!stats) stats = { promptsEnhanced: 0, fixesApplied: 0 };
+  if (statPrompts) statPrompts.textContent = stats.promptsEnhanced || 0;
+  if (statFixes) statFixes.textContent = stats.fixesApplied || 0;
+}
+
 async function init() {
-  const { echoEnabled, echoRules = {} } = await chrome.storage.local.get([
+  const { echoEnabled, echoRules = {}, echoStats = {} } = await chrome.storage.local.get([
     "echoEnabled",
-    "echoRules"
+    "echoRules",
+    "echoStats"
   ]);
   enabledEl.checked = echoEnabled !== false;
   renderRules(echoRules);
+  renderStats(echoStats);
 }
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.echoStats) {
+    renderStats(changes.echoStats.newValue);
+  }
+});
 
 enabledEl.addEventListener("change", async () => {
   await chrome.storage.local.set({ echoEnabled: enabledEl.checked });
 });
 
 init();
+

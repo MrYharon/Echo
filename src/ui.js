@@ -618,6 +618,18 @@ Echo.ui = {
     }
   },
 
+  recordStat(key) {
+    try {
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get(["echoStats"], (res) => {
+          const stats = (res && res.echoStats) || { promptsEnhanced: 0, fixesApplied: 0 };
+          stats[key] = (stats[key] || 0) + 1;
+          chrome.storage.local.set({ echoStats: stats });
+        });
+      }
+    } catch (e) {}
+  },
+
   triggerAutocorrect() {
     if (!Echo.ui.input) return;
     const current = Echo.detector.read(Echo.ui.input);
@@ -635,6 +647,7 @@ Echo.ui = {
     Echo.ui.actionBtn.textContent = "Corrected";
     Echo.ui.undoBtn.style.display = "inline-flex";
     Echo.ui.showToast("Prompt auto-corrected", true);
+    Echo.ui.recordStat("promptsEnhanced");
     setTimeout(() => {
       if (Echo.ui.actionBtn) Echo.ui.actionBtn.textContent = "Auto-correct";
     }, 2000);
@@ -660,6 +673,7 @@ Echo.ui = {
     }
     Echo.ui.undoBtn.style.display = "inline-flex";
     Echo.ui.showToast("Fix applied", true);
+    Echo.ui.recordStat("fixesApplied");
   },
 
   appendConstraint(text) {
@@ -668,6 +682,7 @@ Echo.ui = {
     Echo.detector.append(Echo.ui.input, text);
     Echo.ui.undoBtn.style.display = "inline-flex";
     Echo.ui.showToast("Output format added", true);
+    Echo.ui.recordStat("fixesApplied");
   },
 
   update(result) {
