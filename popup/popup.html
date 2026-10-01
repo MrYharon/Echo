@@ -249,6 +249,101 @@
       margin-top: 1px;
     }
 
+    /* History Styles */
+    .history-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .history-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    .btn-text {
+      background: transparent;
+      border: none;
+      color: #f87171;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .btn-text:hover {
+      background: rgba(248, 113, 113, 0.1);
+    }
+    .history-list {
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 8px 16px;
+    }
+    .history-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 11px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+    .history-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .history-platform-tag {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #94a3b8;
+    }
+    .history-score-diff {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 11px;
+    }
+    .history-text {
+      color: #e2e8f0;
+      line-height: 1.35;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+    .history-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-mini {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      border-radius: 4px;
+      padding: 3px 7px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-mini:hover {
+      background: var(--accent);
+      color: #082f49;
+      border-color: var(--accent);
+    }
+    .history-empty {
+      padding: 24px 8px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
     input[type="checkbox"] {
       accent-color: var(--accent);
       width: 15px;
@@ -281,6 +376,7 @@
 
   <div class="nav-tabs">
     <button class="nav-tab active" data-tab="sandbox">Playground</button>
+    <button class="nav-tab" data-tab="history">History</button>
     <button class="nav-tab" data-tab="settings">Settings</button>
   </div>
 
@@ -297,6 +393,16 @@
         <button id="sandbox-clear" class="btn-subtle" type="button">Clear</button>
       </div>
       <div class="sandbox-feedback" id="sandbox-feedback"></div>
+    </div>
+  </div>
+
+  <div id="tab-history" class="tab-content">
+    <div class="history-controls">
+      <span class="history-title">Saved Prompts</span>
+      <button id="btn-clear-history" class="btn-text" type="button">Clear All</button>
+    </div>
+    <div id="history-list" class="history-list">
+      <div class="history-empty">No prompts recorded yet. Enhancements on ChatGPT, Claude, and Gemini will appear here automatically.</div>
     </div>
   </div>
 
@@ -317,6 +423,7 @@
     Works locally on ChatGPT, Gemini, and Claude. 100% private.
   </div>
 
+  <script src="../src/db.js"></script>
   <script src="../src/autocorrect.js"></script>
   <script src="../src/analyzer.js"></script>
   <script src="popup.js"></script>
