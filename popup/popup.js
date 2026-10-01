@@ -241,11 +241,130 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;");
 }
 
-// Hook tab clicks to load history
+// Snippets Management
+const snippetsList = document.getElementById("snippets-list");
+const btnToggleNewSnippet = document.getElementById("btn-toggle-new-snippet");
+const snippetForm = document.getElementById("snippet-form");
+const snippetTitleInput = document.getElementById("snippet-title-input");
+const snippetContentInput = document.getElementById("snippet-content-input");
+const btnSaveSnippet = document.getElementById("btn-save-snippet");
+const btnCancelSnippet = document.getElementById("btn-cancel-snippet");
+
+const DEFAULT_TEMPLATES = [
+  {
+    title: "Code Review & Refactor",
+    content: "Review the following code for bugs, edge cases, and performance bottlenecks. Suggest concrete refactorings with clean code blocks and comments."
+  },
+  {
+    title: "Technical Architecture Proposal",
+    content: "Design a modular architecture for the following feature. Detail component boundaries, data flow, API contracts, and trade-offs."
+  },
+  {
+    title: "Executive Summary",
+    content: "Summarize the key findings into an executive briefing under 200 words. Highlight impact, metrics, risks, and recommended action items."
+  }
+];
+
+async function seedDefaultTemplatesIfEmpty() {
+  if (!window.Echo || !window.Echo.db) return;
+  const existing = await window.Echo.db.getSnippets();
+  if (!existing || existing.length === 0) {
+    for (const t of DEFAULT_TEMPLATES) {
+      await window.Echo.db.addSnippet(t);
+    }
+  }
+}
+
+async function loadSnippets() {
+  if (!snippetsList || !window.Echo || !window.Echo.db) return;
+  await seedDefaultTemplatesIfEmpty();
+  const items = await window.Echo.db.getSnippets();
+  snippetsList.innerHTML = "";
+
+  if (!items || items.length === 0) {
+    snippetsList.innerHTML = `<div class="history-empty">No prompt templates saved yet. Click "+ New" above to save your first reusable template.</div>`;
+    return;
+  }
+
+  for (const item of items) {
+    const card = document.createElement("div");
+    card.className = "history-card";
+    card.innerHTML = `
+      <div class="history-card-header">
+        <span style="font-weight:700; color:var(--accent); font-size:11px;">${escapeHtml(item.title)}</span>
+      </div>
+      <div class="history-text">${escapeHtml(item.content)}</div>
+      <div class="history-actions">
+        <button class="btn-mini btn-insert-snippet" type="button">Insert</button>
+        <button class="btn-mini btn-copy-snippet" type="button">Copy</button>
+        <button class="btn-mini btn-del-snippet" type="button" style="color:#f87171;">Delete</button>
+      </div>
+    `;
+
+    card.querySelector(".btn-insert-snippet").addEventListener("click", () => {
+      sandboxInput.value = item.content;
+      updateSandbox();
+      navTabs.forEach((t) => t.classList.remove("active"));
+      tabContents.forEach((c) => c.classList.remove("active"));
+      const tabEl = document.querySelector('[data-tab="sandbox"]');
+      if (tabEl) tabEl.classList.add("active");
+      const targetEl = document.getElementById("tab-sandbox");
+      if (targetEl) targetEl.classList.add("active");
+    });
+
+    card.querySelector(".btn-copy-snippet").addEventListener("click", async (e) => {
+      await navigator.clipboard.writeText(item.content);
+      e.target.textContent = "Copied";
+      setTimeout(() => { e.target.textContent = "Copy"; }, 1200);
+    });
+
+    card.querySelector(".btn-del-snippet").addEventListener("click", async () => {
+      await window.Echo.db.deleteSnippet(item.id);
+      loadSnippets();
+    });
+
+    snippetsList.appendChild(card);
+  }
+}
+
+if (btnToggleNewSnippet) {
+  btnToggleNewSnippet.addEventListener("click", () => {
+    snippetForm.style.display = snippetForm.style.display === "none" ? "block" : "none";
+    if (snippetForm.style.display === "block") {
+      snippetTitleInput.focus();
+    }
+  });
+}
+
+if (btnCancelSnippet) {
+  btnCancelSnippet.addEventListener("click", () => {
+    snippetForm.style.display = "none";
+    snippetTitleInput.value = "";
+    snippetContentInput.value = "";
+  });
+}
+
+if (btnSaveSnippet) {
+  btnSaveSnippet.addEventListener("click", async () => {
+    const title = (snippetTitleInput.value || "").trim();
+    const content = (snippetContentInput.value || "").trim();
+    if (!title || !content || !window.Echo || !window.Echo.db) return;
+
+    await window.Echo.db.addSnippet({ title, content });
+    snippetForm.style.display = "none";
+    snippetTitleInput.value = "";
+    snippetContentInput.value = "";
+    loadSnippets();
+  });
+}
+
+// Hook tab clicks to load history and snippets
 navTabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     if (tab.dataset.tab === "history") {
       loadHistory();
+    } else if (tab.dataset.tab === "snippets") {
+      loadSnippets();
     }
   });
 });
@@ -269,6 +388,7 @@ async function init() {
   renderRules(echoRules);
   renderStats(echoStats);
   loadHistory();
+  loadSnippets();
 }
 
 chrome.storage.onChanged.addListener((changes, area) => {
