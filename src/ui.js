@@ -111,6 +111,51 @@ Echo.ui = {
   color: #38bdf8;
   font-weight: 700;
 }
+.echo-toast {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  opacity: 0;
+  pointer-events: none;
+  background: #0b1120;
+  color: #f8fafc;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(56, 189, 248, 0.2);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
+}
+.echo-toast.echo-toast-show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.echo-toast-msg {
+  color: #38bdf8;
+}
+.echo-toast-undo {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.echo-toast-undo:hover {
+  background: #38bdf8;
+  color: #082f49;
+}
 .echo-panel {
   display: none;
   margin-top: 8px;
@@ -537,6 +582,42 @@ Echo.ui = {
     Echo.ui.host.style.top = top + "px";
   },
 
+  showToast(message, hasUndo) {
+    if (!Echo.ui.host) return;
+    let toast = Echo.ui.host.querySelector(".echo-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.className = "echo-toast";
+      Echo.ui.host.appendChild(toast);
+    }
+    toast.innerHTML = `
+      <span class="echo-toast-msg">${Echo.detector.escapeHtml(message)}</span>
+      ${hasUndo ? '<button class="echo-toast-undo" type="button">Undo</button>' : ''}
+    `;
+    if (hasUndo) {
+      const undoBtn = toast.querySelector(".echo-toast-undo");
+      if (undoBtn) {
+        undoBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          Echo.ui.triggerUndo();
+          Echo.ui.hideToast();
+        });
+      }
+    }
+    toast.classList.add("echo-toast-show");
+    clearTimeout(Echo.ui.toastTimer);
+    Echo.ui.toastTimer = setTimeout(() => {
+      Echo.ui.hideToast();
+    }, 3500);
+  },
+
+  hideToast() {
+    const toast = Echo.ui.host ? Echo.ui.host.querySelector(".echo-toast") : null;
+    if (toast) {
+      toast.classList.remove("echo-toast-show");
+    }
+  },
+
   triggerAutocorrect() {
     if (!Echo.ui.input) return;
     const current = Echo.detector.read(Echo.ui.input);
@@ -553,6 +634,7 @@ Echo.ui = {
 
     Echo.ui.actionBtn.textContent = "Corrected";
     Echo.ui.undoBtn.style.display = "inline-flex";
+    Echo.ui.showToast("Prompt auto-corrected", true);
     setTimeout(() => {
       if (Echo.ui.actionBtn) Echo.ui.actionBtn.textContent = "Auto-correct";
     }, 2000);
@@ -564,6 +646,7 @@ Echo.ui = {
     Echo.ui.previousText = null;
     Echo.detector.write(Echo.ui.input, restoreText);
     Echo.ui.undoBtn.style.display = "none";
+    Echo.ui.showToast("Reverted original prompt", false);
   },
 
   applyIndividualFix(fix) {
@@ -576,6 +659,7 @@ Echo.ui = {
       Echo.detector.replaceText(Echo.ui.input, fix.target, fix.replacement);
     }
     Echo.ui.undoBtn.style.display = "inline-flex";
+    Echo.ui.showToast("Fix applied", true);
   },
 
   appendConstraint(text) {
@@ -583,6 +667,7 @@ Echo.ui = {
     Echo.ui.previousText = Echo.detector.read(Echo.ui.input);
     Echo.detector.append(Echo.ui.input, text);
     Echo.ui.undoBtn.style.display = "inline-flex";
+    Echo.ui.showToast("Output format added", true);
   },
 
   update(result) {
