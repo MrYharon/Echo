@@ -648,6 +648,20 @@ Echo.ui = {
     Echo.ui.undoBtn.style.display = "inline-flex";
     Echo.ui.showToast("Prompt auto-corrected", true);
     Echo.ui.recordStat("promptsEnhanced");
+
+    if (Echo.db && Echo.db.addHistory) {
+      const initialScore = Echo.ui.lastResult ? Echo.ui.lastResult.score : 0;
+      const finalScore = Echo.analyzer ? Echo.analyzer.analyze(autocorrect.corrected).score : 100;
+      Echo.db.addHistory({
+        originalText: current,
+        correctedText: autocorrect.corrected,
+        initialScore: initialScore,
+        finalScore: finalScore,
+        platform: location.hostname || "web",
+        changes: autocorrect.changes || []
+      }).catch(() => {});
+    }
+
     setTimeout(() => {
       if (Echo.ui.actionBtn) Echo.ui.actionBtn.textContent = "Auto-correct";
     }, 2000);
