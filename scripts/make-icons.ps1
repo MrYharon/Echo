@@ -1,46 +1,58 @@
 Add-Type -AssemblyName System.Drawing
 
+function Add-RoundedRect($pathObj, $x, $y, $w, $h, $r) {
+  $d = $r * 2
+  $pathObj.AddArc($x, $y, $d, $d, 180, 90)
+  $pathObj.AddArc($x + $w - $d, $y, $d, $d, 270, 90)
+  $pathObj.AddArc($x + $w - $d, $y + $h - $d, $d, $d, 0, 90)
+  $pathObj.AddArc($x, $y + $h - $d, $d, $d, 90, 90)
+  $pathObj.CloseFigure()
+}
+
 function New-Icon($size, $path) {
   $bmp = New-Object System.Drawing.Bitmap($size, $size)
   $bmp.SetResolution(96, 96)
   $g = [System.Drawing.Graphics]::FromImage($bmp)
   $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
-  $g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
-  $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+  $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
   $g.Clear([System.Drawing.Color]::Transparent)
 
-  $rect = New-Object System.Drawing.Rectangle(0, 0, $size, $size)
-  $radius = [int]($size * 0.22)
-  $pathObj = New-Object System.Drawing.Drawing2D.GraphicsPath
-  $d = $radius * 2
-  $pathObj.AddArc($rect.X, $rect.Y, $d, $d, 180, 90)
-  $pathObj.AddArc($rect.Right - $d, $rect.Y, $d, $d, 270, 90)
-  $pathObj.AddArc($rect.Right - $d, $rect.Bottom - $d, $d, $d, 0, 90)
-  $pathObj.AddArc($rect.X, $rect.Bottom - $d, $d, $d, 90, 90)
-  $pathObj.CloseFigure()
+  # Flat light blue container
+  $bgPath = New-Object System.Drawing.Drawing2D.GraphicsPath
+  $r = [float]($size * 0.22)
+  Add-RoundedRect $bgPath 0 0 $size $size $r
+  $bgBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 56, 189, 248))
+  $g.FillPath($bgBrush, $bgPath)
+  $bgBrush.Dispose()
+  $bgPath.Dispose()
 
-  # Light blue gradient (Sky blue #38bdf8 to #0284c7)
-  $c1 = [System.Drawing.Color]::FromArgb(255, 56, 189, 248)
-  $c2 = [System.Drawing.Color]::FromArgb(255, 2, 132, 199)
-  $brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush($rect, $c1, $c2, 60)
-  $g.FillPath($brush, $pathObj)
+  # Minimal geometric E bars
+  $whiteBrush = [System.Drawing.Brushes]::White
+  $barRadius = [float]([Math]::Max(1.0, $size * 0.04))
 
-  # Draw concentric echo rings / waves in the background
-  $penWave = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(70, 255, 255, 255), [float]($size * 0.05))
-  $waveRect1 = New-Object System.Drawing.RectangleF([float]($size * 0.15), [float]($size * 0.15), [float]($size * 0.7), [float]($size * 0.7))
-  $g.DrawArc($penWave, $waveRect1, -40, 80)
-  $penWave.Dispose()
+  # Vertical stem
+  $stemPath = New-Object System.Drawing.Drawing2D.GraphicsPath
+  Add-RoundedRect $stemPath ($size * 0.25) ($size * 0.23) ($size * 0.13) ($size * 0.54) $barRadius
+  $g.FillPath($whiteBrush, $stemPath)
+  $stemPath.Dispose()
 
-  # Clean bold 'E'
-  $fontFamily = New-Object System.Drawing.FontFamily("Segoe UI")
-  $fontStyle = [System.Drawing.FontStyle]::Bold
-  $font = New-Object System.Drawing.Font($fontFamily, [float]($size * 0.54), $fontStyle, [System.Drawing.GraphicsUnit]::Pixel)
-  $white = [System.Drawing.Brushes]::White
-  $sf = New-Object System.Drawing.StringFormat
-  $sf.Alignment = [System.Drawing.StringAlignment]::Center
-  $sf.LineAlignment = [System.Drawing.StringAlignment]::Center
-  $textRect = New-Object System.Drawing.RectangleF(0, [float](-$size * 0.02), $size, $size)
-  $g.DrawString("E", $font, $white, $textRect, $sf)
+  # Top bar
+  $topPath = New-Object System.Drawing.Drawing2D.GraphicsPath
+  Add-RoundedRect $topPath ($size * 0.25) ($size * 0.23) ($size * 0.50) ($size * 0.12) $barRadius
+  $g.FillPath($whiteBrush, $topPath)
+  $topPath.Dispose()
+
+  # Middle bar
+  $midPath = New-Object System.Drawing.Drawing2D.GraphicsPath
+  Add-RoundedRect $midPath ($size * 0.25) ($size * 0.44) ($size * 0.38) ($size * 0.12) $barRadius
+  $g.FillPath($whiteBrush, $midPath)
+  $midPath.Dispose()
+
+  # Bottom bar
+  $botPath = New-Object System.Drawing.Drawing2D.GraphicsPath
+  Add-RoundedRect $botPath ($size * 0.25) ($size * 0.65) ($size * 0.50) ($size * 0.12) $barRadius
+  $g.FillPath($whiteBrush, $botPath)
+  $botPath.Dispose()
 
   $g.Dispose()
   $bmp.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
@@ -51,4 +63,4 @@ New-Item -ItemType Directory -Force -Path "icons" | Out-Null
 New-Icon 16 "icons/icon16.png"
 New-Icon 48 "icons/icon48.png"
 New-Icon 128 "icons/icon128.png"
-Write-Output "Light blue icons generated."
+Write-Output "Minimalist light blue icons generated successfully."
