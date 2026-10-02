@@ -1,14 +1,5 @@
 Add-Type -AssemblyName System.Drawing
 
-function Add-RoundedRect($pathObj, $x, $y, $w, $h, $r) {
-  $d = $r * 2
-  $pathObj.AddArc($x, $y, $d, $d, 180, 90)
-  $pathObj.AddArc($x + $w - $d, $y, $d, $d, 270, 90)
-  $pathObj.AddArc($x + $w - $d, $y + $h - $d, $d, $d, 0, 90)
-  $pathObj.AddArc($x, $y + $h - $d, $d, $d, 90, 90)
-  $pathObj.CloseFigure()
-}
-
 function New-Icon($size, $path) {
   $bmp = New-Object System.Drawing.Bitmap($size, $size)
   $bmp.SetResolution(96, 96)
@@ -17,41 +8,47 @@ function New-Icon($size, $path) {
   $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
   $g.Clear([System.Drawing.Color]::Transparent)
 
-  # Flat light blue container
-  $bgPath = New-Object System.Drawing.Drawing2D.GraphicsPath
+  # Background squircle
   $r = [float]($size * 0.22)
-  Add-RoundedRect $bgPath 0 0 $size $size $r
-  $bgBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 56, 189, 248))
+  $d = $r * 2
+  $bgPath = New-Object System.Drawing.Drawing2D.GraphicsPath
+  $bgPath.AddArc(0, 0, $d, $d, 180, 90)
+  $bgPath.AddArc($size - $d, 0, $d, $d, 270, 90)
+  $bgPath.AddArc($size - $d, $size - $d, $d, $d, 0, 90)
+  $bgPath.AddArc(0, $size - $d, $d, $d, 90, 90)
+  $bgPath.CloseFigure()
+
+  $bgBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 22, 37, 68))
   $g.FillPath($bgBrush, $bgPath)
   $bgBrush.Dispose()
   $bgPath.Dispose()
 
-  # Minimal geometric E bars
-  $whiteBrush = [System.Drawing.Brushes]::White
-  $barRadius = [float]([Math]::Max(1.0, $size * 0.04))
+  $white = [System.Drawing.Brushes]::White
 
-  # Vertical stem
-  $stemPath = New-Object System.Drawing.Drawing2D.GraphicsPath
-  Add-RoundedRect $stemPath ($size * 0.25) ($size * 0.23) ($size * 0.13) ($size * 0.54) $barRadius
-  $g.FillPath($whiteBrush, $stemPath)
-  $stemPath.Dispose()
-
-  # Top bar
+  # Top Bar with inward stepped tooth
   $topPath = New-Object System.Drawing.Drawing2D.GraphicsPath
-  Add-RoundedRect $topPath ($size * 0.25) ($size * 0.23) ($size * 0.50) ($size * 0.12) $barRadius
-  $g.FillPath($whiteBrush, $topPath)
+  $topPath.AddLine([float]($size * 28 / 128), [float]($size * 26 / 128), [float]($size * 100 / 128), [float]($size * 26 / 128))
+  $topPath.AddLine([float]($size * 100 / 128), [float]($size * 26 / 128), [float]($size * 100 / 128), [float]($size * 40 / 128))
+  $topPath.AddLine([float]($size * 100 / 128), [float]($size * 40 / 128), [float]($size * 49 / 128), [float]($size * 40 / 128))
+  $topPath.AddLine([float]($size * 49 / 128), [float]($size * 40 / 128), [float]($size * 49 / 128), [float]($size * 45 / 128))
+  $topPath.AddLine([float]($size * 49 / 128), [float]($size * 45 / 128), [float]($size * 28 / 128), [float]($size * 45 / 128))
+  $topPath.CloseFigure()
+  $g.FillPath($white, $topPath)
   $topPath.Dispose()
 
-  # Middle bar
-  $midPath = New-Object System.Drawing.Drawing2D.GraphicsPath
-  Add-RoundedRect $midPath ($size * 0.25) ($size * 0.44) ($size * 0.38) ($size * 0.12) $barRadius
-  $g.FillPath($whiteBrush, $midPath)
-  $midPath.Dispose()
+  # Middle Bar
+  $midRect = New-Object System.Drawing.RectangleF([float]($size * 28 / 128), [float]($size * 57 / 128), [float]($size * 52 / 128), [float]($size * 14 / 128))
+  $g.FillRectangle($white, $midRect)
 
-  # Bottom bar
+  # Bottom Bar with upward stepped tooth
   $botPath = New-Object System.Drawing.Drawing2D.GraphicsPath
-  Add-RoundedRect $botPath ($size * 0.25) ($size * 0.65) ($size * 0.50) ($size * 0.12) $barRadius
-  $g.FillPath($whiteBrush, $botPath)
+  $botPath.AddLine([float]($size * 28 / 128), [float]($size * 83 / 128), [float]($size * 49 / 128), [float]($size * 83 / 128))
+  $botPath.AddLine([float]($size * 49 / 128), [float]($size * 83 / 128), [float]($size * 49 / 128), [float]($size * 88 / 128))
+  $botPath.AddLine([float]($size * 49 / 128), [float]($size * 88 / 128), [float]($size * 100 / 128), [float]($size * 88 / 128))
+  $botPath.AddLine([float]($size * 100 / 128), [float]($size * 88 / 128), [float]($size * 100 / 128), [float]($size * 102 / 128))
+  $botPath.AddLine([float]($size * 100 / 128), [float]($size * 102 / 128), [float]($size * 28 / 128), [float]($size * 102 / 128))
+  $botPath.CloseFigure()
+  $g.FillPath($white, $botPath)
   $botPath.Dispose()
 
   $g.Dispose()
@@ -63,4 +60,4 @@ New-Item -ItemType Directory -Force -Path "icons" | Out-Null
 New-Icon 16 "icons/icon16.png"
 New-Icon 48 "icons/icon48.png"
 New-Icon 128 "icons/icon128.png"
-Write-Output "Minimalist light blue icons generated successfully."
+Write-Output "Exact glyph icons generated successfully."

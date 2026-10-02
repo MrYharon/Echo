@@ -1,8 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
-  <rect width="128" height="128" rx="28" fill="#38bdf8" />
-  <!-- Minimalist Geometric E -->
-  <rect x="32" y="30" width="16" height="68" rx="5" fill="#ffffff" />
-  <rect x="32" y="30" width="62" height="15" rx="5" fill="#ffffff" />
-  <rect x="32" y="56" width="46" height="15" rx="5" fill="#ffffff" />
-  <rect x="32" y="83" width="62" height="15" rx="5" fill="#ffffff" />
+  <defs>
+    <!-- Background: Deep navy acoustic canvas -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#162544" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="128" height="128" rx="28" fill="url(#bgGrad)" />
+
+  <!-- Subtle acoustic wave lines in the background -->
+  <path d="M 0 35 Q 35 15, 65 30 T 128 20" fill="none" stroke="#223b6b" stroke-width="2" opacity="0.4" />
+  <path d="M 0 65 Q 40 45, 75 60 T 128 50" fill="none" stroke="#223b6b" stroke-width="2" opacity="0.3" />
+  <path d="M 0 95 Q 30 75, 70 90 T 128 80" fill="none" stroke="#223b6b" stroke-width="2" opacity="0.4" />
+  
+  <!-- Exact Geometric E Glyph -->
+  <!-- Top Bar with inward stepped tooth -->
+  <path d="M 28 26 L 100 26 L 100 40 L 49 40 L 49 45 L 28 45 Z" fill="#ffffff" />
+  <!-- Middle Bar -->
+  <rect x="28" y="57" width="52" height="14" fill="#ffffff" />
+  <!-- Bottom Bar with upward stepped tooth -->
+  <path d="M 28 83 L 49 83 L 49 88 L 100 88 L 100 102 L 28 102 Z" fill="#ffffff" />
 </svg>
