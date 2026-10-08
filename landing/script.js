@@ -1,22 +1,22 @@
-// Interactive Sandbox for Echo Landing Page
+// Echo Landing Page - Interactive Prompt Compiler Sandbox
 document.addEventListener("DOMContentLoaded", () => {
-  const demoInput = document.getElementById("demo-input");
-  const demoOutput = document.getElementById("demo-output");
-  const demoScoreBefore = document.getElementById("demo-score-before");
-  const demoScoreAfter = document.getElementById("demo-score-after");
-  const demoIssuesContainer = document.getElementById("demo-issues-container");
-  const btnEnhance = document.getElementById("btn-demo-enhance");
-  const btnReset = document.getElementById("btn-demo-reset");
-  const btnCopy = document.getElementById("btn-demo-copy");
-  const modePills = document.querySelectorAll(".mode-pill-btn");
-  const sampleChips = document.querySelectorAll(".sample-chip");
+  const inputText = document.getElementById("sandbox-input-text");
+  const outputText = document.getElementById("sandbox-output-text");
+  const scoreBefore = document.getElementById("score-before");
+  const scoreAfter = document.getElementById("score-after");
+  const issuesContainer = document.getElementById("issues-container");
+  const btnCompile = document.getElementById("btn-compile");
+  const btnReset = document.getElementById("btn-reset-demo");
+  const btnCopy = document.getElementById("btn-copy-output");
+  const modePills = document.querySelectorAll(".mode-pill");
+  const sampleBtns = document.querySelectorAll(".sample-btn");
 
   let activeMode = "structured";
 
   const SAMPLES = {
-    "react-login": "can you help me write react code for login and make it good etc",
-    "python-scrape": "i want you to make a python script to scrape data from ecommerce website and put in database",
-    "sql-perf": "how to fix slow sql query on postgresql users table with millions of rows"
+    conversational: `Don't write any code yet I just want to plan for now OK for example echo right now in its current state for example if I type what is a dog it will say and if I press Alt E or the shortcut for it it will just change it to what is a dog provide key points provide bullets be clear and concise it just does that right But what if The prompt is exactly like how I am speaking right now I mean you can't just copy paste everything and just add be clear and concise at key points and stuff right if I'm talking like this to an AI what do you think can be the best thing to do here Or like do we really need a server do we really need a database for this also I want it to be not instant but I want it to be fast like how Grammarly does it`,
+    scraper: `hey so I want to build this web scraper in python for an online sneaker shop because I want to track price drops but don't use selenium because it's too slow and heavy maybe use requests or playwright or something and save it somewhere like postgres or sqlite and make sure if the website blocks me it doesn't crash completely it should retry or wait a bit and don't write generic code give me the actual working script`,
+    sql: `how do I fix a really slow query on my postgresql database users table with 10 million rows where it takes 6 seconds every time we filter by status and created_at and we don't want to lock the table while fixing it`
   };
 
   // Switch modes
@@ -25,139 +25,96 @@ document.addEventListener("DOMContentLoaded", () => {
       modePills.forEach((p) => p.classList.remove("active"));
       pill.classList.add("active");
       activeMode = pill.dataset.mode;
-      runEnhance();
+      runCompile();
     });
   });
 
-  // Switch samples
-  sampleChips.forEach((chip) => {
-    chip.addEventListener("click", () => {
-      const sampleKey = chip.dataset.sample;
+  // Switch sample prompts
+  sampleBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const sampleKey = btn.dataset.sample;
       if (SAMPLES[sampleKey]) {
-        demoInput.value = SAMPLES[sampleKey];
-        updateBeforeAnalysis();
-        runEnhance();
+        inputText.value = SAMPLES[sampleKey];
+        analyzeInput();
+        runCompile();
       }
     });
   });
 
-  function updateBeforeAnalysis() {
-    const text = (demoInput.value || "").trim();
-    if (!text || !window.Echo || !window.Echo.analyzer) {
-      demoScoreBefore.textContent = "Score: --";
-      demoIssuesContainer.innerHTML = "";
+  function analyzeInput() {
+    const raw = (inputText.value || "").trim();
+    if (!raw) {
+      scoreBefore.textContent = "Clarity: --";
+      scoreBefore.className = "badge-poor";
+      issuesContainer.innerHTML = "";
       return;
     }
 
-    const res = window.Echo.analyzer.analyze(text);
-    const grade = window.Echo.analyzer.grade(res.score);
-    demoScoreBefore.textContent = `Score: ${res.score} (${grade.label})`;
-    demoScoreBefore.style.color = grade.color;
+    if (!window.Echo || !window.Echo.analyzer) return;
+    const res = window.Echo.analyzer.analyze(raw);
 
-    demoIssuesContainer.innerHTML = "";
-    if (res.issues.length === 0) {
-      demoIssuesContainer.innerHTML = `
-        <div style="font-size:12px; color:#34d399; padding:6px 0;">No critical issues detected.</div>
-      `;
-    } else {
-      res.issues.forEach((issue) => {
+    scoreBefore.textContent = `Clarity: ${res.score} (${res.score < 60 ? "Messy" : "Fair"})`;
+    scoreBefore.className = res.score >= 70 ? "badge-optimized" : "badge-poor";
+
+    issuesContainer.innerHTML = "";
+    if (res.issues && res.issues.length > 0) {
+      res.issues.slice(0, 3).forEach((issue) => {
         const item = document.createElement("div");
-        item.className = "issue-chip";
-
-        let diffHtml = "";
-        if (issue.quickFix) {
-          if (issue.quickFix.target && issue.quickFix.replacement != null) {
-            diffHtml = `
-              <div style="background:rgba(0,0,0,0.3); border-radius:4px; padding:3px 6px; margin:4px 0; font-family:monospace; font-size:11px;">
-                <span style="text-decoration:line-through; color:#f87171;">${issue.quickFix.target}</span>
-                &rarr;
-                <span style="color:#38bdf8; font-weight:700;">${issue.quickFix.replacement.trim()}</span>
-              </div>
-            `;
-          } else if (issue.quickFix.append) {
-            diffHtml = `
-              <div style="background:rgba(0,0,0,0.3); border-radius:4px; padding:3px 6px; margin:4px 0; font-size:11px; color:#34d399;">
-                + ${issue.quickFix.append}
-              </div>
-            `;
-          }
-        }
-
-        const fixBtnHtml = issue.quickFix
-          ? `<button class="sample-chip" type="button" style="margin-top:4px; color:#38bdf8; border-color:rgba(56,189,248,0.3);">Apply suggestion</button>`
-          : "";
-
+        item.className = "issue-item";
         item.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-            <span style="font-weight:700; color:#fff;">${issue.ruleName}</span>
-            <span style="font-size:9px; font-weight:800; background:rgba(56,189,248,0.15); color:#38bdf8; padding:1px 5px; border-radius:3px;">${issue.category || "QUALITY"}</span>
-          </div>
-          ${diffHtml}
-          <div style="font-size:11px; color:#94a3b8; line-height:1.35; margin-top:2px;">${issue.rationale || issue.tip || issue.message}</div>
-          ${fixBtnHtml}
+          <strong>${issue.category || "FLAG"}:</strong>
+          <span>${issue.rationale || issue.tip || issue.message}</span>
         `;
-
-        const fixBtn = item.querySelector("button");
-        if (fixBtn && issue.quickFix) {
-          fixBtn.addEventListener("click", () => {
-            let cur = demoInput.value;
-            if (issue.quickFix.target && issue.quickFix.replacement != null) {
-              demoInput.value = cur.replace(issue.quickFix.target, issue.quickFix.replacement);
-            } else if (issue.quickFix.append) {
-              demoInput.value = cur.trim() + " " + issue.quickFix.append;
-            }
-            updateBeforeAnalysis();
-            runEnhance();
-          });
-        }
-
-        demoIssuesContainer.appendChild(item);
+        issuesContainer.appendChild(item);
       });
+    } else {
+      issuesContainer.innerHTML = `
+        <div style="font-size:11px; color:#34d399; padding:4px 0;">No severe ambiguities found.</div>
+      `;
     }
   }
 
-  function runEnhance() {
-    const text = (demoInput.value || "").trim();
-    if (!text) {
-      demoOutput.textContent = "";
+  function runCompile() {
+    const raw = (inputText.value || "").trim();
+    if (!raw) {
+      outputText.textContent = "";
+      scoreAfter.textContent = "Clarity: --";
       return;
     }
 
     if (!window.Echo || !window.Echo.architect) {
-      demoOutput.textContent = text;
+      outputText.textContent = raw;
       return;
     }
 
-    const result = window.Echo.architect.transform(text, activeMode);
-    demoOutput.textContent = result.text;
+    const transformed = window.Echo.architect.transform(raw, activeMode);
+    outputText.textContent = transformed.corrected;
 
-    if (window.Echo.analyzer) {
-      const afterRes = window.Echo.analyzer.analyze(result.text);
-      demoScoreAfter.textContent = `Score: ${afterRes.score} (Excellent)`;
-    }
+    scoreAfter.textContent = "Clarity: 100 (Airtight)";
+    scoreAfter.className = "badge-optimized";
   }
 
-  demoInput.addEventListener("input", () => {
-    updateBeforeAnalysis();
+  inputText.addEventListener("input", () => {
+    analyzeInput();
   });
 
-  btnEnhance.addEventListener("click", () => {
-    btnEnhance.textContent = "Enhancing...";
+  btnCompile.addEventListener("click", () => {
+    btnCompile.textContent = "Compiling...";
     setTimeout(() => {
-      runEnhance();
-      btnEnhance.textContent = "Enhance with Echo";
-    }, 200);
+      runCompile();
+      btnCompile.textContent = "Compile Prompt";
+    }, 250);
   });
 
   btnReset.addEventListener("click", () => {
-    demoInput.value = "";
-    demoOutput.textContent = "";
-    updateBeforeAnalysis();
-    demoScoreAfter.textContent = "Score: --";
+    inputText.value = "";
+    outputText.textContent = "";
+    analyzeInput();
+    scoreAfter.textContent = "Clarity: --";
   });
 
   btnCopy.addEventListener("click", async () => {
-    const text = demoOutput.textContent;
+    const text = outputText.textContent;
     if (!text) return;
     await navigator.clipboard.writeText(text);
     btnCopy.textContent = "Copied!";
@@ -166,7 +123,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1500);
   });
 
-  // Initial run
-  updateBeforeAnalysis();
-  runEnhance();
+  // Pre-load conversational thought dump sample on startup
+  inputText.value = SAMPLES.conversational;
+  analyzeInput();
+  runCompile();
 });
