@@ -1,7 +1,7 @@
-// Echo - Creative Interactive Laboratory & Kinetic Acoustic Canvas
+// Echo - Creative Kinetic Monogram & Acoustic Canvas Engine
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Acoustic Soundwave Background Canvas (Matching Monogram Wallpaper)
-  const canvas = document.getElementById("hero-canvas");
+  // 1. Full-Bleed Kinetic Acoustic Ripple Canvas
+  const canvas = document.getElementById("fluid-canvas");
   if (canvas) {
     const ctx = canvas.getContext("2d");
     let width = (canvas.width = window.innerWidth);
@@ -16,42 +16,52 @@ document.addEventListener("DOMContentLoaded", () => {
     let mouseY = height / 3;
     let targetMouseX = mouseX;
     let targetMouseY = mouseY;
+    let mouseSpeed = 0;
+    let lastX = mouseX;
+    let lastY = mouseY;
 
     window.addEventListener("mousemove", (e) => {
       targetMouseX = e.clientX;
       targetMouseY = e.clientY;
+      const dx = targetMouseX - lastX;
+      const dy = targetMouseY - lastY;
+      mouseSpeed = Math.min(Math.sqrt(dx * dx + dy * dy), 30);
+      lastX = targetMouseX;
+      lastY = targetMouseY;
     });
 
     let waveOffset = 0;
 
     function renderWaves() {
-      // Smooth mouse follow
-      mouseX += (targetMouseX - mouseX) * 0.05;
-      mouseY += (targetMouseY - mouseY) * 0.05;
+      // Smooth interpolation
+      mouseX += (targetMouseX - mouseX) * 0.04;
+      mouseY += (targetMouseY - mouseY) * 0.04;
+      mouseSpeed *= 0.94;
 
       ctx.clearRect(0, 0, width, height);
 
-      const rings = 14;
-      const baseRadius = 80;
-      const spacing = 48;
+      // Large multi-ring acoustic propagation
+      const rings = 22;
+      const baseRadius = 100;
+      const spacing = 58;
 
       ctx.lineWidth = 1;
 
       for (let i = 0; i < rings; i++) {
-        const radius = baseRadius + i * spacing + Math.sin(waveOffset + i * 0.4) * 6;
-        const opacity = Math.max(0, 0.28 - (i / rings) * 0.25);
+        const radius = baseRadius + i * spacing + Math.sin(waveOffset + i * 0.35) * (8 + mouseSpeed * 0.4);
+        const opacity = Math.max(0, 0.24 - (i / rings) * 0.21);
 
         ctx.strokeStyle = `rgba(19, 30, 51, ${opacity})`;
         ctx.beginPath();
 
-        // Draw organic wavy contour ring
-        const segments = 60;
+        // 72 organic radial segments
+        const segments = 72;
         for (let s = 0; s <= segments; s++) {
           const angle = (s / segments) * Math.PI * 2;
-          const distortion = Math.sin(angle * 4 + waveOffset + i) * 8;
-          const r = radius + distortion;
+          const harmonicDistortion = Math.sin(angle * 5 + waveOffset + i * 0.5) * (10 + (mouseSpeed * 0.3));
+          const r = radius + harmonicDistortion;
           const x = mouseX + Math.cos(angle) * r;
-          const y = mouseY + Math.sin(angle) * (r * 0.85);
+          const y = mouseY + Math.sin(angle) * (r * 0.82);
 
           if (s === 0) {
             ctx.moveTo(x, y);
@@ -63,14 +73,61 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.stroke();
       }
 
-      waveOffset += 0.012;
+      waveOffset += 0.009;
       requestAnimationFrame(renderWaves);
     }
 
     renderWaves();
   }
 
-  // 2. Interactive Prompt Laboratory
+  // 2. Kinetic 3D Monogram Sculpture Parallax
+  const sculpture = document.getElementById("monogram-sculpture");
+  if (sculpture) {
+    const slabTop = sculpture.querySelector(".slab-top");
+    const slabMid = sculpture.querySelector(".slab-mid");
+    const slabBot = sculpture.querySelector(".slab-bot");
+
+    window.addEventListener("mousemove", (e) => {
+      const rect = sculpture.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const deltaX = (e.clientX - centerX) / (window.innerWidth / 2);
+      const deltaY = (e.clientY - centerY) / (window.innerHeight / 2);
+
+      // Subtle 3D perspective rotation
+      sculpture.style.transform = `perspective(900px) rotateY(${deltaX * 12}deg) rotateX(${-deltaY * 12}deg)`;
+
+      // Kinetic slab horizontal translation
+      if (slabTop) slabTop.style.transform = `translateX(${-deltaX * 14}px)`;
+      if (slabMid) slabMid.style.transform = `translateX(${deltaX * 18}px)`;
+      if (slabBot) slabBot.style.transform = `translateX(${-deltaX * 10}px)`;
+    });
+
+    sculpture.addEventListener("mouseleave", () => {
+      sculpture.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg)";
+      if (slabTop) slabTop.style.transform = "translateX(0px)";
+      if (slabMid) slabMid.style.transform = "translateX(0px)";
+      if (slabBot) slabBot.style.transform = "translateX(0px)";
+    });
+  }
+
+  // 3. Scroll Fade-in Intersection Observer
+  const fadeElements = document.querySelectorAll(".fade-in-element");
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+        }
+      });
+    }, { threshold: 0.12 });
+
+    fadeElements.forEach((el) => observer.observe(el));
+  } else {
+    fadeElements.forEach((el) => el.classList.add("is-visible"));
+  }
+
+  // 4. Interactive Laboratory Workbench
   const inputText = document.getElementById("lab-input");
   const outputText = document.getElementById("lab-output");
   const clarityBefore = document.getElementById("clarity-before");
@@ -79,15 +136,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCompile = document.getElementById("btn-run-compile");
   const btnReset = document.getElementById("btn-reset-input");
   const btnCopy = document.getElementById("btn-copy-contract");
-  const modeButtons = document.querySelectorAll(".mode-toggle-btn");
-  const sampleButtons = document.querySelectorAll(".sample-pill-btn");
+  const modeButtons = document.querySelectorAll(".mode-tab-btn");
+  const sampleButtons = document.querySelectorAll(".preset-btn");
 
   let activeMode = "structured";
 
   const PROMPT_SAMPLES = {
-    conversational: `Don't write any code yet I just want to plan for now OK for example echo right now in its current state for example if I type what is a dog it will say and if I press Alt E or the shortcut for it it will just change it to what is a dog provide key points provide bullets be clear and concise it just does that right But what if The prompt is exactly like how I am speaking right now I mean you can't just copy paste everything and just add be clear and concise at key points and stuff right if I'm talking like this to an AI what do you think can be the best thing to do here Or like do we really need a server do we really need a database for this also I want it to be not instant but I want it to be fast like how Grammarly does it`,
-    scraper: `hey so I want to build this web scraper in python for an online sneaker shop because I want to track price drops but don't use selenium because it's too slow and heavy maybe use requests or playwright or something and save it somewhere like postgres or sqlite and make sure if the website blocks me it doesn't crash completely it should retry or wait a bit and don't write generic code give me the actual working script`,
-    sql: `how do I fix a really slow query on my postgresql database users table with 10 million rows where it takes 6 seconds every time we filter by status and created_at and we don't want to lock the table while fixing it`
+    booking: `hey I need to build a barbershop appointment booking system with stripe integration and calendar sync but don't use nextjs or tailwind we want raw fastify and vanilla js and make sure two people can't double book the same barber slot at the same second so use optimistic locking or postgres transactions and don't write generic mock code give me the actual db schema and route handler`,
+    react: `look I have this react component that re-renders 50 times whenever the user types in a search box and it lags the whole browser don't just tell me to use useMemo tell me exactly where the state should live and don't introduce external redux or zustand keep it clean react hooks`,
+    postgres: `we have a postgres database with 15 million audit log rows and our query checking user activity between two timestamps is taking 8 seconds and locking workers don't suggest upgrading the hardware explain the b-tree index strategy and explain analyze breakdown`
   };
 
   // Mode switching
@@ -100,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Sample prompt buttons
+  // Sample prompt selection
   sampleButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const key = btn.dataset.sample;
@@ -115,87 +172,111 @@ document.addEventListener("DOMContentLoaded", () => {
   function evaluateInputClarity() {
     const raw = (inputText.value || "").trim();
     if (!raw) {
-      clarityBefore.textContent = "Clarity: --";
-      clarityBefore.className = "clarity-chip";
-      diagDrawer.innerHTML = "";
+      if (clarityBefore) {
+        clarityBefore.textContent = "Clarity: --";
+        clarityBefore.className = "score-chip";
+      }
+      if (diagDrawer) diagDrawer.innerHTML = "";
       return;
     }
 
     if (!window.Echo || !window.Echo.analyzer) return;
     const analysis = window.Echo.analyzer.analyze(raw);
 
-    clarityBefore.textContent = `Clarity: ${analysis.score}/100 (${analysis.score < 60 ? "Messy" : "Fair"})`;
-    clarityBefore.className = analysis.score >= 70 ? "clarity-chip airtight" : "clarity-chip messy";
+    if (clarityBefore) {
+      clarityBefore.textContent = `Clarity: ${analysis.score}/100 (${analysis.score < 60 ? "Messy" : "Fair"})`;
+      clarityBefore.className = analysis.score >= 70 ? "score-chip airtight" : "score-chip messy";
+    }
 
-    diagDrawer.innerHTML = "";
-    if (analysis.issues && analysis.issues.length > 0) {
-      analysis.issues.slice(0, 3).forEach((issue) => {
-        const item = document.createElement("div");
-        item.className = "diag-item";
-        item.innerHTML = `
-          <strong>[${issue.category || "FLAG"}]</strong>
-          <span>${issue.rationale || issue.tip || issue.message}</span>
+    if (diagDrawer) {
+      diagDrawer.innerHTML = "";
+      if (analysis.issues && analysis.issues.length > 0) {
+        analysis.issues.slice(0, 3).forEach((issue) => {
+          const item = document.createElement("div");
+          item.className = "feedback-alert";
+          item.innerHTML = `
+            <strong>[${issue.category || "FLAG"}]</strong> ${issue.rationale || issue.tip || issue.message}
+          `;
+          diagDrawer.appendChild(item);
+        });
+      } else {
+        diagDrawer.innerHTML = `
+          <div style="font-size:12px; color:#15803d; font-weight:700; padding:6px 0;">No attention-diluting distraction vectors detected.</div>
         `;
-        diagDrawer.appendChild(item);
-      });
-    } else {
-      diagDrawer.innerHTML = `
-        <div style="font-size:12px; color:#15803d; font-weight:600; padding:4px 0;">No severe attention head distractors detected.</div>
-      `;
+      }
     }
   }
 
   function executeDecompilation() {
     const raw = (inputText.value || "").trim();
     if (!raw) {
-      outputText.textContent = "";
-      clarityAfter.textContent = "Clarity: --";
+      if (outputText) outputText.textContent = "";
+      if (clarityAfter) clarityAfter.textContent = "Clarity: --";
       return;
     }
 
     if (!window.Echo || !window.Echo.architect) {
-      outputText.textContent = raw;
+      if (outputText) outputText.textContent = raw;
       return;
     }
 
     const transformed = window.Echo.architect.transform(raw, activeMode);
-    outputText.textContent = transformed.corrected;
+    if (outputText) outputText.textContent = transformed.corrected;
 
-    clarityAfter.textContent = "Clarity: 100/100 (Airtight)";
-    clarityAfter.className = "clarity-chip airtight";
+    if (clarityAfter) {
+      clarityAfter.textContent = "Clarity: 100/100 (Airtight)";
+      clarityAfter.className = "score-chip airtight";
+    }
   }
 
-  inputText.addEventListener("input", () => {
+  if (inputText) {
+    inputText.addEventListener("input", () => {
+      evaluateInputClarity();
+    });
+  }
+
+  if (btnCompile) {
+    btnCompile.addEventListener("click", () => {
+      btnCompile.textContent = "Compiling...";
+      setTimeout(() => {
+        executeDecompilation();
+        btnCompile.textContent = "Compile Prompt \u2192";
+      }, 160);
+    });
+  }
+
+  if (btnReset) {
+    btnReset.addEventListener("click", () => {
+      if (inputText) inputText.value = "";
+      if (outputText) outputText.textContent = "";
+      evaluateInputClarity();
+      if (clarityAfter) clarityAfter.textContent = "Clarity: --";
+    });
+  }
+
+  if (btnCopy) {
+    btnCopy.addEventListener("click", async () => {
+      const text = outputText ? outputText.textContent : "";
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        btnCopy.textContent = "Copied to Clipboard!";
+        setTimeout(() => {
+          btnCopy.textContent = "Copy Prompt";
+        }, 1800);
+      } catch (err) {
+        btnCopy.textContent = "Copied!";
+        setTimeout(() => {
+          btnCopy.textContent = "Copy Prompt";
+        }, 1800);
+      }
+    });
+  }
+
+  // Preload default realistic developer thought dump
+  if (inputText) {
+    inputText.value = PROMPT_SAMPLES.booking;
     evaluateInputClarity();
-  });
-
-  btnCompile.addEventListener("click", () => {
-    btnCompile.textContent = "Compiling...";
-    setTimeout(() => {
-      executeDecompilation();
-      btnCompile.textContent = "Compile Prompt";
-    }, 200);
-  });
-
-  btnReset.addEventListener("click", () => {
-    inputText.value = "";
-    outputText.textContent = "";
-    evaluateInputClarity();
-    clarityAfter.textContent = "Clarity: --";
-  });
-
-  btnCopy.addEventListener("click", async () => {
-    const text = outputText.textContent;
-    if (!text) return;
-    await navigator.clipboard.writeText(text);
-    btnCopy.textContent = "Copied to Clipboard!";
-    setTimeout(() => {
-      btnCopy.textContent = "Copy Prompt";
-    }, 1500);
-  });
-
-  // Preload conversational thought dump
-  inputText.value = PROMPT_SAMPLES.conversational;
-  evaluateInputClarity();
-  executeDecompilation();
+    executeDecompilation();
+  }
 });
