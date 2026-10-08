@@ -89,6 +89,13 @@
           tick();
         }
       });
+      chrome.runtime.onMessage.addListener((request) => {
+        if (request.type === "TRIGGER_AUTOCORRECT") {
+          if (Echo.ui && Echo.ui.triggerAutocorrect) {
+            Echo.ui.triggerAutocorrect();
+          }
+        }
+      });
       setInterval(tick, 1000);
       tick();
     });

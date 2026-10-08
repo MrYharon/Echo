@@ -78,33 +78,56 @@ ${modeGuideline}
 Produce the optimized prompt now:`;
   },
 
+  async callBackgroundWorker(rawPrompt, mode, provider, apiKey, customModel) {
+    return new Promise((resolve) => {
+      try {
+        chrome.runtime.sendMessage(
+          {
+            type: "ENHANCE_PROMPT",
+            rawPrompt,
+            mode,
+            provider,
+            apiKey,
+            customModel
+          },
+          (res) => {
+            if (chrome.runtime.lastError) {
+              resolve(null);
+              return;
+            }
+            if (res && res.success && res.text) {
+              resolve(res.text);
+            } else {
+              resolve(null);
+            }
+          }
+        );
+      } catch {
+        resolve(null);
+      }
+    });
+  },
+
   async enhance(rawPrompt, mode = "structured") {
     const text = (rawPrompt || "").trim();
     if (!text) return { text: "", provider: "none" };
 
     const settings = await this.getSettings();
 
-    // 1. Try Gemini API if key is configured
-    if ((settings.provider === "gemini" || settings.provider === "auto") && settings.geminiApiKey) {
-      try {
-        const result = await this.callGemini(text, mode, settings.geminiApiKey, settings.customModel);
-        if (result) return { text: result, provider: "gemini" };
-      } catch (err) {
-        console.warn("Echo AI: Gemini API failed, falling back", err);
+    // 1. Delegate to Background Service Worker (bypasses all webpage CSP headers)
+    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+      const apiKey = settings.provider === "openai" ? settings.openaiApiKey : (settings.geminiApiKey || "");
+      if (apiKey) {
+        try {
+          const bgResult = await this.callBackgroundWorker(text, mode, settings.provider, apiKey, settings.customModel);
+          if (bgResult) return { text: bgResult, provider: settings.provider };
+        } catch (err) {
+          console.warn("Echo AI: Background proxy failed, checking local options", err);
+        }
       }
     }
 
-    // 2. Try OpenAI API if key is configured
-    if ((settings.provider === "openai" || settings.provider === "auto") && settings.openaiApiKey) {
-      try {
-        const result = await this.callOpenAI(text, mode, settings.openaiApiKey, settings.customModel);
-        if (result) return { text: result, provider: "openai" };
-      } catch (err) {
-        console.warn("Echo AI: OpenAI API failed, falling back", err);
-      }
-    }
-
-    // 3. Try Chrome on-device Gemini Nano if available
+    // 2. Try Chrome on-device Gemini Nano if available (0ms, 100% private, free)
     if (settings.provider === "chrome_nano" || settings.provider === "auto") {
       try {
         const nanoAvailable = await this.isChromeNanoAvailable();
@@ -117,7 +140,7 @@ Produce the optimized prompt now:`;
       }
     }
 
-    // 4. Default to Echo Intelligent Prompt Architect
+    // 3. Fallback to Echo Intelligent Prompt Architect (deterministic offline)
     if (Echo.architect && Echo.architect.transform) {
       const fallback = Echo.architect.transform(text, mode);
       return { text: fallback.text, provider: "local_architect", changes: fallback.changes };

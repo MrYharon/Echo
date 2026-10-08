@@ -480,7 +480,7 @@
       </div>
       <textarea id="sandbox-input" class="sandbox-textarea" placeholder="Type or paste a prompt to test autocorrect..."></textarea>
       <div class="sandbox-actions">
-        <button id="sandbox-autocorrect" class="btn-action" type="button">Auto-correct</button>
+        <button id="sandbox-autocorrect" class="btn-action" type="button">Compile Prompt</button>
         <button id="sandbox-copy" class="btn-subtle" type="button">Copy</button>
         <button id="sandbox-clear" class="btn-subtle" type="button">Clear</button>
       </div>
@@ -536,7 +536,10 @@
       </select>
 
       <div id="gemini-key-wrap" style="margin-bottom: 8px;">
-        <label style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px;">Gemini API Key</label>
+        <label style="font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span>Gemini API Key</span>
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent); text-decoration:none; font-size:10px;">Get free key &rarr;</a>
+        </label>
         <input type="password" id="gemini-key" placeholder="AIzaSy..." style="width: 100%; background: var(--surface); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 11px; outline: none;" />
       </div>
 

@@ -33,6 +33,18 @@
       "run_at": "document_idle"
     }
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "toggle-autocorrect": {
+      "suggested_key": {
+        "default": "Alt+E",
+        "mac": "Alt+E"
+      },
+      "description": "Auto-correct prompt"
+    }
+  },
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "Echo - Prompt Coach",

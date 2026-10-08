@@ -155,7 +155,7 @@ if (btnAutocorrect) {
     const beforeRes = window.Echo.analyzer ? window.Echo.analyzer.analyze(text) : null;
     const beforeScore = beforeRes ? beforeRes.score : 0;
 
-    btnAutocorrect.textContent = "Enhancing...";
+    btnAutocorrect.textContent = "Compiling...";
     btnAutocorrect.disabled = true;
 
     try {
@@ -180,9 +180,9 @@ if (btnAutocorrect) {
           }).catch(() => {});
         }
 
-        btnAutocorrect.textContent = "Enhanced";
+        btnAutocorrect.textContent = "Compiled";
       } else {
-        btnAutocorrect.textContent = "Auto-correct";
+        btnAutocorrect.textContent = "Compile Prompt";
       }
     } catch (err) {
       console.error("Autocorrect error:", err);

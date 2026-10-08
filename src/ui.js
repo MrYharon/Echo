@@ -742,11 +742,11 @@ Echo.ui = {
     if (!current || !current.trim()) return;
 
     if (Echo.ui.actionBtn) {
-      Echo.ui.actionBtn.textContent = "Enhancing...";
+      Echo.ui.actionBtn.textContent = "Compiling...";
       Echo.ui.actionBtn.disabled = true;
     }
     if (Echo.ui.pillBtn) {
-      Echo.ui.pillBtn.textContent = "Enhancing...";
+      Echo.ui.pillBtn.textContent = "Compiling...";
     }
 
     try {
@@ -763,10 +763,10 @@ Echo.ui = {
       Echo.ui.previousText = current;
       Echo.detector.write(Echo.ui.input, autocorrect.corrected);
 
-      if (Echo.ui.actionBtn) Echo.ui.actionBtn.textContent = "Enhanced";
-      if (Echo.ui.pillBtn) Echo.ui.pillBtn.textContent = "Enhanced";
+      if (Echo.ui.actionBtn) Echo.ui.actionBtn.textContent = "Compiled";
+      if (Echo.ui.pillBtn) Echo.ui.pillBtn.textContent = "Compiled";
       if (Echo.ui.undoBtn) Echo.ui.undoBtn.style.display = "inline-flex";
-      Echo.ui.showToast("Prompt enhanced", true);
+      Echo.ui.showToast("Prompt compiled", true);
       Echo.ui.recordStat("promptsEnhanced");
 
       if (Echo.db && Echo.db.addHistory) {

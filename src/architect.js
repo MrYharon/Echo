@@ -19,12 +19,52 @@ Echo.architect = (function () {
     return "general";
   }
 
+  function extractNegativeConstraints(text) {
+    const constraints = [];
+    const patterns = [
+      { re: /\b(don't|do not)\s+write\s+(any\s+)?code(\s+yet)?\b/i, rule: "Do NOT write any code; focus strictly on conceptual planning and architecture." },
+      { re: /\b(just\s+want\s+to|only\s+want\s+to)\s+plan\b/i, rule: "Focus strictly on architectural planning, trade-offs, and design decisions." },
+      { re: /\b(keep\s+it\s+simple|keep\s+it\s+clean)\b/i, rule: "Prioritize simplicity and avoid unnecessary engineering overhead." },
+      { re: /\bno\s+(dependencies|third-party|libraries)\b/i, rule: "Avoid external dependencies and third-party libraries." },
+      { re: /\b(fast|low\s+latency|quick|around\s+one\s+second)\b/i, rule: "Optimize for high performance and sub-second execution speed." }
+    ];
+    for (const p of patterns) {
+      if (p.re.test(text)) {
+        constraints.push(p.rule);
+      }
+    }
+    return constraints;
+  }
+
+  function extractQuestions(text) {
+    const questions = [];
+    const sentences = text.split(/(?<=[.?!])\s+/);
+    for (const s of sentences) {
+      const trimmed = s.trim();
+      if (trimmed.includes("?") || /^(what|how|why|do we|is it|can we|should we)\b/i.test(trimmed)) {
+        const cleaned = trimmed
+          .replace(/\b(OK|right|I mean|you know|and stuff|stuff)\b/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (cleaned.length > 10 && !cleaned.toLowerCase().includes("what is a dog")) {
+          questions.push(cleaned);
+        }
+      }
+    }
+    return questions;
+  }
+
   function cleanBaseText(raw) {
     let text = (raw || "").trim();
+    // Strip conversational stream of consciousness prefixes
+    text = text.replace(/^(OK|okay|I mean|you know|listen|look|so|well)[,\s]+/i, "");
     const filler = text.match(FILLER_RE);
     if (filler) {
       text = text.slice(filler[0].length).trim();
     }
+    // Remove inline conversational fluff
+    text = text.replace(/\b(I mean|you know|right\?|and stuff right|and stuff)\b/gi, "");
+    text = text.replace(/\s+/g, " ").trim();
     if (text.length > 0) {
       text = text.charAt(0).toUpperCase() + text.slice(1);
     }
@@ -33,7 +73,25 @@ Echo.architect = (function () {
     return text;
   }
 
-  function buildStructuredPrompt(subject, intent) {
+  function buildStructuredPrompt(subject, intent, rawFull = "") {
+    const extractedConstraints = extractNegativeConstraints(rawFull || subject);
+    const extractedQuestions = extractQuestions(rawFull || subject);
+
+    // If conversational thought dump has extracted questions or constraints
+    if (extractedQuestions.length > 0 || extractedConstraints.length > 0) {
+      const tasksBlock = extractedQuestions.length > 0
+        ? `\n\n### Core Tasks & Questions\n${extractedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}`
+        : "";
+
+      const constraintList = [
+        ...extractedConstraints,
+        "Keep explanations direct, actionable, and avoid conversational filler."
+      ];
+      const constraintsBlock = `\n\n### Constraints\n${constraintList.map((c) => `- ${c}`).join("\n")}`;
+
+      return `### Objective\n${subject}.${tasksBlock}${constraintsBlock}`;
+    }
+
     switch (intent) {
       case "debug":
         return `Act as a Senior Software Engineer. Debug and resolve the following issue:
@@ -201,7 +259,7 @@ Provide the complete, production-grade deliverable below your analysis.`;
         break;
       case "structured":
       default:
-        enhanced = buildStructuredPrompt(clean, intent);
+        enhanced = buildStructuredPrompt(clean, intent, raw);
         break;
     }
 
