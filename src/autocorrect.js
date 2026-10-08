@@ -67,6 +67,31 @@ Echo.autocorrect = {
     ];
   },
 
+  // Transform a raw prompt using AI engine if available, with instant local fallback
+  async correctWithAI(text, mode = "structured") {
+    const raw = (text || "").trim();
+    if (!raw) {
+      return { original: raw, corrected: raw, changed: false, changes: [] };
+    }
+    if (Echo.ai && Echo.ai.enhance) {
+      try {
+        const res = await Echo.ai.enhance(raw, mode);
+        if (res && res.text) {
+          return {
+            original: raw,
+            corrected: res.text,
+            changed: raw !== res.text,
+            changes: res.changes || [{ type: "ai_rewrite", title: `Enhanced via ${res.provider}` }],
+            provider: res.provider
+          };
+        }
+      } catch (err) {
+        console.warn("Echo AI enhance failed, using local architect", err);
+      }
+    }
+    return this.correctFull(raw, mode);
+  },
+
   // Transform a raw prompt into a structured, high-performing AI prompt
   correctFull(text, mode = "structured") {
     const raw = (text || "").trim();

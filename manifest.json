@@ -8,7 +8,9 @@
     "https://chatgpt.com/*",
     "https://chat.openai.com/*",
     "https://claude.ai/*",
-    "https://gemini.google.com/*"
+    "https://gemini.google.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.openai.com/*"
   ],
   "content_scripts": [
     {
@@ -22,6 +24,7 @@
         "src/detector.js",
         "src/db.js",
         "src/architect.js",
+        "src/ai.js",
         "src/autocorrect.js",
         "src/analyzer.js",
         "src/ui.js",

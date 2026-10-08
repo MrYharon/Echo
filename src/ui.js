@@ -231,8 +231,33 @@ Echo.ui = {
 .echo-action-desc {
   font-size: 11px;
   color: #94a3b8;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   line-height: 1.4;
+}
+.echo-mode-pills {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.echo-mode-pill {
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.echo-mode-pill:hover {
+  color: #fff;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+.echo-mode-pill.active {
+  background: rgba(56, 189, 248, 0.16);
+  color: #38bdf8;
+  border-color: #38bdf8;
 }
 .echo-action-controls {
   display: flex;
@@ -444,8 +469,13 @@ Echo.ui = {
           <button class="echo-close-btn" type="button" aria-label="Close">x</button>
         </div>
         <div class="echo-action-banner">
-          <div class="echo-action-title">Auto-Correct Prompt</div>
-          <div class="echo-action-desc">Removes filler prefixes, strengthens action verbs, and sets clear AI output format.</div>
+          <div class="echo-action-title">Prompt Architect</div>
+          <div class="echo-action-desc">Transform raw drafts into production-ready prompts with clear constraints.</div>
+          <div class="echo-mode-pills">
+            <button class="echo-mode-pill active" data-mode="structured" type="button">Structured</button>
+            <button class="echo-mode-pill" data-mode="concise" type="button">Concise</button>
+            <button class="echo-mode-pill" data-mode="deep_reasoning" type="button">Deep</button>
+          </div>
           <div class="echo-action-controls">
             <button class="echo-btn-primary" type="button">Auto-correct</button>
             <button class="echo-btn-secondary" type="button" style="display:none;">Undo</button>
@@ -496,6 +526,18 @@ Echo.ui = {
         Echo.ui.chipGroup.appendChild(chip);
       }
     }
+
+    // Mode pills
+    Echo.ui.currentMode = "structured";
+    const modePills = Echo.ui.host.querySelectorAll(".echo-mode-pill");
+    modePills.forEach((pill) => {
+      pill.addEventListener("click", (e) => {
+        e.stopPropagation();
+        modePills.forEach((p) => p.classList.remove("active"));
+        pill.classList.add("active");
+        Echo.ui.currentMode = pill.dataset.mode;
+      });
+    });
 
     Echo.ui.pill.addEventListener("click", (e) => {
       // If clicked on the Auto-correct button inside pill
@@ -630,41 +672,60 @@ Echo.ui = {
     } catch (e) {}
   },
 
-  triggerAutocorrect() {
+  async triggerAutocorrect() {
     if (!Echo.ui.input) return;
     const current = Echo.detector.read(Echo.ui.input);
     if (!current || !current.trim()) return;
 
-    const autocorrect = (Echo.autocorrect && Echo.autocorrect.correctFull)
-      ? Echo.autocorrect.correctFull(current)
-      : null;
-
-    if (!autocorrect || !autocorrect.changed) return;
-
-    Echo.ui.previousText = current;
-    Echo.detector.write(Echo.ui.input, autocorrect.corrected);
-
-    Echo.ui.actionBtn.textContent = "Corrected";
-    Echo.ui.undoBtn.style.display = "inline-flex";
-    Echo.ui.showToast("Prompt auto-corrected", true);
-    Echo.ui.recordStat("promptsEnhanced");
-
-    if (Echo.db && Echo.db.addHistory) {
-      const initialScore = Echo.ui.lastResult ? Echo.ui.lastResult.score : 0;
-      const finalScore = Echo.analyzer ? Echo.analyzer.analyze(autocorrect.corrected).score : 100;
-      Echo.db.addHistory({
-        originalText: current,
-        correctedText: autocorrect.corrected,
-        initialScore: initialScore,
-        finalScore: finalScore,
-        platform: location.hostname || "web",
-        changes: autocorrect.changes || []
-      }).catch(() => {});
+    if (Echo.ui.actionBtn) {
+      Echo.ui.actionBtn.textContent = "Enhancing...";
+      Echo.ui.actionBtn.disabled = true;
+    }
+    if (Echo.ui.pillBtn) {
+      Echo.ui.pillBtn.textContent = "Enhancing...";
     }
 
-    setTimeout(() => {
-      if (Echo.ui.actionBtn) Echo.ui.actionBtn.textContent = "Auto-correct";
-    }, 2000);
+    try {
+      const mode = Echo.ui.currentMode || "structured";
+      let autocorrect = null;
+      if (Echo.autocorrect && Echo.autocorrect.correctWithAI) {
+        autocorrect = await Echo.autocorrect.correctWithAI(current, mode);
+      } else if (Echo.autocorrect && Echo.autocorrect.correctFull) {
+        autocorrect = Echo.autocorrect.correctFull(current, mode);
+      }
+
+      if (!autocorrect || !autocorrect.changed) return;
+
+      Echo.ui.previousText = current;
+      Echo.detector.write(Echo.ui.input, autocorrect.corrected);
+
+      if (Echo.ui.actionBtn) Echo.ui.actionBtn.textContent = "Enhanced";
+      if (Echo.ui.pillBtn) Echo.ui.pillBtn.textContent = "Enhanced";
+      if (Echo.ui.undoBtn) Echo.ui.undoBtn.style.display = "inline-flex";
+      Echo.ui.showToast("Prompt enhanced", true);
+      Echo.ui.recordStat("promptsEnhanced");
+
+      if (Echo.db && Echo.db.addHistory) {
+        const initialScore = Echo.ui.lastResult ? Echo.ui.lastResult.score : 0;
+        const finalScore = Echo.analyzer ? Echo.analyzer.analyze(autocorrect.corrected).score : 100;
+        Echo.db.addHistory({
+          originalText: current,
+          correctedText: autocorrect.corrected,
+          initialScore: initialScore,
+          finalScore: finalScore,
+          platform: location.hostname || "web",
+          changes: autocorrect.changes || []
+        }).catch(() => {});
+      }
+    } catch (err) {
+      console.warn("Echo enhance error:", err);
+    } finally {
+      if (Echo.ui.actionBtn) Echo.ui.actionBtn.disabled = false;
+      setTimeout(() => {
+        if (Echo.ui.actionBtn) Echo.ui.actionBtn.textContent = "Auto-correct";
+        if (Echo.ui.pillBtn) Echo.ui.pillBtn.textContent = "Auto-correct";
+      }, 2000);
+    }
   },
 
   triggerUndo() {

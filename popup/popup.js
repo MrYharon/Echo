@@ -94,36 +94,58 @@ if (sandboxInput) {
   sandboxInput.addEventListener("input", updateSandbox);
 }
 
+let currentMode = "structured";
+const modePills = document.querySelectorAll(".mode-pill");
+modePills.forEach((pill) => {
+  pill.addEventListener("click", () => {
+    modePills.forEach((p) => p.classList.remove("active"));
+    pill.classList.add("active");
+    currentMode = pill.dataset.mode;
+  });
+});
+
 if (btnAutocorrect) {
-  btnAutocorrect.addEventListener("click", () => {
+  btnAutocorrect.addEventListener("click", async () => {
     const text = (sandboxInput.value || "").trim();
     if (!text || !window.Echo || !window.Echo.autocorrect) return;
 
     const beforeRes = window.Echo.analyzer ? window.Echo.analyzer.analyze(text) : null;
     const beforeScore = beforeRes ? beforeRes.score : 0;
 
-    const corr = window.Echo.autocorrect.correctFull(text);
-    if (corr && corr.corrected) {
-      sandboxInput.value = corr.corrected;
-      updateSandbox();
+    btnAutocorrect.textContent = "Enhancing...";
+    btnAutocorrect.disabled = true;
 
-      const afterRes = window.Echo.analyzer ? window.Echo.analyzer.analyze(corr.corrected) : null;
-      const afterScore = afterRes ? afterRes.score : 100;
+    try {
+      const corr = await window.Echo.autocorrect.correctWithAI(text, currentMode);
+      if (corr && corr.corrected) {
+        sandboxInput.value = corr.corrected;
+        updateSandbox();
 
-      if (window.Echo.db && window.Echo.db.addHistory) {
-        window.Echo.db.addHistory({
-          originalText: text,
-          correctedText: corr.corrected,
-          initialScore: beforeScore,
-          finalScore: afterScore,
-          platform: "playground",
-          changes: corr.changes || []
-        }).then(() => {
-          loadHistory();
-        }).catch(() => {});
+        const afterRes = window.Echo.analyzer ? window.Echo.analyzer.analyze(corr.corrected) : null;
+        const afterScore = afterRes ? afterRes.score : 100;
+
+        if (window.Echo.db && window.Echo.db.addHistory) {
+          window.Echo.db.addHistory({
+            originalText: text,
+            correctedText: corr.corrected,
+            initialScore: beforeScore,
+            finalScore: afterScore,
+            platform: "playground",
+            changes: corr.changes || []
+          }).then(() => {
+            loadHistory();
+          }).catch(() => {});
+        }
+
+        btnAutocorrect.textContent = "Enhanced";
+      } else {
+        btnAutocorrect.textContent = "Auto-correct";
       }
-
-      btnAutocorrect.textContent = "Corrected";
+    } catch (err) {
+      console.error("Autocorrect error:", err);
+      btnAutocorrect.textContent = "Auto-correct";
+    } finally {
+      btnAutocorrect.disabled = false;
       setTimeout(() => {
         btnAutocorrect.textContent = "Auto-correct";
       }, 1500);
@@ -378,6 +400,57 @@ function renderStats(stats) {
   if (statFixes) statFixes.textContent = stats.fixesApplied || 0;
 }
 
+// AI Engine Elements
+const aiProviderSelect = document.getElementById("ai-provider");
+const geminiKeyWrap = document.getElementById("gemini-key-wrap");
+const geminiKeyInput = document.getElementById("gemini-key");
+const openaiKeyWrap = document.getElementById("openai-key-wrap");
+const openaiKeyInput = document.getElementById("openai-key");
+const btnSaveAiSettings = document.getElementById("btn-save-ai-settings");
+const aiStatusMsg = document.getElementById("ai-status-msg");
+
+function updateAiFieldVisibility(provider) {
+  if (provider === "gemini") {
+    geminiKeyWrap.style.display = "block";
+    openaiKeyWrap.style.display = "none";
+  } else if (provider === "openai") {
+    geminiKeyWrap.style.display = "none";
+    openaiKeyWrap.style.display = "block";
+  } else if (provider === "auto") {
+    geminiKeyWrap.style.display = "block";
+    openaiKeyWrap.style.display = "block";
+  } else {
+    geminiKeyWrap.style.display = "none";
+    openaiKeyWrap.style.display = "none";
+  }
+}
+
+if (aiProviderSelect) {
+  aiProviderSelect.addEventListener("change", () => {
+    updateAiFieldVisibility(aiProviderSelect.value);
+  });
+}
+
+if (btnSaveAiSettings) {
+  btnSaveAiSettings.addEventListener("click", async () => {
+    const provider = aiProviderSelect.value;
+    const geminiKey = (geminiKeyInput.value || "").trim();
+    const openaiKey = (openaiKeyInput.value || "").trim();
+
+    if (window.Echo && window.Echo.ai && window.Echo.ai.saveSettings) {
+      await window.Echo.ai.saveSettings({
+        provider,
+        geminiApiKey: geminiKey,
+        openaiApiKey: openaiKey
+      });
+      aiStatusMsg.textContent = "Saved";
+      setTimeout(() => {
+        aiStatusMsg.textContent = "";
+      }, 2000);
+    }
+  });
+}
+
 async function init() {
   const { echoEnabled, echoRules = {}, echoStats = {} } = await chrome.storage.local.get([
     "echoEnabled",
@@ -389,6 +462,14 @@ async function init() {
   renderStats(echoStats);
   loadHistory();
   loadSnippets();
+
+  if (window.Echo && window.Echo.ai && window.Echo.ai.getSettings) {
+    const aiConfig = await window.Echo.ai.getSettings();
+    if (aiProviderSelect) aiProviderSelect.value = aiConfig.provider || "auto";
+    if (geminiKeyInput) geminiKeyInput.value = aiConfig.geminiApiKey || "";
+    if (openaiKeyInput) openaiKeyInput.value = aiConfig.openaiApiKey || "";
+    updateAiFieldVisibility(aiConfig.provider || "auto");
+  }
 }
 
 chrome.storage.onChanged.addListener((changes, area) => {

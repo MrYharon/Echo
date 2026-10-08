@@ -144,6 +144,39 @@
       color: #fff;
     }
 
+    .mode-selector-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .mode-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .mode-pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: #94a3b8;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .mode-pill:hover {
+      color: #fff;
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+    .mode-pill.active {
+      background: rgba(56, 189, 248, 0.16);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
     .sandbox-feedback {
       margin-top: 10px;
       max-height: 140px;
@@ -387,6 +420,12 @@
         <span class="score-badge" id="sandbox-score">Ready</span>
         <span style="font-size: 11px; color: var(--muted);" id="sandbox-count">0 issues</span>
       </div>
+      <div class="mode-selector-row">
+        <span class="mode-label">Mode</span>
+        <button class="mode-pill active" data-mode="structured" type="button">Structured</button>
+        <button class="mode-pill" data-mode="concise" type="button">Concise</button>
+        <button class="mode-pill" data-mode="deep_reasoning" type="button">Deep Reasoning</button>
+      </div>
       <textarea id="sandbox-input" class="sandbox-textarea" placeholder="Type or paste a prompt to test autocorrect..."></textarea>
       <div class="sandbox-actions">
         <button id="sandbox-autocorrect" class="btn-action" type="button">Auto-correct</button>
@@ -432,6 +471,34 @@
       <span>Real-time Coaching</span>
       <input type="checkbox" id="enabled" />
     </div>
+
+    <div class="rules-header">AI Enhancement Engine</div>
+    <div style="padding: 10px 16px; border-bottom: 1px solid var(--border);">
+      <label style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px;">Provider</label>
+      <select id="ai-provider" style="width: 100%; background: var(--surface); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 11px; outline: none; margin-bottom: 8px;">
+        <option value="auto">Auto (API &gt; Chrome Nano &gt; Local)</option>
+        <option value="gemini">Google Gemini (API Key)</option>
+        <option value="openai">OpenAI / Compatible (API Key)</option>
+        <option value="chrome_nano">Chrome On-Device (Gemini Nano)</option>
+        <option value="local_architect">Echo Local Architect (Offline)</option>
+      </select>
+
+      <div id="gemini-key-wrap" style="margin-bottom: 8px;">
+        <label style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px;">Gemini API Key</label>
+        <input type="password" id="gemini-key" placeholder="AIzaSy..." style="width: 100%; background: var(--surface); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 11px; outline: none;" />
+      </div>
+
+      <div id="openai-key-wrap" style="margin-bottom: 8px; display: none;">
+        <label style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px;">OpenAI API Key</label>
+        <input type="password" id="openai-key" placeholder="sk-..." style="width: 100%; background: var(--surface); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 11px; outline: none;" />
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button id="btn-save-ai-settings" class="btn-action" type="button" style="padding: 5px 12px; font-size: 10px;">Save Engine</button>
+        <span id="ai-status-msg" style="font-size: 10px; color: var(--accent);"></span>
+      </div>
+    </div>
+
     <div class="rules-header">Active Evaluation Rules</div>
     <div class="rules" id="rules"></div>
   </div>
@@ -442,6 +509,7 @@
 
   <script src="../src/db.js"></script>
   <script src="../src/architect.js"></script>
+  <script src="../src/ai.js"></script>
   <script src="../src/autocorrect.js"></script>
   <script src="../src/analyzer.js"></script>
   <script src="popup.js"></script>
