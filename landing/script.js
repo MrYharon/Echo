@@ -1,7 +1,10 @@
 // Echo - Creative Kinetic Monogram & Acoustic Canvas Engine
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Full-Bleed Kinetic Acoustic Ripple Canvas
+  // 1. Full-Bleed Kinetic Acoustic Ripple Canvas with Shockwave Physics
   const canvas = document.getElementById("fluid-canvas");
+  const progressBar = document.getElementById("scroll-progress-bar");
+  let shockwaves = [];
+
   if (canvas) {
     const ctx = canvas.getContext("2d");
     let width = (canvas.width = window.innerWidth);
@@ -20,23 +23,47 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastX = mouseX;
     let lastY = mouseY;
 
+    let lastScrollY = window.scrollY;
+    let scrollVelocity = 0;
+
+    // Track mouse & update ambient spotlight
     window.addEventListener("mousemove", (e) => {
       targetMouseX = e.clientX;
       targetMouseY = e.clientY;
       const dx = targetMouseX - lastX;
       const dy = targetMouseY - lastY;
-      mouseSpeed = Math.min(Math.sqrt(dx * dx + dy * dy), 30);
+      mouseSpeed = Math.min(Math.sqrt(dx * dx + dy * dy), 35);
       lastX = targetMouseX;
       lastY = targetMouseY;
+
+      document.body.style.setProperty("--cursor-x", `${e.clientX}px`);
+      document.body.style.setProperty("--cursor-y", `${e.clientY}px`);
     });
+
+    // Track scroll velocity & update progress bar
+    window.addEventListener("scroll", () => {
+      const currentScrollY = window.scrollY;
+      const deltaScroll = Math.abs(currentScrollY - lastScrollY);
+      scrollVelocity = Math.min(deltaScroll * 0.8, 40);
+      lastScrollY = currentScrollY;
+
+      if (progressBar) {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = maxScroll > 0 ? (currentScrollY / maxScroll) * 100 : 0;
+        progressBar.style.width = `${progress}%`;
+      }
+    }, { passive: true });
 
     let waveOffset = 0;
 
     function renderWaves() {
-      // Smooth interpolation
-      mouseX += (targetMouseX - mouseX) * 0.04;
-      mouseY += (targetMouseY - mouseY) * 0.04;
-      mouseSpeed *= 0.94;
+      // Smooth interpolation & damping
+      mouseX += (targetMouseX - mouseX) * 0.045;
+      mouseY += (targetMouseY - mouseY) * 0.045;
+      mouseSpeed *= 0.93;
+      scrollVelocity *= 0.91;
+
+      const totalEnergy = mouseSpeed + scrollVelocity;
 
       ctx.clearRect(0, 0, width, height);
 
@@ -48,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.lineWidth = 1;
 
       for (let i = 0; i < rings; i++) {
-        const radius = baseRadius + i * spacing + Math.sin(waveOffset + i * 0.35) * (8 + mouseSpeed * 0.4);
+        const radius = baseRadius + i * spacing + Math.sin(waveOffset + i * 0.35) * (8 + totalEnergy * 0.45);
         const opacity = Math.max(0, 0.24 - (i / rings) * 0.21);
 
         ctx.strokeStyle = `rgba(19, 30, 51, ${opacity})`;
@@ -58,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const segments = 72;
         for (let s = 0; s <= segments; s++) {
           const angle = (s / segments) * Math.PI * 2;
-          const harmonicDistortion = Math.sin(angle * 5 + waveOffset + i * 0.5) * (10 + (mouseSpeed * 0.3));
+          const harmonicDistortion = Math.sin(angle * 5 + waveOffset + i * 0.5) * (10 + (totalEnergy * 0.35));
           const r = radius + harmonicDistortion;
           const x = mouseX + Math.cos(angle) * r;
           const y = mouseY + Math.sin(angle) * (r * 0.82);
@@ -73,14 +100,38 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.stroke();
       }
 
-      waveOffset += 0.009;
+      // Render expanding shockwaves
+      for (let w = shockwaves.length - 1; w >= 0; w--) {
+        const sw = shockwaves[w];
+        sw.radius += sw.speed;
+        sw.opacity *= 0.95;
+
+        if (sw.opacity < 0.01 || sw.radius > sw.maxRadius) {
+          shockwaves.splice(w, 1);
+          continue;
+        }
+
+        ctx.strokeStyle = `rgba(2, 132, 199, ${sw.opacity * 0.45})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = `rgba(56, 189, 248, ${sw.opacity * 0.25})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.radius * 0.8, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      waveOffset += 0.009 + (totalEnergy * 0.0006);
       requestAnimationFrame(renderWaves);
     }
 
     renderWaves();
   }
 
-  // 2. Kinetic 3D Monogram Sculpture Parallax
+  // 2. Kinetic 3D Monogram Sculpture Parallax & Shockwave Trigger
   const sculpture = document.getElementById("monogram-sculpture");
   if (sculpture) {
     const slabTop = sculpture.querySelector(".slab-top");
@@ -94,8 +145,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const deltaX = (e.clientX - centerX) / (window.innerWidth / 2);
       const deltaY = (e.clientY - centerY) / (window.innerHeight / 2);
 
-      // Subtle 3D perspective rotation
-      sculpture.style.transform = `perspective(900px) rotateY(${deltaX * 12}deg) rotateX(${-deltaY * 12}deg)`;
+      // 3D perspective rotation
+      sculpture.style.transform = `perspective(900px) rotateY(${deltaX * 14}deg) rotateX(${-deltaY * 14}deg)`;
 
       // Kinetic slab horizontal translation
       if (slabTop) slabTop.style.transform = `translateX(${-deltaX * 14}px)`;
@@ -109,22 +160,52 @@ document.addEventListener("DOMContentLoaded", () => {
       if (slabMid) slabMid.style.transform = "translateX(0px)";
       if (slabBot) slabBot.style.transform = "translateX(0px)";
     });
+
+    // Acoustic shockwave pulse on sculpture click
+    sculpture.addEventListener("click", () => {
+      const rect = sculpture.getBoundingClientRect();
+      shockwaves.push({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        radius: 30,
+        maxRadius: 750,
+        opacity: 0.9,
+        speed: 16
+      });
+      sculpture.style.transform = "perspective(900px) scale(0.95)";
+      setTimeout(() => {
+        sculpture.style.transform = "perspective(900px) scale(1)";
+      }, 150);
+    });
   }
 
-  // 3. Scroll Fade-in Intersection Observer
+  // 3. Scroll Fade-in & Animated Strikethrough Intersection Observer
   const fadeElements = document.querySelectorAll(".fade-in-element");
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add("is-visible");
+
+          // Trigger strikethrough animation when feature section scrolls into view
+          const strikethroughs = entry.target.querySelectorAll(".diff-chip-removed");
+          if (strikethroughs.length > 0) {
+            strikethroughs.forEach((chip, idx) => {
+              setTimeout(() => {
+                chip.classList.add("striked");
+              }, 180 * (idx + 1));
+            });
+          }
         }
       });
     }, { threshold: 0.12 });
 
     fadeElements.forEach((el) => observer.observe(el));
   } else {
-    fadeElements.forEach((el) => el.classList.add("is-visible"));
+    fadeElements.forEach((el) => {
+      el.classList.add("is-visible");
+      el.querySelectorAll(".diff-chip-removed").forEach((c) => c.classList.add("striked"));
+    });
   }
 
   // 4. Interactive Laboratory Workbench
@@ -140,6 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const sampleButtons = document.querySelectorAll(".preset-btn");
 
   let activeMode = "structured";
+  let streamTimer = null;
 
   const PROMPT_SAMPLES = {
     booking: `hey I need to build a barbershop appointment booking system with stripe integration and calendar sync but don't use nextjs or tailwind we want raw fastify and vanilla js and make sure two people can't double book the same barber slot at the same second so use optimistic locking or postgres transactions and don't write generic mock code give me the actual db schema and route handler`,
@@ -153,7 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
       modeButtons.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       activeMode = btn.dataset.mode;
-      executeDecompilation();
+      executeDecompilation(true);
     });
   });
 
@@ -164,7 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (PROMPT_SAMPLES[key]) {
         inputText.value = PROMPT_SAMPLES[key];
         evaluateInputClarity();
-        executeDecompilation();
+        executeDecompilation(true);
       }
     });
   });
@@ -209,11 +291,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function executeDecompilation() {
+  // Smooth score counter animation
+  function animateScoreCounter(targetScore) {
+    if (!clarityAfter) return;
+    let current = 40;
+    const step = () => {
+      current += Math.ceil((targetScore - current) * 0.25);
+      if (current >= targetScore) {
+        clarityAfter.textContent = `Clarity: ${targetScore}/100 (Airtight)`;
+        clarityAfter.className = "score-chip airtight pulse-ping";
+        setTimeout(() => {
+          clarityAfter.classList.remove("pulse-ping");
+        }, 800);
+      } else {
+        clarityAfter.textContent = `Clarity: ${current}/100`;
+        requestAnimationFrame(step);
+      }
+    };
+    requestAnimationFrame(step);
+  }
+
+  function executeDecompilation(animateStream = false) {
     const raw = (inputText.value || "").trim();
     if (!raw) {
       if (outputText) {
         outputText.textContent = "// Echo Meta-Compiler Ready\n// Type or paste any stream-of-consciousness thought dump on the left,\n// or click one of the sample presets above to see instant decompilation.";
+        outputText.classList.remove("is-compiling");
       }
       if (clarityAfter) {
         clarityAfter.textContent = "Clarity: --";
@@ -228,12 +331,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const transformed = window.Echo.architect.transform(raw, activeMode);
-    if (outputText) outputText.textContent = transformed.corrected;
+    const finalContent = transformed.corrected;
 
-    if (clarityAfter) {
-      clarityAfter.textContent = "Clarity: 100/100 (Airtight)";
-      clarityAfter.className = "score-chip airtight";
+    if (outputText) {
+      outputText.classList.add("is-compiling");
+
+      if (animateStream) {
+        // Fast line-by-line streaming simulation
+        if (streamTimer) clearInterval(streamTimer);
+        const lines = finalContent.split("\n");
+        let currentLine = 0;
+        outputText.textContent = "";
+
+        streamTimer = setInterval(() => {
+          if (currentLine < lines.length) {
+            outputText.textContent += (currentLine === 0 ? "" : "\n") + lines[currentLine];
+            currentLine++;
+            outputText.scrollTop = outputText.scrollHeight;
+          } else {
+            clearInterval(streamTimer);
+            streamTimer = null;
+            outputText.classList.remove("is-compiling");
+          }
+        }, 16);
+      } else {
+        outputText.textContent = finalContent;
+        setTimeout(() => {
+          outputText.classList.remove("is-compiling");
+        }, 500);
+      }
     }
+
+    animateScoreCounter(100);
   }
 
   if (inputText) {
@@ -245,18 +374,21 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnCompile) {
     btnCompile.addEventListener("click", () => {
       btnCompile.textContent = "Compiling...";
+      btnCompile.style.transform = "scale(0.96)";
       setTimeout(() => {
-        executeDecompilation();
+        executeDecompilation(true);
         btnCompile.textContent = "Compile Prompt \u2192";
+        btnCompile.style.transform = "scale(1)";
       }, 160);
     });
   }
 
   if (btnReset) {
     btnReset.addEventListener("click", () => {
+      if (streamTimer) clearInterval(streamTimer);
       if (inputText) inputText.value = "";
       evaluateInputClarity();
-      executeDecompilation();
+      executeDecompilation(false);
     });
   }
 
@@ -267,8 +399,10 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         await navigator.clipboard.writeText(text);
         btnCopy.textContent = "Copied to Clipboard!";
+        btnCopy.style.transform = "scale(1.05)";
         setTimeout(() => {
           btnCopy.textContent = "Copy Prompt";
+          btnCopy.style.transform = "scale(1)";
         }, 1800);
       } catch (err) {
         btnCopy.textContent = "Copied!";
@@ -283,6 +417,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (inputText) {
     inputText.value = "";
     evaluateInputClarity();
-    executeDecompilation();
+    executeDecompilation(false);
   }
 });
