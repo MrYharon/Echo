@@ -4,11 +4,14 @@ Echo.rules = {
   tooShort: {
     id: "tooShort",
     name: "Concrete task",
+    category: "CONTEXT",
     weight: 40,
     check(text) {
       if (text.length < 12) {
         return {
           severity: "error",
+          category: "CONTEXT",
+          rationale: "Under-specified prompts cause the AI to guess scope and hallucinate details.",
           message:
             "Prompt is too short. Specify the exact task, context, and desired result.",
           tip: 'Define what you need, the format, and the context.',
@@ -25,6 +28,7 @@ Echo.rules = {
   weakVerbs: {
     id: "weakVerbs",
     name: "Vague language",
+    category: "CLARITY",
     weight: 20,
     patterns: [
       {
@@ -59,6 +63,8 @@ Echo.rules = {
         if (m) {
           return {
             severity: "warning",
+            category: "CLARITY",
+            rationale: "Vague terms dilute attention weights, leading the model to produce generic output.",
             message: 'Vague phrasing detected: "' + m[0] + '".',
             tip: p.tip,
             quickFix: {
@@ -76,6 +82,7 @@ Echo.rules = {
   actionVerb: {
     id: "actionVerb",
     name: "Action verb",
+    category: "DIRECTIVENESS",
     weight: 15,
     VERBS: new Set([
       "write", "create", "draft", "summarize", "explain", "analyze",
@@ -94,6 +101,8 @@ Echo.rules = {
       if (firstWord && !Echo.rules.actionVerb.VERBS.has(firstWord.toLowerCase())) {
         return {
           severity: "suggestion",
+          category: "DIRECTIVENESS",
+          rationale: "Starting directly with an action verb primes the LLM to execute without conversational filler.",
           message:
             'Start directly with an action verb instead of "' + firstWord + '".',
           tip: "Verbs like build, draft, explain, analyze, or debug ensure focused AI output.",
@@ -111,6 +120,7 @@ Echo.rules = {
   missingSpecifics: {
     id: "missingSpecifics",
     name: "Constraints & format",
+    category: "SPECIFICATIONS",
     weight: 20,
     FORMAT_RE: /\b(list|table|json|csv|bullets?|headings?|code|markdown|diagram|outline|template|steps?|summary|email|script|essay|report|paragraphs?|sentence)\b/i,
     CONSTRAINT_RE: /\b(word count|words|characters|pages?|length|tone|style|formal|casual|friendly|audience|beginner|expert|deadline|limit|min|max|examples?|in the style of)\b/i,
@@ -125,6 +135,8 @@ Echo.rules = {
           : "Format with clear sections and concise bullet points.";
         return {
           severity: "warning",
+          category: "SPECIFICATIONS",
+          rationale: "LLMs require explicit schema and output constraints to avoid returning unformatted walls of text.",
           message: "No output format or constraints specified.",
           tip: "Specify format (bullet points, code, JSON) and tone/length limits.",
           quickFix: {
@@ -140,12 +152,15 @@ Echo.rules = {
   multipleAsks: {
     id: "multipleAsks",
     name: "One ask at a time",
+    category: "STRUCTURE",
     weight: 10,
     check(text) {
       const questions = (text.match(/\?/g) || []).length;
       if (questions >= 2) {
         return {
           severity: "suggestion",
+          category: "STRUCTURE",
+          rationale: "Unstructured compound questions cause LLMs to focus on the first ask while ignoring secondary constraints.",
           message: questions + " separate questions bundled together.",
           tip: "Split into distinct prompts or number them explicitly for clearer responses.",
           quickFix: {
@@ -184,6 +199,8 @@ Echo.analyzer = {
         issues.push({
           ruleId: ruleId,
           ruleName: rule.name,
+          category: result.category || rule.category || "QUALITY",
+          rationale: result.rationale || "",
           severity: result.severity,
           message: result.message,
           tip: result.tip,

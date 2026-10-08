@@ -184,20 +184,72 @@
     }
     .mini-issue {
       background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 6px;
-      padding: 6px 8px;
+      padding: 8px 10px;
       margin-bottom: 6px;
       font-size: 11px;
     }
+    .mini-issue-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
     .mini-issue-name {
-      font-weight: 600;
+      font-weight: 700;
       color: #f1f5f9;
-      margin-bottom: 2px;
+      font-size: 11px;
+    }
+    .mini-issue-cat {
+      font-size: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+    }
+    .mini-diff-box {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 4px;
+      padding: 4px 6px;
+      margin: 4px 0;
+      font-size: 10px;
+      font-family: ui-monospace, monospace;
+    }
+    .mini-diff-del {
+      text-decoration: line-through;
+      color: #f87171;
+    }
+    .mini-diff-ins {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .mini-diff-append {
+      color: #34d399;
+      font-weight: 600;
     }
     .mini-issue-tip {
       color: var(--muted);
       font-size: 10px;
+      line-height: 1.35;
+    }
+    .mini-apply-btn {
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      display: inline-block;
+    }
+    .mini-apply-btn:hover {
+      background: var(--accent);
+      color: #082f49;
     }
 
     /* Settings Styles */

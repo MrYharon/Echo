@@ -303,8 +303,13 @@ Echo.ui = {
   color: #ffffff;
 }
 .echo-issue {
-  padding: 11px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(15, 23, 42, 0.4);
+  transition: background 0.15s ease;
+}
+.echo-issue:hover {
+  background: rgba(15, 23, 42, 0.8);
 }
 .echo-issue:last-child {
   border-bottom: none;
@@ -312,63 +317,122 @@ Echo.ui = {
 .echo-issue-head {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 4px;
 }
-.echo-issue-tag {
+.echo-category-badge {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.echo-cat-directiveness {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.25);
+}
+.echo-cat-clarity {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+.echo-cat-context {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(96, 165, 250, 0.25);
+}
+.echo-cat-specifications {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+}
+.echo-cat-structure {
+  background: rgba(192, 132, 252, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(192, 132, 252, 0.25);
+}
+.echo-issue-name {
+  font-weight: 700;
+  color: #f1f5f9;
+  font-size: 11px;
+}
+.echo-diff-box {
+  background: rgba(7, 13, 25, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 7px 10px;
+  margin: 6px 0 8px;
+  font-size: 11px;
+}
+.echo-diff-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.echo-diff-del {
+  text-decoration: line-through;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.12);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: ui-monospace, monospace;
+}
+.echo-diff-arrow {
+  color: #64748b;
+  font-size: 11px;
+}
+.echo-diff-ins {
+  color: #38bdf8;
+  font-weight: 700;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: ui-monospace, monospace;
+}
+.echo-diff-tag {
+  color: #64748b;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 4px;
-  letter-spacing: 0.03em;
 }
-.echo-tag-error {
-  background: rgba(248, 113, 113, 0.16);
-  color: #f87171;
-}
-.echo-tag-warning {
-  background: rgba(245, 158, 11, 0.16);
-  color: #fbbf24;
-}
-.echo-tag-suggestion {
-  background: rgba(56, 189, 248, 0.16);
-  color: #38bdf8;
-}
-.echo-issue-name {
+.echo-diff-ins-append {
+  color: #34d399;
   font-weight: 600;
-  color: #f1f5f9;
-  font-size: 12px;
-}
-.echo-issue-msg {
-  color: #cbd5e1;
-  margin-top: 5px;
-  font-size: 12px;
-  line-height: 1.4;
-}
-.echo-issue-tip {
-  color: #94a3b8;
-  margin-top: 4px;
-  font-size: 11px;
+  background: rgba(52, 211, 153, 0.12);
+  padding: 2px 6px;
+  border-radius: 3px;
   line-height: 1.35;
+}
+.echo-issue-rationale {
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+.echo-issue-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 .echo-fix-btn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-top: 8px;
-  background: rgba(56, 189, 248, 0.1);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.28);
+  background: #38bdf8;
+  color: #082f49;
+  border: none;
   border-radius: 5px;
-  padding: 4px 8px;
+  padding: 4px 10px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .echo-fix-btn:hover {
-  background: #38bdf8;
-  color: #082f49;
+  background: #7dd3fc;
 }
 .echo-presets {
   padding: 10px 14px 12px;
@@ -817,39 +881,55 @@ Echo.ui = {
       for (const issue of result.issues) {
         const el = document.createElement("div");
         el.className = "echo-issue";
-        const tagClass =
-          "echo-tag-" +
-          (issue.severity === "error"
-            ? "error"
-            : issue.severity === "warning"
-            ? "warning"
-            : "suggestion");
 
-        let fixHtml = "";
+        const cat = (issue.category || "QUALITY").toLowerCase();
+        const catClass = "echo-cat-" + cat;
+
+        let diffHtml = "";
         if (issue.quickFix) {
-          fixHtml = '<button class="echo-fix-btn" type="button">Apply fix: ' +
-            Echo.detector.escapeHtml(issue.quickFix.label) +
-            "</button>";
+          if (issue.quickFix.target && issue.quickFix.replacement != null) {
+            diffHtml = `
+              <div class="echo-diff-box">
+                <div class="echo-diff-row">
+                  <span class="echo-diff-del">${Echo.detector.escapeHtml(issue.quickFix.target)}</span>
+                  <span class="echo-diff-arrow">&rarr;</span>
+                  <span class="echo-diff-ins">${Echo.detector.escapeHtml(issue.quickFix.replacement.trim())}</span>
+                </div>
+              </div>
+            `;
+          } else if (issue.quickFix.append) {
+            diffHtml = `
+              <div class="echo-diff-box">
+                <div class="echo-diff-row">
+                  <span class="echo-diff-tag">+ Add Constraint:</span>
+                  <span class="echo-diff-ins-append">${Echo.detector.escapeHtml(issue.quickFix.append)}</span>
+                </div>
+              </div>
+            `;
+          }
         }
 
-        el.innerHTML =
-          '<div class="echo-issue-head"><span class="echo-issue-tag ' +
-          tagClass +
-          '">' +
-          issue.severity +
-          '</span><span class="echo-issue-name">' +
-          Echo.detector.escapeHtml(issue.ruleName) +
-          "</span></div>" +
-          '<div class="echo-issue-msg">' +
-          Echo.detector.escapeHtml(issue.message) +
-          "</div>" +
-          '<div class="echo-issue-tip">' +
-          Echo.detector.escapeHtml(issue.tip) +
-          "</div>" +
-          fixHtml;
+        let fixActionHtml = "";
+        if (issue.quickFix) {
+          fixActionHtml = `
+            <div class="echo-issue-footer">
+              <button class="echo-fix-btn" type="button">Apply suggestion</button>
+            </div>
+          `;
+        }
+
+        el.innerHTML = `
+          <div class="echo-issue-head">
+            <span class="echo-category-badge ${catClass}">${Echo.detector.escapeHtml(issue.category || "QUALITY")}</span>
+            <span class="echo-issue-name">${Echo.detector.escapeHtml(issue.ruleName)}</span>
+          </div>
+          ${diffHtml}
+          <div class="echo-issue-rationale">${Echo.detector.escapeHtml(issue.rationale || issue.tip || issue.message)}</div>
+          ${fixActionHtml}
+        `;
 
         const fixBtn = el.querySelector(".echo-fix-btn");
-        if (fixBtn) {
+        if (fixBtn && issue.quickFix) {
           fixBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             Echo.ui.applyIndividualFix(issue.quickFix);

@@ -63,10 +63,54 @@ document.addEventListener("DOMContentLoaded", () => {
       res.issues.forEach((issue) => {
         const item = document.createElement("div");
         item.className = "issue-chip";
+
+        let diffHtml = "";
+        if (issue.quickFix) {
+          if (issue.quickFix.target && issue.quickFix.replacement != null) {
+            diffHtml = `
+              <div style="background:rgba(0,0,0,0.3); border-radius:4px; padding:3px 6px; margin:4px 0; font-family:monospace; font-size:11px;">
+                <span style="text-decoration:line-through; color:#f87171;">${issue.quickFix.target}</span>
+                &rarr;
+                <span style="color:#38bdf8; font-weight:700;">${issue.quickFix.replacement.trim()}</span>
+              </div>
+            `;
+          } else if (issue.quickFix.append) {
+            diffHtml = `
+              <div style="background:rgba(0,0,0,0.3); border-radius:4px; padding:3px 6px; margin:4px 0; font-size:11px; color:#34d399;">
+                + ${issue.quickFix.append}
+              </div>
+            `;
+          }
+        }
+
+        const fixBtnHtml = issue.quickFix
+          ? `<button class="sample-chip" type="button" style="margin-top:4px; color:#38bdf8; border-color:rgba(56,189,248,0.3);">Apply suggestion</button>`
+          : "";
+
         item.innerHTML = `
-          <span style="font-weight:700;">${issue.ruleName}:</span>
-          <span>${issue.message}</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <span style="font-weight:700; color:#fff;">${issue.ruleName}</span>
+            <span style="font-size:9px; font-weight:800; background:rgba(56,189,248,0.15); color:#38bdf8; padding:1px 5px; border-radius:3px;">${issue.category || "QUALITY"}</span>
+          </div>
+          ${diffHtml}
+          <div style="font-size:11px; color:#94a3b8; line-height:1.35; margin-top:2px;">${issue.rationale || issue.tip || issue.message}</div>
+          ${fixBtnHtml}
         `;
+
+        const fixBtn = item.querySelector("button");
+        if (fixBtn && issue.quickFix) {
+          fixBtn.addEventListener("click", () => {
+            let cur = demoInput.value;
+            if (issue.quickFix.target && issue.quickFix.replacement != null) {
+              demoInput.value = cur.replace(issue.quickFix.target, issue.quickFix.replacement);
+            } else if (issue.quickFix.append) {
+              demoInput.value = cur.trim() + " " + issue.quickFix.append;
+            }
+            updateBeforeAnalysis();
+            runEnhance();
+          });
+        }
+
         demoIssuesContainer.appendChild(item);
       });
     }

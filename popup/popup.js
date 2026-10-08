@@ -81,10 +81,53 @@ function updateSandbox() {
     for (const issue of res.issues) {
       const item = document.createElement("div");
       item.className = "mini-issue";
+
+      let diffHtml = "";
+      if (issue.quickFix) {
+        if (issue.quickFix.target && issue.quickFix.replacement != null) {
+          diffHtml = `
+            <div class="mini-diff-box">
+              <span class="mini-diff-del">${issue.quickFix.target}</span>
+              &rarr;
+              <span class="mini-diff-ins">${issue.quickFix.replacement.trim()}</span>
+            </div>
+          `;
+        } else if (issue.quickFix.append) {
+          diffHtml = `
+            <div class="mini-diff-box">
+              <span class="mini-diff-append">+ ${issue.quickFix.append}</span>
+            </div>
+          `;
+        }
+      }
+
+      const fixBtnHtml = issue.quickFix
+        ? `<button class="mini-apply-btn" type="button">Apply suggestion</button>`
+        : "";
+
       item.innerHTML = `
-        <div class="mini-issue-name">${issue.ruleName}: ${issue.message}</div>
-        <div class="mini-issue-tip">Tip: ${issue.tip}</div>
+        <div class="mini-issue-head">
+          <span class="mini-issue-name">${issue.ruleName}</span>
+          <span class="mini-issue-cat">${issue.category || "QUALITY"}</span>
+        </div>
+        ${diffHtml}
+        <div class="mini-issue-tip">${issue.rationale || issue.tip || issue.message}</div>
+        ${fixBtnHtml}
       `;
+
+      const fixBtn = item.querySelector(".mini-apply-btn");
+      if (fixBtn && issue.quickFix) {
+        fixBtn.addEventListener("click", () => {
+          let cur = sandboxInput.value;
+          if (issue.quickFix.target && issue.quickFix.replacement != null) {
+            sandboxInput.value = cur.replace(issue.quickFix.target, issue.quickFix.replacement);
+          } else if (issue.quickFix.append) {
+            sandboxInput.value = cur.trim() + " " + issue.quickFix.append;
+          }
+          updateSandbox();
+        });
+      }
+
       sandboxFeedback.appendChild(item);
     }
   }, 200);
