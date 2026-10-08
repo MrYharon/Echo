@@ -176,7 +176,9 @@ document.addEventListener("DOMContentLoaded", () => {
         clarityBefore.textContent = "Clarity: --";
         clarityBefore.className = "score-chip";
       }
-      if (diagDrawer) diagDrawer.innerHTML = "";
+      if (diagDrawer) {
+        diagDrawer.innerHTML = '<div style="font-size:12px; color:var(--ink-muted); padding:6px 0;">Select a sample above or paste your prompt to view real-time diagnostics.</div>';
+      }
       return;
     }
 
@@ -210,8 +212,13 @@ document.addEventListener("DOMContentLoaded", () => {
   function executeDecompilation() {
     const raw = (inputText.value || "").trim();
     if (!raw) {
-      if (outputText) outputText.textContent = "";
-      if (clarityAfter) clarityAfter.textContent = "Clarity: --";
+      if (outputText) {
+        outputText.textContent = "// Echo Meta-Compiler Ready\n// Type or paste any stream-of-consciousness thought dump on the left,\n// or click one of the sample presets above to see instant decompilation.";
+      }
+      if (clarityAfter) {
+        clarityAfter.textContent = "Clarity: --";
+        clarityAfter.className = "score-chip";
+      }
       return;
     }
 
@@ -248,16 +255,15 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnReset) {
     btnReset.addEventListener("click", () => {
       if (inputText) inputText.value = "";
-      if (outputText) outputText.textContent = "";
       evaluateInputClarity();
-      if (clarityAfter) clarityAfter.textContent = "Clarity: --";
+      executeDecompilation();
     });
   }
 
   if (btnCopy) {
     btnCopy.addEventListener("click", async () => {
       const text = outputText ? outputText.textContent : "";
-      if (!text) return;
+      if (!text || text.startsWith("// Echo Meta-Compiler Ready")) return;
       try {
         await navigator.clipboard.writeText(text);
         btnCopy.textContent = "Copied to Clipboard!";
@@ -273,9 +279,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Preload default realistic developer thought dump
+  // Initialize with clean empty input so the placeholder is visible and typing requires zero backspacing
   if (inputText) {
-    inputText.value = PROMPT_SAMPLES.booking;
+    inputText.value = "";
     evaluateInputClarity();
     executeDecompilation();
   }

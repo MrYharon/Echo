@@ -5,8 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Echo &mdash; The AI Prompt Compiler</title>
   <meta name="description" content="Echo decompiles conversational streams of consciousness into structured, airtight prompt contracts for ChatGPT, Claude, and Gemini." />
+  
+  <!-- Open Graph & Social Cards (Discord, Messenger, Twitter, Facebook, Slack) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Echo" />
+  <meta property="og:title" content="Echo &mdash; The AI Prompt Compiler" />
+  <meta property="og:description" content="Decompiles stream-of-consciousness thought dumps into structured, airtight prompt specifications for ChatGPT, Claude, and Gemini." />
+  <meta property="og:image" content="assets/brand-logo.png" />
+  <meta property="og:image:secure_url" content="assets/brand-logo.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="335" />
+  <meta property="og:image:height" content="297" />
+  <meta property="og:image:alt" content="Echo Monogram Emblem" />
+
+  <!-- Twitter / Discord Rich Embed Card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Echo &mdash; The AI Prompt Compiler" />
+  <meta name="twitter:description" content="Decompiles stream-of-consciousness thought dumps into structured, airtight prompt specifications for ChatGPT, Claude, and Gemini." />
+  <meta name="twitter:image" content="assets/brand-logo.png" />
+  <meta name="theme-color" content="#131e33" />
+
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/png" href="assets/brand-logo.png" />
+  <link rel="apple-touch-icon" href="assets/brand-logo.png" />
 </head>
 <body>
   <!-- Full-Bleed Kinetic Soundwave Ripple Canvas -->
@@ -68,14 +89,12 @@
             <div class="sculpture-card" id="monogram-sculpture">
               <div class="sculpture-bg-lines"></div>
               <svg class="monogram-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Stepped Top Slab -->
-                <rect class="slab-top" x="32" y="32" width="136" height="34" rx="4" />
-                <!-- Stepped Middle Slab with indentation -->
-                <rect class="slab-mid" x="32" y="83" width="98" height="34" rx="4" />
-                <!-- Stepped Bottom Slab -->
-                <rect class="slab-bot" x="32" y="134" width="136" height="34" rx="4" />
-                <!-- Vertical Spine Connecting the E -->
-                <rect class="slab-spine" x="32" y="32" width="34" height="136" rx="4" fill="#ffffff" />
+                <!-- Top Stepped Slab (Exactly matching brand monogram) -->
+                <path class="slab-top" d="M 32,30 H 168 V 56 H 70 V 65 H 32 Z" fill="#ffffff" />
+                <!-- Middle Floating Slab -->
+                <path class="slab-mid" d="M 32,87 H 130 V 113 H 32 Z" fill="#ffffff" />
+                <!-- Bottom Stepped Slab (Mirror stepped notch) -->
+                <path class="slab-bot" d="M 32,135 H 70 V 145 H 168 V 171 H 32 Z" fill="#ffffff" />
               </svg>
             </div>
           </div>
@@ -209,7 +228,7 @@
                 <button class="preset-btn" data-sample="postgres" type="button">PostgreSQL Query</button>
               </div>
 
-              <textarea id="lab-input" class="lab-text-input" placeholder="Type or paste any stream-of-consciousness thought dump..."></textarea>
+              <textarea id="lab-input" class="lab-text-input" placeholder="e.g. hey I need to build a barbershop appointment booking system with stripe integration and calendar sync but don't use nextjs or tailwind we want raw fastify and vanilla js and make sure two people can't double book the same barber slot at the same second so use optimistic locking or postgres transactions and don't write generic mock code give me the actual db schema and route handler"></textarea>
 
               <div style="display: flex; gap: 12px; margin-bottom: 16px;">
                 <button id="btn-run-compile" class="text-action-link" type="button" style="cursor: pointer; background: transparent; border: none; font-size: 14px;">
