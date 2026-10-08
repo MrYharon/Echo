@@ -68,10 +68,14 @@ Echo.autocorrect = {
   },
 
   // Transform a raw prompt into a structured, high-performing AI prompt
-  correctFull(text) {
+  correctFull(text, mode = "structured") {
     const raw = (text || "").trim();
     if (!raw) {
       return { original: raw, corrected: raw, changed: false, changes: [] };
+    }
+
+    if (Echo.architect && Echo.architect.transform) {
+      return Echo.architect.transform(raw, mode);
     }
 
     const changes = [];

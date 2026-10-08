@@ -21,6 +21,7 @@
       "js": [
         "src/detector.js",
         "src/db.js",
+        "src/architect.js",
         "src/autocorrect.js",
         "src/analyzer.js",
         "src/ui.js",
