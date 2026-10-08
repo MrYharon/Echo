@@ -1,24 +1,39 @@
-# Echo - Prompt Coach
+# Echo - Grammarly for AI Prompting
 
-Echo is a browser extension that acts as a real-time Grammarly for AI prompting. It analyzes what you type in ChatGPT, Claude, and Gemini, flags prompt weaknesses, and provides one-click auto-correction directly in the input field.
+Echo is an open-source browser extension that acts as a real-time prompt engineering layer for ChatGPT, Claude, and Gemini. It analyzes what you type in prompt textboxes, flags prompt weaknesses, and restructures raw, sloppy drafts into production-ready AI specifications.
+
+## How Grammarly Works vs How Echo Works
+
+Grammarly does not rely on a single slow AI call or simplistic regex. It executes a multi-tiered pipeline:
+1. **Tier 1 (Instant DOM Tokenizer, <15ms)**: Tracks cursor position and flags low-level tokens without keystroke lag.
+2. **Tier 2 (Quality Grading Engine)**: Evaluates input against quality dimensions (Correctness, Clarity, Delivery).
+3. **Tier 3 (Semantic Rewrite Engine)**: Feeds intent and context into task-specific small models and instruction-tuned LLMs.
+
+Echo adopts this exact architecture for prompt engineering:
+- **Tier 1: DOM Tokenizer & Underlines**: Injects floating coaching badges and inline replacement tags directly into ChatGPT, Claude, and Gemini textboxes.
+- **Tier 2: Prompt Quality Grader (0-100)**: Evaluates 5 dimensions: Concrete Task, Action Directives, Specific Constraints, Intent Domain, and Single-Ask Focus.
+- **Tier 3: Multi-Tier Prompt Architect & AI Engine**: Rewrites prompts using structured Markdown frameworks (`### Objective`, `### Specifications`, `### Constraints`), concise high-signal directives, or deep-reasoning mode via Chrome on-device AI (`window.ai` / Gemini Nano), cloud LLM APIs (Gemini 1.5, OpenAI), or the local rule-based architect.
+
+## Enhancement Modes
+
+- **Structured**: Deconstructs raw prompts into distinct Markdown sections with an expert persona, explicit requirements, expected output format, and negative constraints.
+- **Concise**: Eliminates conversational filler and compresses the ask into a dense, high-signal single directive.
+- **Deep Reasoning**: Instructs the LLM to analyze edge cases, evaluate trade-offs, and state assumptions before generating the final output.
 
 ## Features
 
-- **One-Click Auto-Correct**: Instantly rewrite weak prompts into direct, structured instructions that optimize AI responses.
-- **Real-Time Quality Score**: Live score (0-100 and A-D grade) displayed in a lightweight floating pill next to the active input.
-- **Targeted Quick-Fixes**: One-click inline fixes for specific issues (filler removal, weak verbs, vague vocabulary).
-- **Format & Constraint Presets**: Rapidly inject output specifications (clean code, JSON, numbered steps, concise tone).
+- **Multi-Engine AI Integration**: Supports Chrome's built-in on-device Gemini Nano (`window.ai`), BYOK Gemini 1.5 and OpenAI API keys, with automatic fallback to Echo's local Prompt Architect engine.
+- **Real-Time Quality Score**: Live score (0-100 and A-D grade) displayed in a floating pill next to the active input.
+- **Inline Replacement Tags**: Squiggly-style suggestions (`"help me" -> "assist by providing"`) clickable right above the input box.
+- **IndexedDB History**: Automatically records every prompt enhanced, tracking before-and-after quality scores and token diffs.
+- **Prompt Template Manager**: Save and insert reusable prompt snippets directly from the popup.
 - **Keyboard Shortcut**: Press `Alt+E` to auto-correct the current prompt immediately.
 - **Undo Support**: Easily revert to your original input if needed.
-- **100% Local & Private**: All evaluation and correction logic runs entirely in your browser. No external API calls, tracking, or network overhead.
+- **100% Private**: Runs entirely in the browser with local storage.
 
-## Core Rules
+## Landing Page & Demo
 
-1. **Concrete Task**: Detects underspecified or overly brief prompts and guides you to define the goal and context.
-2. **Action Verbs**: Replaces conversational filler ("can you please help me with") with direct command verbs ("Build", "Draft", "Explain", "Analyze").
-3. **Clarity**: Flags ambiguous terms ("something good", "stuff", "things", "etc") and suggests precise technical criteria.
-4. **Constraints & Format**: Prompts for required output formats (code with comments, tables, JSON) and scope limits.
-5. **One Ask at a Time**: Identifies cluttered multi-part questions and advises sequential numbering or prompt splitting.
+A standalone product landing page with a live interactive Prompt Architect sandbox is available in the `landing/` directory (`landing/index.html`).
 
 ## Installation
 
@@ -31,13 +46,23 @@ Echo is a browser extension that acts as a real-time Grammarly for AI prompting.
 
 ```
 manifest.json          MV3 extension manifest
-src/detector.js        Detects active input and provides DOM read/write methods
-src/autocorrect.js     Heuristic transformation engine for prompt auto-correction
-src/analyzer.js        Rule engine, scoring, and targeted quick-fix definitions
-src/ui.js              Light blue floating pill, suggestion panel, and controls
-src/content.js         Lifecycle coordination, debouncing, and keyboard listeners
-popup/                 Extension settings and rule toggles
-icons/                 Light blue brand icons and SVG asset
+landing/               Product landing page and live interactive sandbox demo
+  index.html           Landing page markup with architecture guide
+  style.css            Dark modern CSS styles and glassmorphism cards
+  script.js            Interactive browser demo of the Prompt Architect
+src/
+  ai.js                Multi-tiered AI engine (Chrome Nano, Gemini, OpenAI, local)
+  architect.js         Intent classifier and structured prompt framework generator
+  autocorrect.js       Correction coordinator with async AI enhancement
+  analyzer.js          Rule engine, scoring, and targeted quick-fix definitions
+  detector.js          DOM input detector with multi-platform read/write handlers
+  db.js                Browser IndexedDB storage client for history and snippets
+  ui.js                Floating pill, suggestion panel, mode pills, and toast
+  content.js           Content script lifecycle coordination and keyboard listeners
+popup/
+  popup.html           Toolbar playground, history, templates, and settings
+  popup.js             Popup controller, mode switching, and stats tracking
+icons/                 Monogram brand icons and SVG asset
 scripts/make-icons.ps1 PowerShell script to regenerate extension icons
 ```
 
