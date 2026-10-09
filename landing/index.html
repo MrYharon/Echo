@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -7,7 +7,7 @@
   <meta name="description" content="Echo decompiles conversational streams of consciousness into structured, airtight prompt contracts for ChatGPT, Claude, and Gemini." />
   
   <meta name="title" content="Echo &mdash; In-DOM AI Prompt Compiler" />
-  <meta name="author" content="Hugh Daeniel Dela Peña" />
+  <meta name="author" content="Hugh Daeniel Dela PeÃ±a" />
   <link rel="canonical" href="https://echo.hughdp.tech/" />
 
   <!-- Open Graph / Discord / Facebook / Messenger / LinkedIn -->
@@ -61,8 +61,8 @@
         </ul>
 
         <div style="display: flex; align-items: center; gap: 28px;">
-          <a href="https://github.com/MrYharon/Echo" target="_blank" class="nav-anchor">GitHub &nearr;</a>
-          <a href="assets/echo-extension.zip" download class="nav-download-link">Download Extension &darr;</a>
+          <a href="https://github.com/MrYharon/Echo" target="_blank" rel="noopener noreferrer" class="nav-anchor" aria-label="Echo repository on GitHub (opens in a new window)">GitHub &nearr;</a>
+          <a href="assets/echo-extension.zip" download class="nav-download-link" aria-label="Download unpacked Echo extension archive (.zip)">Download Extension &darr;</a>
         </div>
       </div>
     </header>
@@ -81,13 +81,13 @@
               Echo is an in-DOM prompt compiler for ChatGPT, Claude, and Gemini. It intercepts raw conversational thought dumps, isolating intent, promoting negative guardrails, and stripping attention-diluting noise before the model processes your tokens.
             </p>
             <div class="hero-links-row">
-              <a href="assets/echo-extension.zip" download class="text-action-link">
+              <a href="assets/echo-extension.zip" download class="text-action-link" aria-label="Download unpacked Echo extension archive (.zip)">
                 Download Extension (.zip) &darr;
               </a>
               <a href="#laboratory" class="text-subtle-link">
                 Open Interactive Laboratory &rarr;
               </a>
-              <a href="https://github.com/MrYharon/Echo" target="_blank" class="text-subtle-link">
+              <a href="https://github.com/MrYharon/Echo" target="_blank" rel="noopener noreferrer" class="text-subtle-link" aria-label="View source code on GitHub (opens in a new window)">
                 View Source on GitHub &nearr;
               </a>
             </div>
@@ -95,9 +95,9 @@
 
           <!-- Kinetic Interactive 'E' Monogram Sculpture -->
           <div class="hero-sculpture-container">
-            <div class="sculpture-card" id="monogram-sculpture">
+            <div class="sculpture-card" id="monogram-sculpture" role="button" tabindex="0" aria-label="Interactive Echo monogram sculpture. Click or press Enter to emit acoustic shockwave">
               <div class="sculpture-bg-lines"></div>
-              <svg class="monogram-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg class="monogram-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <!-- Top Stepped Slab (Exactly matching brand monogram) -->
                 <path class="slab-top" d="M 32,30 H 168 V 56 H 70 V 65 H 32 Z" fill="#ffffff" />
                 <!-- Middle Floating Slab -->
@@ -210,15 +210,15 @@
         </div>
 
         <div class="lab-workbench-slab">
-          <div class="lab-nav-bar">
-            <div class="lab-live-indicator">
-              <span class="pulse-dot"></span>
+          <div class="lab-nav-bar" role="tablist" aria-label="Compilation Modes">
+            <div class="lab-live-indicator" aria-live="polite">
+              <span class="pulse-dot" aria-hidden="true"></span>
               <span>Echo Meta-Compiler Engine</span>
             </div>
             <div class="lab-mode-picker">
-              <button class="mode-tab-btn active" data-mode="structured" type="button">Structured</button>
-              <button class="mode-tab-btn" data-mode="concise" type="button">Concise</button>
-              <button class="mode-tab-btn" data-mode="deep_reasoning" type="button">Deep Reasoning</button>
+              <button class="mode-tab-btn active" role="tab" aria-selected="true" data-mode="structured" type="button">Structured</button>
+              <button class="mode-tab-btn" role="tab" aria-selected="false" data-mode="concise" type="button">Concise</button>
+              <button class="mode-tab-btn" role="tab" aria-selected="false" data-mode="deep_reasoning" type="button">Deep Reasoning</button>
             </div>
           </div>
 
@@ -226,45 +226,45 @@
             <!-- Left Column: Raw Input -->
             <div class="lab-col input-col">
               <div class="col-header-bar">
-                <span class="col-label-title">Raw Human Thought (Before)</span>
-                <span class="score-chip messy" id="clarity-before">Clarity: 38/100 (Messy)</span>
+                <label for="lab-input" class="col-label-title">Raw Human Thought (Before)</label>
+                <span class="score-chip messy" id="clarity-before" aria-live="polite">Clarity: 38/100 (Messy)</span>
               </div>
 
-              <div class="preset-chip-row">
+              <div class="preset-chip-row" role="group" aria-label="Sample Prompt Presets">
                 <span style="font-size: 11px; font-weight: 700; color: var(--ink-muted);">Samples:</span>
-                <button class="preset-btn" data-sample="booking" type="button">Booking Engine</button>
-                <button class="preset-btn" data-sample="react" type="button">React State Bug</button>
-                <button class="preset-btn" data-sample="postgres" type="button">PostgreSQL Query</button>
+                <button class="preset-btn" data-sample="booking" type="button" aria-label="Load Barbershop Booking Engine sample prompt">Booking Engine</button>
+                <button class="preset-btn" data-sample="react" type="button" aria-label="Load React State Bug sample prompt">React State Bug</button>
+                <button class="preset-btn" data-sample="postgres" type="button" aria-label="Load PostgreSQL Query sample prompt">PostgreSQL Query</button>
               </div>
 
-              <textarea id="lab-input" class="lab-text-input" placeholder="e.g. hey I need to build a barbershop appointment booking system with stripe integration and calendar sync but don't use nextjs or tailwind we want raw fastify and vanilla js and make sure two people can't double book the same barber slot at the same second so use optimistic locking or postgres transactions and don't write generic mock code give me the actual db schema and route handler"></textarea>
+              <textarea id="lab-input" class="lab-text-input" aria-label="Raw human thought prompt input" placeholder="e.g. hey I need to build a barbershop appointment booking system with stripe integration and calendar sync but don't use nextjs or tailwind we want raw fastify and vanilla js and make sure two people can't double book the same barber slot at the same second so use optimistic locking or postgres transactions and don't write generic mock code give me the actual db schema and route handler"></textarea>
 
               <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                <button id="btn-run-compile" class="text-action-link" type="button" style="cursor: pointer; background: transparent; border: none; font-size: 14px;">
+                <button id="btn-run-compile" class="text-action-link" type="button" aria-label="Compile prompt contract" style="cursor: pointer; background: transparent; border: none; font-size: 14px;">
                   Compile Prompt &rarr;
                 </button>
-                <button id="btn-reset-input" class="text-subtle-link" type="button" style="cursor: pointer; background: transparent; border: none; font-size: 13px;">
-                  Reset
+                <button id="btn-reset-input" class="text-subtle-link" type="button" aria-label="Clear raw prompt input and reset workbench" style="cursor: pointer; background: transparent; border: none; font-size: 13px;">
+                  Clear Input
                 </button>
               </div>
 
-              <div class="lab-feedback-list" id="lab-diagnostics"></div>
+              <div class="lab-feedback-list" id="lab-diagnostics" aria-live="polite" aria-label="Real-time Prompt Diagnostics"></div>
             </div>
 
             <!-- Right Column: Compiled Contract -->
             <div class="lab-col output-col">
               <div class="col-header-bar">
-                <span class="col-label-title">Compiled Prompt Contract (After)</span>
-                <span class="score-chip airtight" id="clarity-after">Clarity: 100/100 (Airtight)</span>
+                <span class="col-label-title" id="output-contract-label">Compiled Prompt Contract (After)</span>
+                <span class="score-chip airtight" id="clarity-after" aria-live="polite">Clarity: 100/100 (Airtight)</span>
               </div>
 
-              <div id="lab-output" class="lab-text-output"></div>
+              <div id="lab-output" class="lab-text-output" role="region" aria-labelledby="output-contract-label" aria-live="polite"></div>
 
               <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
                 <span style="font-size: 11px; font-weight: 700; color: var(--brand-blue);">
                   Synthesized via Echo Meta-Compiler
                 </span>
-                <button id="btn-copy-contract" class="text-action-link" type="button" style="cursor: pointer; background: transparent; border: none; font-size: 13px;">
+                <button id="btn-copy-contract" class="text-action-link" type="button" aria-label="Copy compiled prompt contract to clipboard" style="cursor: pointer; background: transparent; border: none; font-size: 13px;">
                   Copy Prompt
                 </button>
               </div>
@@ -289,7 +289,7 @@
               Download the unpacked extension package directly from this page and extract the zip archive to any folder on your computer.
             </p>
             <div style="margin-top: 18px;">
-              <a href="assets/echo-extension.zip" download class="text-action-link" style="font-size: 13px;">
+              <a href="assets/echo-extension.zip" download class="text-action-link" aria-label="Download unpacked Echo extension archive (.zip)" style="font-size: 13px;">
                 Download echo-extension.zip &darr;
               </a>
             </div>
@@ -377,10 +377,10 @@
           <span>The AI Prompt Compiler</span>
         </div>
         <div class="footer-links-list">
-          <a href="https://github.com/MrYharon/Echo" target="_blank" class="footer-anchor">GitHub</a>
+          <a href="https://github.com/MrYharon/Echo" target="_blank" rel="noopener noreferrer" class="footer-anchor" aria-label="Echo repository on GitHub (opens in a new window)">GitHub</a>
           <a href="#installation" class="footer-anchor">Install Guide</a>
           <a href="#laboratory" class="footer-anchor">Laboratory</a>
-          <a href="assets/echo-extension.zip" download class="footer-anchor">Download Extension</a>
+          <a href="assets/echo-extension.zip" download class="footer-anchor" aria-label="Download unpacked Echo extension archive (.zip)">Download Extension</a>
         </div>
       </div>
     </footer>

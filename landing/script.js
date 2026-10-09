@@ -161,8 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (slabBot) slabBot.style.transform = "translateX(0px)";
     });
 
-    // Acoustic shockwave pulse on sculpture click
-    sculpture.addEventListener("click", () => {
+    // Acoustic shockwave pulse on sculpture click or keyboard activation
+    const triggerSculptureShockwave = () => {
       const rect = sculpture.getBoundingClientRect();
       shockwaves.push({
         x: rect.left + rect.width / 2,
@@ -176,6 +176,14 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         sculpture.style.transform = "perspective(900px) scale(1)";
       }, 150);
+    };
+
+    sculpture.addEventListener("click", triggerSculptureShockwave);
+    sculpture.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        triggerSculptureShockwave();
+      }
     });
   }
 
@@ -232,8 +240,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Mode switching
   modeButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      modeButtons.forEach((b) => b.classList.remove("active"));
+      modeButtons.forEach((b) => {
+        b.classList.remove("active");
+        b.setAttribute("aria-selected", "false");
+      });
       btn.classList.add("active");
+      btn.setAttribute("aria-selected", "true");
       activeMode = btn.dataset.mode;
       executeDecompilation(true);
     });

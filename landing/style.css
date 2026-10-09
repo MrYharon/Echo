@@ -338,6 +338,11 @@ body::before {
   transform: scale(1.02) rotate(-0.5deg);
 }
 
+.sculpture-card:focus-visible {
+  outline: 3px solid var(--brand-blue);
+  outline-offset: 4px;
+}
+
 .sculpture-bg-lines {
   position: absolute;
   inset: 0;
@@ -613,6 +618,11 @@ body::before {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+.mode-tab-btn:focus-visible {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 1px;
+}
+
 .lab-grid-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -690,6 +700,11 @@ body::before {
   background: var(--ink-navy);
   color: #ffffff;
   border-color: var(--ink-navy);
+}
+
+.preset-btn:focus-visible {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 1px;
 }
 
 .lab-text-input {
