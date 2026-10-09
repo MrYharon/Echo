@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-09T11:45:00Z",
+  "title": "Design System: Echo",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Marine Navy", "canonical": "#131e33" },
+      "accent-blue": { "role": "secondary", "displayName": "Electric Blue", "canonical": "#0284c7" },
+      "accent-cyan": { "role": "tertiary", "displayName": "Resonance Cyan", "canonical": "#0ea5e9" },
+      "neutral-bg": { "role": "neutral", "displayName": "Canvas Paper", "canonical": "#fbfcfd" },
+      "neutral-surface": { "role": "neutral", "displayName": "Gallery White", "canonical": "#ffffff" },
+      "ink-primary": { "role": "neutral", "displayName": "Deep Obsidian", "canonical": "#0b1324" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Hero", "purpose": "Hero oversized headlines" },
+      "headline": { "displayName": "Section Headline", "purpose": "Major feature headers" },
+      "label": { "displayName": "Mono Label", "purpose": "Taxonomy kickers and step counters" }
+    },
+    "shadows": [
+      { "name": "surface-soft", "value": "0 10px 30px rgba(0, 0, 0, 0.03)", "purpose": "Subtle ambient lift for white cards" },
+      { "name": "sculpture-deep", "value": "0 24px 60px rgba(19, 30, 51, 0.25)", "purpose": "Deep projection for dark monogram card" }
+    ],
+    "motion": [
+      { "name": "editorial-ease", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Smooth tactile response for links and sculpture" }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "960px" },
+      { "name": "xl", "value": "1300px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Text Action Link",
+      "kind": "button",
+      "refersTo": "link-action",
+      "description": "Editorial anchor action with horizontal translate hover.",
+      "html": "<a href=\"#\" class=\"ds-text-action-link\">Download Extension (.zip) &darr;</a>",
+      "css": ".ds-text-action-link { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800; color: #131e33; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border-bottom: 2px solid #131e33; padding-bottom: 3px; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-text-action-link:hover { color: #0284c7; border-color: #0284c7; transform: translateX(4px); }"
+    },
+    {
+      "name": "Preset Chip",
+      "kind": "chip",
+      "refersTo": "btn-preset",
+      "description": "Quick prompt selector chip.",
+      "html": "<button class=\"ds-preset-btn\">Booking Engine</button>",
+      "css": ".ds-preset-btn { font-family: 'Plus Jakarta Sans', sans-serif; padding: 4px 10px; font-size: 11px; font-weight: 600; background: #f1f5f9; border: 1px solid #e5e9f0; color: #52617a; border-radius: 4px; cursor: pointer; transition: all 0.15s ease; } .ds-preset-btn:hover { background: #131e33; color: #ffffff; border-color: #131e33; transform: translateY(-2px); }"
+    },
+    {
+      "name": "Clarity Score Chip (Airtight)",
+      "kind": "chip",
+      "refersTo": "chip-airtight",
+      "description": "Prompt clarity score status pill.",
+      "html": "<span class=\"ds-score-chip\">Clarity: 100/100 (Airtight)</span>",
+      "css": ".ds-score-chip { font-family: 'Plus Jakarta Sans', sans-serif; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; background: #dcfce7; color: #15803d; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Acoustic Spec Sheet",
+    "overview": "Echo treats prompt engineering as precise compilation rather than casual chat. Swiss editorial clarity meets kinetic acoustic resonance.",
+    "keyCharacteristics": [
+      "High-contrast gallery canvas (#fbfcfd) paired with deep marine navy (#131e33)",
+      "Editorial text hyperlinks rather than chunky button pills",
+      "Exact geometric 3-slab stepped monogram with sharp 90-degree right angles",
+      "Kinetic acoustic soundwave ripples and 3D parallax tilt"
+    ],
+    "rules": [
+      { "name": "The 5% Cyan Rule", "body": "Resonance Cyan and Electric Blue are precision instruments, not wallpaper. They occupy less than 5% of any viewport surface.", "section": "colors" },
+      { "name": "The Strict Kicker Rule", "body": "Section kickers are always set in uppercase JetBrains Mono with 0.08em letter-spacing.", "section": "typography" },
+      { "name": "The Tonal Layering Rule", "body": "Surfaces are separated by value contrast and 1px hairline rules, never by heavy black drop shadows.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do maintain clean gallery canvas (#fbfcfd / #ffffff) with deep marine navy (#131e33).",
+      "Do preserve the exact 3-piece geometry of the stepped 'E' monogram.",
+      "Do pair Plus Jakarta Sans with JetBrains Mono."
+    ],
+    "donts": [
+      "Don't add generic SaaS boilerplate tropes: muddy glowing drop shadows or neon pill buttons.",
+      "Don't connect the three slabs of the 'E' monogram with a vertical spine.",
+      "Don't use centered generic blog layouts."
+    ]
+  }
+}
