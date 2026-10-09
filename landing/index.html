@@ -91,9 +91,6 @@
               <a href="#laboratory" class="text-subtle-link">
                 Open Interactive Laboratory &rarr;
               </a>
-              <a href="https://github.com/MrYharon/Echo" target="_blank" rel="noopener noreferrer" class="text-subtle-link" aria-label="View source code on GitHub (opens in a new window)">
-                View Source on GitHub &nearr;
-              </a>
             </div>
           </div>
 
@@ -144,7 +141,7 @@
               <span class="diff-chip-removed">&times; "I mean you can't just copy paste everything"</span>
               <span class="diff-chip-removed">&times; "and stuff right if I'm talking like this"</span>
               <span class="diff-chip-removed">&times; "what do you think can be the best thing"</span>
-              <div style="font-size: 13px; font-weight: 700; color: #15803d; margin-top: 14px;">
+              <div class="diff-summary-success">
                 &check; 42% token reduction &bull; Distraction vectors neutralized
               </div>
             </div>
@@ -168,7 +165,7 @@
               </div>
               <span class="diff-chip-promoted">PRIORITY BOUNDARY: Do NOT generate code implementations.</span>
               <span class="diff-chip-promoted">PRIORITY BOUNDARY: Do NOT introduce external ORMs or dependencies.</span>
-              <div style="font-size: 13px; font-weight: 700; color: var(--brand-blue); margin-top: 14px;">
+              <div class="diff-summary-accent">
                 &check; Hoisted to top-level instructions &bull; Zero violation rate
               </div>
             </div>
@@ -190,12 +187,12 @@
                 <span>Deliverable Decompiler</span>
                 <span>Output Schema</span>
               </div>
-              <div style="font-family: var(--font-code); font-size: 12px; line-height: 1.8; color: var(--ink-navy);">
+              <div class="spec-schema-preview">
                 1. Architectural trade-offs: Edge vs Dedicated Server<br />
                 2. Latency profile comparison against sub-second SLAs<br />
                 3. Database requirement analysis for prompt cache persistence
               </div>
-              <div style="font-size: 13px; font-weight: 700; color: #15803d; margin-top: 14px;">
+              <div class="diff-summary-success">
                 &check; Structured contract verified
               </div>
             </div>
@@ -235,7 +232,7 @@
               </div>
 
               <div class="preset-chip-row" role="group" aria-label="Sample Prompt Presets">
-                <span style="font-size: 11px; font-weight: 700; color: var(--ink-muted);">Samples:</span>
+                <span class="preset-label">Samples:</span>
                 <button class="preset-btn" data-sample="booking" type="button" aria-label="Load Barbershop Booking Engine sample prompt">Booking Engine</button>
                 <button class="preset-btn" data-sample="react" type="button" aria-label="Load React State Bug sample prompt">React State Bug</button>
                 <button class="preset-btn" data-sample="postgres" type="button" aria-label="Load PostgreSQL Query sample prompt">PostgreSQL Query</button>
@@ -243,11 +240,11 @@
 
               <textarea id="lab-input" class="lab-text-input" aria-label="Raw human thought prompt input" placeholder="e.g. hey I need to build a barbershop appointment booking system with stripe integration and calendar sync but don't use nextjs or tailwind we want raw fastify and vanilla js and make sure two people can't double book the same barber slot at the same second so use optimistic locking or postgres transactions and don't write generic mock code give me the actual db schema and route handler"></textarea>
 
-              <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                <button id="btn-run-compile" class="text-action-link" type="button" aria-label="Compile prompt contract" style="cursor: pointer; background: transparent; border: none; font-size: 14px;">
+              <div class="lab-actions-row">
+                <button id="btn-run-compile" class="text-action-link lab-compile-btn" type="button" aria-label="Compile prompt contract">
                   Compile Prompt &rarr;
                 </button>
-                <button id="btn-reset-input" class="text-subtle-link" type="button" aria-label="Clear raw prompt input and reset workbench" style="cursor: pointer; background: transparent; border: none; font-size: 13px;">
+                <button id="btn-reset-input" class="text-subtle-link lab-reset-btn" type="button" aria-label="Clear raw prompt input and reset workbench">
                   Clear Input
                 </button>
               </div>
@@ -264,11 +261,8 @@
 
               <div id="lab-output" class="lab-text-output" role="region" aria-labelledby="output-contract-label" aria-live="polite"></div>
 
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
-                <span style="font-size: 11px; font-weight: 700; color: var(--brand-blue);">
-                  Synthesized via Echo Meta-Compiler
-                </span>
-                <button id="btn-copy-contract" class="text-action-link" type="button" disabled aria-disabled="true" aria-label="Copy compiled prompt contract to clipboard" style="cursor: pointer; background: transparent; border: none; font-size: 13px;">
+              <div class="lab-output-footer">
+                <button id="btn-copy-contract" class="text-action-link lab-copy-btn" type="button" disabled aria-disabled="true" aria-label="Copy compiled prompt contract to clipboard">
                   Copy Prompt
                 </button>
               </div>
@@ -292,8 +286,8 @@
             <p class="install-body">
               Download the unpacked extension package directly from this page and extract the zip archive to any folder on your computer.
             </p>
-            <div style="margin-top: 18px;">
-              <a href="assets/echo-extension.zip" download class="text-action-link" aria-label="Download unpacked Echo extension archive (.zip)" style="font-size: 13px;">
+            <div class="install-action-row">
+              <a href="assets/echo-extension.zip" download class="text-action-link install-cta-link" aria-label="Download unpacked Echo extension archive (.zip)">
                 Download echo-extension.zip &darr;
               </a>
             </div>

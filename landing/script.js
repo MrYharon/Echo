@@ -288,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
         clarityBefore.className = "score-chip";
       }
       if (diagDrawer) {
-        diagDrawer.innerHTML = '<div style="font-size:12px; color:var(--ink-muted); padding:6px 0;">Select a sample above or paste your prompt to view real-time diagnostics.</div>';
+        diagDrawer.innerHTML = '<div class="diag-empty-notice">Select a sample above or paste your prompt to view real-time diagnostics.</div>';
       }
       return;
     }
@@ -313,9 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
           diagDrawer.appendChild(item);
         });
       } else {
-        diagDrawer.innerHTML = `
-          <div style="font-size:12px; color:#15803d; font-weight:700; padding:6px 0;">No attention-diluting distraction vectors detected.</div>
-        `;
+        diagDrawer.innerHTML = '<div class="diag-success-notice">No attention-diluting distraction vectors detected.</div>';
       }
     }
   }
