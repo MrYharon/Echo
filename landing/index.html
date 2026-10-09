@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Echo &mdash; The AI Prompt Compiler</title>
   <meta name="description" content="Echo decompiles conversational streams of consciousness into structured, airtight prompt contracts for ChatGPT, Claude, and Gemini." />
   
@@ -53,16 +53,20 @@
           <span class="nav-brand-text">Echo</span>
         </a>
 
-        <ul class="nav-anchors">
+        <ul class="nav-anchors" id="nav-anchors-list">
           <li><a href="#laboratory" class="nav-anchor">Laboratory</a></li>
           <li><a href="#deconstruction" class="nav-anchor">Deconstruction</a></li>
           <li><a href="#installation" class="nav-anchor">Installation</a></li>
           <li><a href="#comparison" class="nav-anchor">Comparison</a></li>
         </ul>
 
-        <div style="display: flex; align-items: center; gap: 28px;">
-          <a href="https://github.com/MrYharon/Echo" target="_blank" rel="noopener noreferrer" class="nav-anchor" aria-label="Echo repository on GitHub (opens in a new window)">GitHub &nearr;</a>
+        <div class="nav-actions">
+          <a href="https://github.com/MrYharon/Echo" target="_blank" rel="noopener noreferrer" class="nav-anchor nav-github-link" aria-label="Echo repository on GitHub (opens in a new window)">GitHub &nearr;</a>
           <a href="assets/echo-extension.zip" download class="nav-download-link" aria-label="Download unpacked Echo extension archive (.zip)">Download Extension &darr;</a>
+          <button class="nav-menu-toggle" id="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="nav-anchors-list" aria-label="Toggle navigation menu">
+            <span class="menu-bar"></span>
+            <span class="menu-bar"></span>
+          </button>
         </div>
       </div>
     </header>
@@ -321,6 +325,7 @@
           <p class="stagger-p">How Echo compares to unassisted prompting and generic string-appending add-ons.</p>
         </div>
 
+        <div class="matrix-swipe-hint" aria-hidden="true">&larr; Swipe sideways to view full comparison &rarr;</div>
         <div class="matrix-table-wrap">
           <table class="matrix-table">
             <thead>

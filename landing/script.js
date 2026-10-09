@@ -15,6 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
       height = canvas.height = window.innerHeight;
     });
 
+    window.addEventListener("orientationchange", () => {
+      setTimeout(() => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }, 100);
+    });
+
     let mouseX = width / 2;
     let mouseY = height / 3;
     let targetMouseX = mouseX;
@@ -26,19 +33,26 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastScrollY = window.scrollY;
     let scrollVelocity = 0;
 
-    // Track mouse & update ambient spotlight
-    window.addEventListener("mousemove", (e) => {
-      targetMouseX = e.clientX;
-      targetMouseY = e.clientY;
+    // Track mouse & touch coordinates, update ambient spotlight
+    const updatePointerCoord = (clientX, clientY) => {
+      targetMouseX = clientX;
+      targetMouseY = clientY;
       const dx = targetMouseX - lastX;
       const dy = targetMouseY - lastY;
       mouseSpeed = Math.min(Math.sqrt(dx * dx + dy * dy), 35);
       lastX = targetMouseX;
       lastY = targetMouseY;
 
-      document.body.style.setProperty("--cursor-x", `${e.clientX}px`);
-      document.body.style.setProperty("--cursor-y", `${e.clientY}px`);
-    });
+      document.body.style.setProperty("--cursor-x", `${clientX}px`);
+      document.body.style.setProperty("--cursor-y", `${clientY}px`);
+    };
+
+    window.addEventListener("mousemove", (e) => updatePointerCoord(e.clientX, e.clientY));
+    window.addEventListener("touchmove", (e) => {
+      if (e.touches && e.touches[0]) {
+        updatePointerCoord(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
 
     // Track scroll velocity & update progress bar
     window.addEventListener("scroll", () => {
@@ -138,28 +152,31 @@ document.addEventListener("DOMContentLoaded", () => {
     const slabMid = sculpture.querySelector(".slab-mid");
     const slabBot = sculpture.querySelector(".slab-bot");
 
-    window.addEventListener("mousemove", (e) => {
-      const rect = sculpture.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const deltaX = (e.clientX - centerX) / (window.innerWidth / 2);
-      const deltaY = (e.clientY - centerY) / (window.innerHeight / 2);
+    // Only bind mousemove 3D perspective parallax on fine pointer (desktop) devices
+    if (!window.matchMedia("(pointer: coarse)").matches) {
+      window.addEventListener("mousemove", (e) => {
+        const rect = sculpture.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const deltaX = (e.clientX - centerX) / (window.innerWidth / 2);
+        const deltaY = (e.clientY - centerY) / (window.innerHeight / 2);
 
-      // 3D perspective rotation
-      sculpture.style.transform = `perspective(900px) rotateY(${deltaX * 14}deg) rotateX(${-deltaY * 14}deg)`;
+        // 3D perspective rotation
+        sculpture.style.transform = `perspective(900px) rotateY(${deltaX * 14}deg) rotateX(${-deltaY * 14}deg)`;
 
-      // Kinetic slab horizontal translation
-      if (slabTop) slabTop.style.transform = `translateX(${-deltaX * 14}px)`;
-      if (slabMid) slabMid.style.transform = `translateX(${deltaX * 18}px)`;
-      if (slabBot) slabBot.style.transform = `translateX(${-deltaX * 10}px)`;
-    });
+        // Kinetic slab horizontal translation
+        if (slabTop) slabTop.style.transform = `translateX(${-deltaX * 14}px)`;
+        if (slabMid) slabMid.style.transform = `translateX(${deltaX * 18}px)`;
+        if (slabBot) slabBot.style.transform = `translateX(${-deltaX * 10}px)`;
+      });
 
-    sculpture.addEventListener("mouseleave", () => {
-      sculpture.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg)";
-      if (slabTop) slabTop.style.transform = "translateX(0px)";
-      if (slabMid) slabMid.style.transform = "translateX(0px)";
-      if (slabBot) slabBot.style.transform = "translateX(0px)";
-    });
+      sculpture.addEventListener("mouseleave", () => {
+        sculpture.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg)";
+        if (slabTop) slabTop.style.transform = "translateX(0px)";
+        if (slabMid) slabMid.style.transform = "translateX(0px)";
+        if (slabBot) slabBot.style.transform = "translateX(0px)";
+      });
+    }
 
     // Acoustic shockwave pulse on sculpture click or keyboard activation
     const triggerSculptureShockwave = () => {
@@ -421,6 +438,35 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
           btnCopy.textContent = "Copy Prompt";
         }, 1800);
+      }
+    });
+  }
+
+  // 5. Mobile Responsive Navigation Drawer
+  const menuToggle = document.getElementById("nav-menu-toggle");
+  const navAnchors = document.getElementById("nav-anchors-list");
+  if (menuToggle && navAnchors) {
+    menuToggle.addEventListener("click", () => {
+      const isOpen = navAnchors.classList.toggle("is-open");
+      menuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      menuToggle.classList.toggle("is-active", isOpen);
+    });
+
+    // Close drawer when clicking any anchor link
+    navAnchors.querySelectorAll(".nav-anchor").forEach((link) => {
+      link.addEventListener("click", () => {
+        navAnchors.classList.remove("is-open");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.classList.remove("is-active");
+      });
+    });
+
+    // Close drawer when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!navAnchors.contains(e.target) && !menuToggle.contains(e.target)) {
+        navAnchors.classList.remove("is-open");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.classList.remove("is-active");
       }
     });
   }
