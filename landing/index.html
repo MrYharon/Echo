@@ -231,7 +231,7 @@
             <div class="lab-col input-col">
               <div class="col-header-bar">
                 <label for="lab-input" class="col-label-title">Raw Human Thought (Before)</label>
-                <span class="score-chip messy" id="clarity-before" aria-live="polite">Clarity: 38/100 (Messy)</span>
+                <span class="score-chip" id="clarity-before" aria-live="polite">Clarity: --</span>
               </div>
 
               <div class="preset-chip-row" role="group" aria-label="Sample Prompt Presets">
@@ -259,7 +259,7 @@
             <div class="lab-col output-col">
               <div class="col-header-bar">
                 <span class="col-label-title" id="output-contract-label">Compiled Prompt Contract (After)</span>
-                <span class="score-chip airtight" id="clarity-after" aria-live="polite">Clarity: 100/100 (Airtight)</span>
+                <span class="score-chip" id="clarity-after" aria-live="polite">Clarity: --</span>
               </div>
 
               <div id="lab-output" class="lab-text-output" role="region" aria-labelledby="output-contract-label" aria-live="polite"></div>
@@ -268,7 +268,7 @@
                 <span style="font-size: 11px; font-weight: 700; color: var(--brand-blue);">
                   Synthesized via Echo Meta-Compiler
                 </span>
-                <button id="btn-copy-contract" class="text-action-link" type="button" aria-label="Copy compiled prompt contract to clipboard" style="cursor: pointer; background: transparent; border: none; font-size: 13px;">
+                <button id="btn-copy-contract" class="text-action-link" type="button" disabled aria-disabled="true" aria-label="Copy compiled prompt contract to clipboard" style="cursor: pointer; background: transparent; border: none; font-size: 13px;">
                   Copy Prompt
                 </button>
               </div>

@@ -351,16 +351,29 @@ document.addEventListener("DOMContentLoaded", () => {
         clarityAfter.textContent = "Clarity: --";
         clarityAfter.className = "score-chip";
       }
+      if (btnCopy) {
+        btnCopy.setAttribute("disabled", "true");
+        btnCopy.setAttribute("aria-disabled", "true");
+      }
       return;
     }
 
     if (!window.Echo || !window.Echo.architect) {
       if (outputText) outputText.textContent = raw;
+      if (btnCopy) {
+        btnCopy.removeAttribute("disabled");
+        btnCopy.setAttribute("aria-disabled", "false");
+      }
       return;
     }
 
     const transformed = window.Echo.architect.transform(raw, activeMode);
     const finalContent = transformed.corrected;
+
+    if (btnCopy) {
+      btnCopy.removeAttribute("disabled");
+      btnCopy.setAttribute("aria-disabled", "false");
+    }
 
     if (outputText) {
       outputText.classList.add("is-compiling");
@@ -402,6 +415,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnCompile) {
     btnCompile.addEventListener("click", () => {
+      const raw = (inputText.value || "").trim();
+      if (!raw) {
+        if (inputText) {
+          inputText.focus();
+          inputText.classList.add("input-attention");
+          setTimeout(() => inputText.classList.remove("input-attention"), 450);
+        }
+        return;
+      }
       btnCompile.textContent = "Compiling...";
       btnCompile.style.transform = "scale(0.96)";
       setTimeout(() => {
