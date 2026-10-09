@@ -338,11 +338,35 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(step);
   }
 
+  function formatTerminalLine(line) {
+    const escaped = line
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    if (escaped.startsWith("//")) {
+      return `<span class="tok-comment">${escaped}</span>`;
+    }
+    if (escaped.startsWith("###")) {
+      return `<span class="tok-heading">${escaped}</span>`;
+    }
+    if (/^\d+\.\s/.test(escaped)) {
+      return `<span class="tok-num">${escaped}</span>`;
+    }
+    if (escaped.startsWith("- ")) {
+      return `<span class="tok-bullet">${escaped}</span>`;
+    }
+    return escaped;
+  }
+
+  function formatTerminalMarkup(text) {
+    return text.split("\n").map(formatTerminalLine).join("\n");
+  }
+
   function executeDecompilation(animateStream = false) {
     const raw = (inputText.value || "").trim();
     if (!raw) {
       if (outputText) {
-        outputText.textContent = "// Echo Meta-Compiler Ready\n// Type or paste any stream-of-consciousness thought dump on the left,\n// or click one of the sample presets above to see instant decompilation.";
+        outputText.innerHTML = formatTerminalMarkup("// Echo Meta-Compiler Ready\n// Type or paste any stream-of-consciousness thought dump on the left,\n// or click one of the sample presets above to see instant decompilation.");
         outputText.classList.remove("is-compiling");
       }
       if (clarityAfter) {
@@ -357,7 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!window.Echo || !window.Echo.architect) {
-      if (outputText) outputText.textContent = raw;
+      if (outputText) outputText.innerHTML = formatTerminalMarkup(raw);
       if (btnCopy) {
         btnCopy.removeAttribute("disabled");
         btnCopy.setAttribute("aria-disabled", "false");
@@ -381,11 +405,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (streamTimer) clearInterval(streamTimer);
         const lines = finalContent.split("\n");
         let currentLine = 0;
-        outputText.textContent = "";
+        outputText.innerHTML = "";
 
         streamTimer = setInterval(() => {
           if (currentLine < lines.length) {
-            outputText.textContent += (currentLine === 0 ? "" : "\n") + lines[currentLine];
+            outputText.innerHTML += (currentLine === 0 ? "" : "\n") + formatTerminalLine(lines[currentLine]);
             currentLine++;
             outputText.scrollTop = outputText.scrollHeight;
           } else {
@@ -395,7 +419,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }, 16);
       } else {
-        outputText.textContent = finalContent;
+        outputText.innerHTML = formatTerminalMarkup(finalContent);
         setTimeout(() => {
           outputText.classList.remove("is-compiling");
         }, 500);

@@ -6,10 +6,15 @@
     "colorMeta": {
       "primary": { "role": "primary", "displayName": "Marine Navy", "canonical": "#131e33" },
       "accent-blue": { "role": "secondary", "displayName": "Electric Blue", "canonical": "#0284c7" },
+      "accent-blue-text": { "role": "secondary", "displayName": "Accessible Ocean Blue", "canonical": "#026aa2" },
       "accent-cyan": { "role": "tertiary", "displayName": "Resonance Cyan", "canonical": "#0ea5e9" },
+      "accent-cyan-glow": { "role": "tertiary", "displayName": "Laser Cyan Glow", "canonical": "#38bdf8" },
       "neutral-bg": { "role": "neutral", "displayName": "Canvas Paper", "canonical": "#fbfcfd" },
       "neutral-surface": { "role": "neutral", "displayName": "Gallery White", "canonical": "#ffffff" },
-      "ink-primary": { "role": "neutral", "displayName": "Deep Obsidian", "canonical": "#0b1324" }
+      "ink-primary": { "role": "neutral", "displayName": "Deep Obsidian", "canonical": "#0b1324" },
+      "semantic-success": { "role": "semantic", "displayName": "Airtight Success", "canonical": "#15803d" },
+      "semantic-error": { "role": "semantic", "displayName": "Distraction Error", "canonical": "#9f1239" },
+      "terminal-bg": { "role": "surface", "displayName": "Terminal Slate", "canonical": "#0f172a" }
     },
     "typographyMeta": {
       "display": { "displayName": "Display Hero", "purpose": "Hero oversized headlines" },

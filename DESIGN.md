@@ -5,7 +5,9 @@ colors:
   primary: "#131e33"
   primary-hover: "#0b1324"
   accent-blue: "#0284c7"
+  accent-blue-text: "#026aa2"
   accent-cyan: "#0ea5e9"
+  accent-cyan-glow: "#38bdf8"
   neutral-bg: "#fbfcfd"
   neutral-surface: "#ffffff"
   neutral-subtle: "#f4f6f9"
@@ -15,6 +17,27 @@ colors:
   ink-faint: "#8a99b0"
   border-light: "#e5e9f0"
   border-strong: "#0b1324"
+  semantic-success: "#15803d"
+  semantic-success-bg: "#dcfce7"
+  semantic-success-border: "#bbf7d0"
+  semantic-error: "#9f1239"
+  semantic-error-bg: "#fff1f2"
+  semantic-error-border: "#fecdd3"
+  semantic-alert-text: "#881337"
+  semantic-alert-line: "#f43f5e"
+  semantic-chip-red: "#b91c1c"
+  semantic-chip-red-bg: "#fee2e2"
+  semantic-chip-red-dark: "#991b1b"
+  semantic-chip-strike: "#dc2626"
+  semantic-chip-blue-bg: "#e0f2fe"
+  semantic-pulse-green: "#10b981"
+  terminal-bg: "#0f172a"
+  terminal-border: "#1e293b"
+  terminal-scrollbar: "#334155"
+  terminal-scrollbar-hover: "#475569"
+  syntax-comment: "#64748b"
+  syntax-deliverable: "#34d399"
+  syntax-bullet: "#cbd5e1"
 typography:
   display:
     fontFamily: "Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, sans-serif"
@@ -66,10 +89,15 @@ typography:
     letterSpacing: "0.02em"
 rounded:
   none: "0px"
+  micro: "2px"
+  xs: "3px"
   sm: "4px"
-  md: "8px"
+  md: "6px"
+  base: "8px"
+  card: "10px"
   lg: "12px"
   xl: "20px"
+  full: "999px"
 spacing:
   xs: "4px"
   sm: "8px"
@@ -128,8 +156,17 @@ A crisp, high-contrast palette anchored in maritime navy and pure gallery whites
 - **Muted Slate** (`#52617a`): Secondary body text, captions, and de-emphasized metadata.
 - **Faint Border** (`#e5e9f0`): 1px structural dividing lines across panels and tables.
 
+### Semantic & Browser Surfaces
+- **Airtight Success** (`#15803d` text, `#dcfce7` surface, `#bbf7d0` border): Clarity 100/100 state, verified contract chips.
+- **Distraction Flag** (`#9f1239` text, `#fff1f2` surface, `#fecdd3` border): Real-time prompt diagnostics and filler alerts.
+- **Accessible Accent Text** (`#026aa2`): High-contrast WCAG AA (4.8:1) compliant blue text for sub-18px inline labels on white canvas.
+- **Terminal Syntax Ramp**: Slate comments (`#64748b`), Resonance Cyan headings (`#38bdf8`), Emerald deliverables (`#34d399`), and Muted Slate bullets (`#cbd5e1`).
+- **Themed Browser Surfaces**: Selection highlight (`#0284c7` / `#ffffff`), Code selection (`#0ea5e9` / `#0b1324`), Caret (`#0284c7`), and custom thin scrollbars.
+
 ### Named Rules
 **The 5% Cyan Rule.** Resonance Cyan and Electric Blue are precision instruments, not wallpaper. They occupy less than 5% of any given viewport surface to ensure compilation signals retain high attention priority.
+
+**The Contrast Floor Rule.** All text elements strictly enforce WCAG AA minimum contrast floors: >= 4.5:1 for body and small bold text, and >= 3:1 for large display elements. Small blue text on white surfaces uses `#026aa2` (4.8:1) rather than raw accent `#0284c7` (3.7:1).
 
 ## Typography
 
