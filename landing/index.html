@@ -31,6 +31,11 @@
   <meta name="twitter:image" content="https://echo.hughdp.tech/assets/og-image.png" />
   <meta name="theme-color" content="#131e33" />
 
+  <!-- Typography: Fast DNS Preconnect & Native Variable Weights -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/png" href="assets/brand-logo.png" />
   <link rel="apple-touch-icon" href="assets/brand-logo.png" />
@@ -76,7 +81,6 @@
       <section class="hero-asymmetric fade-in-element">
         <div class="hero-two-column">
           <div class="hero-left-column">
-            <span class="hero-kicker">Compiler Layer for Large Language Models</span>
             <h1 class="hero-h1">
               Stop writing sloppy prompts.<br />
               Start <span class="italic-highlight">compiling</span> them.
@@ -126,7 +130,6 @@
         <!-- Feature 1: Left Text, Right Visual -->
         <div class="stagger-item fade-in-element">
           <div class="stagger-text">
-            <div class="stagger-num">01 / DECONSTRUCT</div>
             <h2 class="stagger-heading">Noise Elimination</h2>
             <p class="stagger-p">
               Conversational fillers like &ldquo;I mean&rdquo;, &ldquo;you know&rdquo;, and &ldquo;and stuff right&rdquo; consume critical attention heads and bias the LLM toward casual, unfocused outputs. Echo systematically purges filler while preserving 100% of the underlying intent.
@@ -151,7 +154,6 @@
         <!-- Feature 2: Right Text, Left Visual (Reversed) -->
         <div class="stagger-item reverse fade-in-element">
           <div class="stagger-text">
-            <div class="stagger-num">02 / ENFORCE</div>
             <h2 class="stagger-heading">Negative Guardrails</h2>
             <p class="stagger-p">
               When humans write negative constraints like &ldquo;Don&rsquo;t write code yet&rdquo; or &ldquo;No third-party libraries&rdquo; inside long paragraphs, models frequently ignore them due to recency bias. Echo hoists negative constraints into high-priority guardrail directives.
@@ -175,7 +177,6 @@
         <!-- Feature 3: Left Text, Right Visual -->
         <div class="stagger-item fade-in-element">
           <div class="stagger-text">
-            <div class="stagger-num">03 / ISOLATE</div>
             <h2 class="stagger-heading">Intent &amp; Deliverable Separation</h2>
             <p class="stagger-p">
               Multi-sentence prompts often bury questions inside speculative thoughts. Echo extracts every explicit requirement and inquiry into numbered deliverables, forcing the model to address each point sequentially without skipping edge cases.
@@ -203,7 +204,6 @@
       <!-- The Live Compiler Laboratory (Full Width Split Workbench) -->
       <section id="laboratory" class="laboratory-section fade-in-element">
         <div class="lab-title-row">
-          <div class="stagger-num">INTERACTIVE WORKBENCH</div>
           <h2 class="lab-headline">Test the compiler live</h2>
           <p class="lab-subheadline">
             Type or paste any messy human thought dump below. See how Echo decompiles intent, extracts negative constraints, and formats an airtight prompt contract.
@@ -274,15 +274,13 @@
       <!-- 3-Step Guided Installation -->
       <section id="installation" class="installation-section fade-in-element">
         <div class="install-header-row">
-          <div class="stagger-num">ONBOARDING</div>
           <h2 class="stagger-heading">Install Echo in 30 seconds</h2>
           <p class="stagger-p">No account required. Operates 100% locally in your browser with zero data tracking.</p>
         </div>
 
         <div class="install-grid-3">
           <div class="install-col-card">
-            <div class="install-num">01 / DOWNLOAD</div>
-            <h3 class="install-title">Download Package</h3>
+            <h3 class="install-title">1. Download Package</h3>
             <p class="install-body">
               Download the unpacked extension package directly from this page and extract the zip archive to any folder on your computer.
             </p>
@@ -294,16 +292,14 @@
           </div>
 
           <div class="install-col-card">
-            <div class="install-num">02 / DEVELOPER MODE</div>
-            <h3 class="install-title">Open Extensions Tab</h3>
+            <h3 class="install-title">2. Open Extensions Tab</h3>
             <p class="install-body">
               In Google Chrome, Brave, or Edge, visit <code>chrome://extensions</code> and switch on the <strong>Developer mode</strong> toggle in the upper right.
             </p>
           </div>
 
           <div class="install-col-card">
-            <div class="install-num">03 / LOAD UNPACKED</div>
-            <h3 class="install-title">Load Unpacked</h3>
+            <h3 class="install-title">3. Load Unpacked</h3>
             <p class="install-body">
               Click <strong>Load unpacked</strong>, choose the extracted Echo directory, then open ChatGPT, Claude, or Gemini and press <code>Alt+E</code>.
             </p>
@@ -314,7 +310,6 @@
       <!-- Architectural Comparison Matrix -->
       <section id="comparison" class="matrix-section fade-in-element">
         <div class="matrix-header-row">
-          <div class="stagger-num">ARCHITECTURAL CONTRAST</div>
           <h2 class="stagger-heading">Why standard prompting fails</h2>
           <p class="stagger-p">How Echo compares to unassisted prompting and generic string-appending add-ons.</p>
         </div>

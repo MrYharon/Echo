@@ -2,7 +2,7 @@
    Asymmetric layout, interactive kinetic 'E' sculpture, fluid acoustic waves, and high-fashion typography.
    Zero vibe-coded boilerplate. */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800&display=swap');
 
 :root {
   --bg-page: #fbfcfd;
@@ -19,6 +19,16 @@
   --line-strong: #0b1324;
   --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-code: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Typography Ramp Tokens (DESIGN.md Normative Scale) */
+  --font-size-display: clamp(2.375rem, 6.2vw, 4.75rem);
+  --font-size-headline: clamp(1.75rem, 4vw, 2.25rem);
+  --font-size-title: 1.25rem;
+  --font-size-body: 1rem;
+  --font-size-caption: 0.875rem;
+  --font-size-label: 0.8125rem;
+  --font-size-micro: 0.75rem;
+  --font-size-chip: 0.6875rem;
 }
 
 * {
@@ -37,7 +47,9 @@ body {
   color: var(--ink-primary);
   font-family: var(--font-main);
   line-height: 1.5;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   position: relative;
   padding-left: env(safe-area-inset-left, 0px);
@@ -299,7 +311,7 @@ body::before {
 }
 
 .hero-p {
-  font-size: clamp(16px, 1.8vw, 21px);
+  font-size: clamp(16px, 1.8vw, 20px);
   line-height: 1.55;
   color: var(--ink-muted);
   max-width: 620px;
@@ -344,7 +356,7 @@ body::before {
 }
 
 .text-subtle-link {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--ink-muted);
   text-decoration: none;
@@ -462,12 +474,22 @@ body::before {
   letter-spacing: -0.03em;
   color: var(--ink-navy);
   margin-bottom: 14px;
+  text-indent: -0.38em;
+  hanging-punctuation: first;
 }
 
 .statement-author {
   font-size: 14px;
   font-weight: 600;
   color: var(--ink-muted);
+}
+
+.stagger-num,
+.install-num,
+.score-chip,
+#clarity-before,
+#clarity-after {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Diagonal Staggered Feature Layout (Alternating Alignments) */
@@ -1000,7 +1022,7 @@ body::before {
 }
 
 .install-title {
-  font-size: 19px;
+  font-size: var(--font-size-title, 20px);
   font-weight: 800;
   color: var(--ink-navy);
   margin-bottom: 10px;
@@ -1226,7 +1248,7 @@ body::before {
     min-height: 48px;
     display: flex;
     align-items: center;
-    font-size: 15px;
+    font-size: var(--font-size-caption, 14px);
     font-weight: 700;
     color: var(--ink-navy);
     padding: 8px 0;
@@ -1253,7 +1275,7 @@ body::before {
     padding: 44px 20px 36px;
   }
   .hero-h1 {
-    font-size: clamp(32px, 8.5vw, 44px);
+    font-size: clamp(28px, 8vw, 36px);
     margin-bottom: 24px;
   }
   .hero-p {

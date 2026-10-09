@@ -18,13 +18,13 @@ colors:
 typography:
   display:
     fontFamily: "Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: "clamp(2.75rem, 6vw, 4.75rem)"
+    fontSize: "clamp(2.375rem, 6.2vw, 4.75rem)"
     fontWeight: 900
-    lineHeight: 1.02
+    lineHeight: 1.04
     letterSpacing: "-0.05em"
   headline:
     fontFamily: "Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, sans-serif"
-    fontSize: "2.25rem"
+    fontSize: "clamp(1.75rem, 4vw, 2.25rem)"
     fontWeight: 800
     lineHeight: 1.15
     letterSpacing: "-0.03em"
@@ -40,12 +40,30 @@ typography:
     fontWeight: 400
     lineHeight: 1.6
     letterSpacing: "-0.01em"
+  caption:
+    fontFamily: "Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 600
+    lineHeight: 1.5
+    letterSpacing: "-0.01em"
   label:
     fontFamily: "JetBrains Mono, ui-monospace, monospace"
     fontSize: "0.8125rem"
     fontWeight: 700
     lineHeight: 1.4
     letterSpacing: "0.08em"
+  micro:
+    fontFamily: "JetBrains Mono, ui-monospace, monospace"
+    fontSize: "0.75rem"
+    fontWeight: 600
+    lineHeight: 1.5
+    letterSpacing: "0.04em"
+  chip:
+    fontFamily: "JetBrains Mono, ui-monospace, monospace"
+    fontSize: "0.6875rem"
+    fontWeight: 700
+    lineHeight: 1.4
+    letterSpacing: "0.02em"
 rounded:
   none: "0px"
   sm: "4px"

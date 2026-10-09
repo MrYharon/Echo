@@ -14,7 +14,12 @@
     "typographyMeta": {
       "display": { "displayName": "Display Hero", "purpose": "Hero oversized headlines" },
       "headline": { "displayName": "Section Headline", "purpose": "Major feature headers" },
-      "label": { "displayName": "Mono Label", "purpose": "Taxonomy kickers and step counters" }
+      "title": { "displayName": "Card Title", "purpose": "Card titles and statement quotes" },
+      "body": { "displayName": "Editorial Body", "purpose": "Primary readable paragraphs" },
+      "caption": { "displayName": "UI Caption", "purpose": "Secondary descriptions and navigation anchors" },
+      "label": { "displayName": "Mono Label", "purpose": "Taxonomy kickers and step counters" },
+      "micro": { "displayName": "Micro Spec", "purpose": "Inline code and technical alerts" },
+      "chip": { "displayName": "Chip Label", "purpose": "Compact status pills and score chips" }
     },
     "shadows": [
       { "name": "surface-soft", "value": "0 10px 30px rgba(0, 0, 0, 0.03)", "purpose": "Subtle ambient lift for white cards" },
