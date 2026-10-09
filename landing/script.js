@@ -1,14 +1,28 @@
 // Echo - Creative Kinetic Monogram & Acoustic Canvas Engine
 document.addEventListener("DOMContentLoaded", () => {
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   // 1. Full-Bleed Kinetic Acoustic Ripple Canvas with Shockwave Physics
   const canvas = document.getElementById("fluid-canvas");
   const progressBar = document.getElementById("scroll-progress-bar");
   let shockwaves = [];
 
-  if (canvas) {
+  if (canvas && !prefersReducedMotion) {
     const ctx = canvas.getContext("2d");
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
+    let isTabVisible = !document.hidden;
+    let animFrameId = null;
+
+    document.addEventListener("visibilitychange", () => {
+      isTabVisible = !document.hidden;
+      if (isTabVisible && !animFrameId) {
+        animFrameId = requestAnimationFrame(renderWaves);
+      } else if (!isTabVisible && animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+      }
+    });
 
     window.addEventListener("resize", () => {
       width = canvas.width = window.innerWidth;
@@ -138,16 +152,21 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.stroke();
       }
 
+      if (!isTabVisible) {
+        animFrameId = null;
+        return;
+      }
+
       waveOffset += 0.009 + (totalEnergy * 0.0006);
-      requestAnimationFrame(renderWaves);
+      animFrameId = requestAnimationFrame(renderWaves);
     }
 
-    renderWaves();
+    animFrameId = requestAnimationFrame(renderWaves);
   }
 
   // 2. Kinetic 3D Monogram Sculpture Parallax & Shockwave Trigger
   const sculpture = document.getElementById("monogram-sculpture");
-  if (sculpture) {
+  if (sculpture && !prefersReducedMotion) {
     const slabTop = sculpture.querySelector(".slab-top");
     const slabMid = sculpture.querySelector(".slab-mid");
     const slabBot = sculpture.querySelector(".slab-bot");
@@ -206,7 +225,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 3. Scroll Fade-in & Animated Strikethrough Intersection Observer
   const fadeElements = document.querySelectorAll(".fade-in-element");
-  if ("IntersectionObserver" in window) {
+  if (prefersReducedMotion) {
+    fadeElements.forEach((el) => {
+      el.classList.add("is-visible");
+      el.querySelectorAll(".diff-chip-removed").forEach((chip) => chip.classList.add("striked"));
+    });
+  } else if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -321,6 +345,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Smooth score counter animation
   function animateScoreCounter(targetScore) {
     if (!clarityAfter) return;
+    if (prefersReducedMotion) {
+      clarityAfter.textContent = `Clarity: ${targetScore}/100 (Airtight)`;
+      clarityAfter.className = "score-chip airtight";
+      return;
+    }
     let current = 40;
     const step = () => {
       current += Math.ceil((targetScore - current) * 0.25);
@@ -400,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (outputText) {
       outputText.classList.add("is-compiling");
 
-      if (animateStream) {
+      if (animateStream && !prefersReducedMotion) {
         // Fast line-by-line streaming simulation
         if (streamTimer) clearInterval(streamTimer);
         const lines = finalContent.split("\n");

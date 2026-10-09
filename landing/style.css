@@ -1461,3 +1461,60 @@ body::before {
     transform: none;
   }
 }
+
+/* Tactile Micro-Interactions: Immediate 100ms Action Feedback */
+.text-action-link:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+.preset-btn:active {
+  transform: scale(0.96);
+}
+
+.mode-tab-btn:active {
+  transform: scale(0.96);
+}
+
+.nav-menu-toggle:active {
+  transform: scale(0.94);
+}
+
+.install-col-card:active {
+  transform: scale(0.99);
+}
+
+/* Accessibility: Respect Operating System Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .fade-in-element {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  #fluid-canvas {
+    display: none !important;
+  }
+  .sculpture-card {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .diff-chip-removed::after {
+    transition: none !important;
+    right: 14px !important;
+  }
+  .lab-text-output.is-compiling::after {
+    display: none !important;
+  }
+}
