@@ -72,12 +72,27 @@ function updateSandbox() {
 
     if (!window.Echo || !window.Echo.analyzer) return;
     const res = window.Echo.analyzer.analyze(text);
-    const grade = window.Echo.analyzer.grade(res.score);
+    const triage = (window.Echo && window.Echo.triage)
+      ? window.Echo.triage.classify(text)
+      : { status: "decompile" };
 
-    sandboxScore.textContent = "Clarity: " + res.score + "/100 (" + grade.label + ")";
-    sandboxScore.classList.toggle("airtight", res.score >= 85);
-    sandboxScore.style.color = "";
-    sandboxCount.textContent = res.issues.length + (res.issues.length === 1 ? " issue" : " issues");
+    if (triage.status === "ready") {
+      sandboxScore.textContent = "Clarity: 100/100 (Direct \u2713)";
+      sandboxScore.classList.add("airtight");
+      sandboxScore.style.color = "#10b981";
+      sandboxCount.textContent = "0 issues (Ready)";
+    } else if (triage.status === "vague") {
+      sandboxScore.textContent = "Clarity: " + Math.min(res.score, 65) + "/100 (Vague)";
+      sandboxScore.classList.remove("airtight");
+      sandboxScore.style.color = "#f59e0b";
+      sandboxCount.textContent = "Speculative hedge";
+    } else {
+      const grade = window.Echo.analyzer.grade(res.score);
+      sandboxScore.textContent = "Clarity: " + res.score + "/100 (" + grade.label + ")";
+      sandboxScore.classList.toggle("airtight", res.score >= 85);
+      sandboxScore.style.color = "";
+      sandboxCount.textContent = res.issues.length + (res.issues.length === 1 ? " issue" : " issues");
+    }
 
     sandboxFeedback.innerHTML = "";
     for (const issue of res.issues) {
