@@ -1,7 +1,7 @@
 var Echo = window.Echo = window.Echo || {};
 
 Echo.architect = (function () {
-  const FILLER_RE = /^(hey|hi|hello|please\s+)?(can\s+you\s+please\s+help\s+me|could\s+you\s+please\s+help\s+me|can\s+you\s+help\s+me|could\s+you\s+help\s+me|help\s+me\s+to|help\s+me|assist\s+me\s+with|assist\s+me|can\s+you\s+please|could\s+you\s+please|please\s+can\s+you|would\s+you\s+be\s+able\s+to|i\s+want\s+you\s+to|i\s+need\s+you\s+to|i\s+would\s+like\s+you\s+to|i'd\s+like\s+you\s+to|hey\s+can\s+you|hi\s+can\s+you|hello\s+can\s+you|can\s+you|could\s+you)\s+(please\s+)?/i;
+  const FILLER_RE = /^(hey|hi|hello|please\s+)?(can\s+you\s+please\s+help\s+me|could\s+you\s+please\s+help\s+me|can\s+you\s+help\s+me|could\s+you\s+help\s+me|help\s+me\s+to|help\s+me|assist\s+me\s+with|assist\s+me|can\s+you\s+please|could\s+you\s+please|please\s+can\s+you|would\s+you\s+be\s+able\s+to|i\s+want\s+you\s+to|i\s+need\s+you\s+to|i\s+would\s+like\s+you\s+to|i'd\s+like\s+you\s+to|hey\s+can\s+you|hi\s+can\s+you|hello\s+can\s+you|can\s+you|could\s+you|so\s+here\s+is\s+a\s+draft\s+for|here\s+is\s+a\s+draft\s+for|here\s+is\s+my\s+draft\s+for|here\s+is\s+my\s+essay|here\s+is\s+a\s+draft)\s+(please\s+)?/i;
 
   const INTENT_PATTERNS = {
     debug: /\b(bug|error|broken|crash|crashing|fails|failed|exception|not\s+working|cannot|cant|undefined|null|none|issue\s+with|traceback|syntax\s+error)\b/i,
@@ -9,7 +9,7 @@ Echo.architect = (function () {
     code_feature: /\b(code|script|implement|build|develop|create|write\s+a\s+(python|js|javascript|typescript|react|sql|api|function|class|component|endpoint|service|scraper))\b/i,
     architecture: /\b(architecture|system\s+design|database\s+schema|data\s+model|microservice|scale|scaling|infrastructure)\b/i,
     explain: /\b(explain|how\s+does|how\s+to|what\s+is|understand|difference\s+between|vs|compare|comparison|pros\s+and\s+cons|overview)\b/i,
-    writing: /\b(email|letter|article|blog|essay|copy|headline|tagline|memo|proposal|pitch|outreach|newsletter)\b/i
+    writing: /\b(email|letter|article|blog|essay|copy|headline|tagline|memo|proposal|pitch|outreach|newsletter|paraphrase|rewrite)\b/i
   };
 
   function detectIntent(text) {
@@ -22,10 +22,12 @@ Echo.architect = (function () {
   function extractNegativeConstraints(text) {
     const constraints = [];
     const patterns = [
-      { re: /\b(don't|do not)\s+write\s+(any\s+)?code(\s+yet)?\b/i, rule: "Do NOT write any code; focus strictly on conceptual planning and architecture." },
+      { re: /\b(don't|do not)\s+write\s+(any\s+)?code(\s+yet)?\b/i, rule: "Do NOT generate code implementations yet; focus strictly on conceptual architecture." },
       { re: /\b(just\s+want\s+to|only\s+want\s+to)\s+plan\b/i, rule: "Focus strictly on architectural planning, trade-offs, and design decisions." },
       { re: /\b(keep\s+it\s+simple|keep\s+it\s+clean)\b/i, rule: "Prioritize simplicity and avoid unnecessary engineering overhead." },
-      { re: /\bno\s+(dependencies|third-party|libraries)\b/i, rule: "Avoid external dependencies and third-party libraries." },
+      { re: /\bno\s+(dependencies|third-party|libraries)\b/i, rule: "Do NOT introduce external dependencies or third-party libraries." },
+      { re: /\b(don't|do not)\s+use\s+(super\s+)?pretentious(\s+words)?\b/i, rule: "Do NOT use pretentious, convoluted, or unnatural vocabulary; keep prose clear and accessible." },
+      { re: /\b(don't|do not)\s+use\s+(nextjs|tailwind|redux|zustand|orms?)\b/i, rule: "Avoid specified frameworks/libraries; stick strictly to the stated core stack." },
       { re: /\b(fast|low\s+latency|quick|around\s+one\s+second)\b/i, rule: "Optimize for high performance and sub-second execution speed." }
     ];
     for (const p of patterns) {
@@ -56,28 +58,138 @@ Echo.architect = (function () {
 
   function cleanBaseText(raw) {
     let text = (raw || "").trim();
-    // Strip conversational stream of consciousness prefixes
     text = text.replace(/^(OK|okay|I mean|you know|listen|look|so|well)[,\s]+/i, "");
     const filler = text.match(FILLER_RE);
     if (filler) {
       text = text.slice(filler[0].length).trim();
     }
-    // Remove inline conversational fluff
     text = text.replace(/\b(I mean|you know|right\?|and stuff right|and stuff)\b/gi, "");
     text = text.replace(/\s+/g, " ").trim();
     if (text.length > 0) {
       text = text.charAt(0).toUpperCase() + text.slice(1);
     }
-    // Clean trailing punctuation
     text = text.replace(/[.?!]+$/, "");
     return text;
+  }
+
+  // Extracts source payload and editorial envelope for essay/writing transformation
+  function extractTransformPayload(raw) {
+    let text = (raw || "").trim();
+
+    // Look for payload introduction markers: "basically ... can you rewrite" or "draft for [topic] ... can you rewrite"
+    let contextSubject = "Writing Draft";
+    const contextMatch = text.match(/\b(draft\s+for\s+my\s+([^,.]+)|assignment\s+about\s+([^,.]+)|essay\s+about\s+([^,.]+))\b/i);
+    if (contextMatch) {
+      contextSubject = (contextMatch[2] || contextMatch[3] || contextMatch[4] || "Academic Essay").trim();
+    }
+
+    // Extract core payload by separating preamble from instructions
+    let draftPayload = text;
+    const basicallyMatch = text.match(/\bbasically\s+([^?]+?)(?=\s+can\s+you|\s+rewrite|\s+please|\s+make\s+this|$)/i);
+    if (basicallyMatch && basicallyMatch[1].length > 20) {
+      draftPayload = basicallyMatch[1].trim();
+    } else {
+      // Fallback: strip conversational lead
+      draftPayload = draftPayload
+        .replace(/^.*?\b(here\s+is\s+(a\s+)?draft\s+.*?:|here\s+is\s+my\s+draft\s+.*?:)\s*/i, "")
+        .replace(/\b(can\s+you\s+rewrite\s+this|rewrite\s+this|make\s+this\s+sound).*$/i, "")
+        .trim();
+    }
+
+    // Capitalize draft payload
+    if (draftPayload.length > 0) {
+      draftPayload = draftPayload.charAt(0).toUpperCase() + draftPayload.slice(1);
+      if (!draftPayload.endsWith(".")) draftPayload += ".";
+    }
+
+    // Determine target tone
+    let tone = "Formal Academic";
+    if (/\b(academic|scholarly|formal|paper|college)\b/i.test(text)) {
+      tone = "Formal Academic";
+    } else if (/\b(casual|friendly|conversational)\b/i.test(text)) {
+      tone = "Accessible Conversational";
+    } else if (/\b(executive|business|professional)\b/i.test(text)) {
+      tone = "Executive Professional";
+    }
+
+    const negativeConstraints = extractNegativeConstraints(text);
+
+    return {
+      contextSubject,
+      draftPayload,
+      tone,
+      negativeConstraints
+    };
+  }
+
+  function buildTransformPrompt(raw, mode = "structured") {
+    const { contextSubject, draftPayload, tone, negativeConstraints } = extractTransformPayload(raw);
+
+    const constraintsList = [
+      `Tone & Register: ${tone}; objective, cohesive, and rhetorically articulate.`,
+      "Fidelity: Preserve all original arguments, logic, and thesis points intact.",
+      ...negativeConstraints,
+      "Flow: Ensure natural sentence transitions and strong paragraph cohesion."
+    ];
+
+    if (mode === "concise") {
+      return `Act as an editor. Paraphrase the following text into ${tone.toLowerCase()} prose with smooth flow. Retain all core arguments and avoid pretentious jargon:
+
+"""
+${draftPayload}
+"""`;
+    }
+
+    if (mode === "deep_reasoning") {
+      return `Act as a Senior Editorial Stylist and Academic Rhetorician. Analyze and rewrite the following draft:
+
+### Source Draft
+"""
+${draftPayload}
+"""
+
+### Editorial Analysis Steps
+1. Identify rhetorical weaknesses, informal phrasing, and structural bottlenecks in the draft.
+2. Outline the improved argumentative structure.
+3. Deliver the finalized, publication-ready revision adhering strictly to a ${tone.toLowerCase()} register.`;
+    }
+
+    // Default: Structured Intent Envelope
+    return `### Role & Objective
+Act as a Professional Editor. Paraphrase and elevate the following draft for a ${contextSubject} into clean, compelling ${tone.toLowerCase()} prose.
+
+### Source Draft (To Paraphrase)
+"""
+${draftPayload}
+"""
+
+### Editorial Guidelines
+${constraintsList.map((c, i) => `${i + 1}. ${c}`).join("\n")}
+
+### Output Deliverable
+- Polished, cohesive final draft ready for submission.`;
+  }
+
+  function buildClarifierPrompt(raw, triage, mode = "structured") {
+    const suggestion = triage.suggestion || cleanBaseText(raw);
+
+    if (mode === "concise") {
+      return suggestion;
+    }
+
+    return `### Clarified Objective
+${suggestion}
+
+### Required Coverage
+1. Direct, authoritative definition addressing the core concept immediately.
+2. Key architectural mechanics and active protocols.
+3. Common practical applications and notable trade-offs.`;
   }
 
   function buildStructuredPrompt(subject, intent, rawFull = "") {
     const extractedConstraints = extractNegativeConstraints(rawFull || subject);
     const extractedQuestions = extractQuestions(rawFull || subject);
 
-    // If conversational thought dump has extracted questions or constraints
     if (extractedQuestions.length > 0 || extractedConstraints.length > 0) {
       const tasksBlock = extractedQuestions.length > 0
         ? `\n\n### Core Tasks & Questions\n${extractedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}`
@@ -148,114 +260,127 @@ ${subject}.
 1. Component Boundaries: Detail the core modules, services, and data flows.
 2. Data & Storage: Recommend database schemas, indexing strategies, and caching layers.
 3. Reliability & Scalability: Address fault tolerance, rate limiting, and failure modes.
-4. Trade-offs: Document pros and cons of the proposed design versus alternatives.`;
+
+### Deliverables
+- System architecture specification with clear component responsibilities.
+- Trade-off evaluation comparing the proposed solution against alternatives.`;
 
       case "explain":
-        return `Provide a clear, in-depth technical explanation:
+        return `Act as a Principal Technical Educator. Explain the following concept with depth and precision:
 
-### Topic
+### Concept to Explain
 ${subject}.
 
-### Structure
-1. Core Concepts: Define fundamental principles and mechanics without superficial analogies.
-2. Comparison / Key Dimensions: Highlight trade-offs, advantages, and limitations.
-3. Practical Application: Provide a real-world code or system scenario illustrating usage.
-4. Summary: Conclude with 3-5 concise bullet points covering key takeaways.`;
+### Explanation Structure
+1. High-Level Summary: Explain the core concept directly in 2-3 sentences.
+2. Internal Mechanics: Detail how the system or concept works step by step.
+3. Practical Application: Provide a concrete, real-world example illustrating the concept in use.
+4. Edge Cases & Common Pitfalls: Highlight frequent misconceptions or performance gotchas.`;
 
-      case "writing":
-        return `Draft a polished, high-impact document:
-
-### Objective
+      default:
+        return `### Objective
 ${subject}.
 
-### Guidelines
-- Tone: Direct, professional, and conversational without generic corporate filler.
-- Structure: Engaging opening hook, clearly stated value proposition, and frictionless call-to-action.
-- Length: Keep concise and respect reader attention.
-- Constraints: Avoid clichés, buzzwords, and passive sentence structures.`;
-
-      default:
-        return `Execute the following task with precision:
-
-### Objective
-${subject}.
-
-### Requirements
-1. Provide a direct, structured solution addressing all facets of the request.
-2. Organize the output using clear headings, bullet points, and numbered steps.
-3. Highlight critical assumptions and actionable next steps.
-
-### Constraints
-- Avoid conversational throat-clearing and generic pleasantries.
-- Deliver production-ready, high-density information.`;
+### Instructions
+1. Provide a comprehensive, structured response addressing the core requirements.
+2. Emphasize clarity, actionable insights, and practical depth.
+3. Highlight critical edge cases, assumptions, and practical recommendations.`;
     }
-  }
-
-  function extractTopic(subject, intent) {
-    let s = subject.trim();
-    switch (intent) {
-      case "debug":
-        return s.replace(/^(fix\s+(my\s+|the\s+)?|debug\s+(my\s+|the\s+)?|resolve\s+(my\s+|the\s+)?)/i, "");
-      case "explain":
-        return s.replace(/^(explain\s+(how\s+|what\s+|why\s+)?|what\s+is\s+|how\s+does\s+|how\s+to\s+)/i, "");
-      case "code_feature":
-        return s.replace(/^(write\s+(a\s+|an\s+)?|build\s+(a\s+|an\s+)?|create\s+(a\s+|an\s+)?|make\s+(a\s+|an\s+)?|code\s+(a\s+|an\s+)?)/i, "");
-      case "writing":
-        return s.replace(/^(write\s+(a\s+|an\s+)?|draft\s+(a\s+|an\s+)?|compose\s+(a\s+|an\s+)?)/i, "");
-      default:
-        return s;
-    }
-  }
-
-  function buildConcisePrompt(subject, intent) {
-    const topic = extractTopic(subject, intent);
-    switch (intent) {
-      case "debug":
-        return `Debug the following issue: ${topic}. Identify the root cause, provide the corrected code with explanatory comments, and list verification steps.`;
-      case "refactor":
-        return `Refactor the following: ${subject}. Optimize for readability, reduced complexity, and modern standards. Provide the clean code without unnecessary boilerplate.`;
-      case "code_feature":
-        return `Build a production-ready solution for: ${topic}. Include robust error handling, types, and concise inline comments.`;
-      case "explain":
-        return `Explain ${topic} clearly. Detail the core mechanics, practical trade-offs, and summarize key takeaways in bullet points.`;
-      case "writing":
-        return `Draft a polished ${topic}. Adopt a direct, engaging tone, structure with clear sections, and avoid buzzwords or filler.`;
-      default:
-        return `${subject}. Provide a structured, step-by-step response with direct actionable recommendations and no fluff.`;
-    }
-  }
-
-  function buildDeepReasoningPrompt(subject, intent) {
-    return `### Complex Problem Statement
-${subject}
-
-### Required Step-by-Step Thought Process
-Before delivering your final solution, work through the following analysis explicitly:
-1. Deconstruct Assumptions: Clarify core requirements, constraints, and implicit assumptions.
-2. Evaluate Alternatives: Compare at least two distinct approaches with trade-offs.
-3. Recommend Optimal Solution: Detail the chosen implementation with justification.
-4. Verification & Edge Cases: Identify failure modes, edge cases, and testing strategies.
-
-### Final Output
-Provide the complete, production-grade deliverable below your analysis.`;
   }
 
   function transform(rawText, mode = "structured") {
     const raw = (rawText || "").trim();
     if (!raw) {
-      return { original: raw, corrected: raw, changed: false, mode, intent: "general", changes: [] };
+      return {
+        original: raw,
+        corrected: raw,
+        changed: false,
+        mode,
+        intent: "general",
+        status: "empty",
+        badge: "Awaiting Input",
+        changes: []
+      };
     }
 
+    // Run cognitive triage via Echo.triage if available
+    const triage = (Echo.triage && Echo.triage.classify)
+      ? Echo.triage.classify(raw)
+      : { status: "decompile", intent: detectIntent(raw), badge: "Decompile" };
+
+    // 1. Pass-Through Mode (Green Prompts): Prompt is already direct and clear
+    if (triage.status === "ready") {
+      return {
+        original: raw,
+        corrected: raw,
+        changed: false,
+        mode: mode,
+        intent: triage.intent,
+        status: triage.status,
+        badge: triage.badge,
+        rationale: triage.rationale,
+        changes: []
+      };
+    }
+
+    // 2. Query Clarifier Mode (Amber Prompts): Vague or speculative inquiry
+    if (triage.status === "vague") {
+      const clarified = buildClarifierPrompt(raw, triage, mode);
+      return {
+        original: raw,
+        corrected: clarified,
+        changed: raw !== clarified,
+        mode: mode,
+        intent: triage.intent,
+        status: triage.status,
+        badge: triage.badge,
+        suggestion: triage.suggestion,
+        rationale: triage.rationale,
+        changes: [
+          {
+            type: "clarify",
+            title: "Sharpened speculative inquiry into direct query",
+            original: raw,
+            replacement: clarified
+          }
+        ]
+      };
+    }
+
+    // 3. Payload & Transform Mode (Red Prose / Essay Prompts)
+    if (triage.intent === "text_transform") {
+      const transformed = buildTransformPrompt(raw, mode);
+      return {
+        original: raw,
+        corrected: transformed,
+        changed: raw !== transformed,
+        mode: mode,
+        intent: triage.intent,
+        status: triage.status,
+        badge: triage.badge,
+        rationale: triage.rationale,
+        changes: [
+          {
+            type: "transform",
+            title: "Segregated essay payload from editorial directives",
+            original: raw.substring(0, 50) + "...",
+            replacement: transformed.substring(0, 50) + "..."
+          }
+        ]
+      };
+    }
+
+    // 4. Spec Decompilation Mode (Red Engineering / Build Prompts)
     const clean = cleanBaseText(raw);
     const intent = detectIntent(clean);
     let enhanced = "";
 
     switch (mode) {
       case "concise":
-        enhanced = buildConcisePrompt(clean, intent);
+        enhanced = `${clean}. Provide a structured, step-by-step response with direct actionable recommendations and no fluff.`;
         break;
       case "deep_reasoning":
-        enhanced = buildDeepReasoningPrompt(clean, intent);
+        enhanced = `### Complex Problem Statement\n${clean}\n\n### Required Step-by-Step Analysis\n1. Deconstruct Assumptions & Constraints\n2. Evaluate Core Architectural Alternatives\n3. Deliver Complete Production-Grade Implementation\n4. Highlight Failure Modes & Verification`;
         break;
       case "structured":
       default:
@@ -263,22 +388,23 @@ Provide the complete, production-grade deliverable below your analysis.`;
         break;
     }
 
-    const changes = [
-      {
-        type: "architect",
-        title: `Restructured prompt into ${mode} framework (${intent})`,
-        original: raw.substring(0, 40) + "...",
-        replacement: enhanced.substring(0, 40) + "..."
-      }
-    ];
-
     return {
       original: raw,
       corrected: enhanced,
       changed: raw !== enhanced,
       mode: mode,
       intent: intent,
-      changes: changes
+      status: triage.status,
+      badge: triage.badge,
+      rationale: triage.rationale,
+      changes: [
+        {
+          type: "architect",
+          title: `Decompiled prompt into ${mode} specification (${intent})`,
+          original: raw.substring(0, 40) + "...",
+          replacement: enhanced.substring(0, 40) + "..."
+        }
+      ]
     };
   }
 
