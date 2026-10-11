@@ -54,6 +54,39 @@ Echo.ui = {
   width: 18px;
   height: 18px;
 }
+.echo-pill.echo-state-ready {
+  border-left: 3px solid #10b981;
+}
+.echo-pill.echo-state-vague {
+  border-left: 3px solid #f59e0b;
+  animation: echoPulseAmber 2.5s infinite;
+}
+.echo-pill.echo-state-decompile {
+  border-left: 3px solid #ef4444;
+}
+@keyframes echoPulseAmber {
+  0%, 100% { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px #1e293b; }
+  50% { box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25), 0 0 0 1px rgba(245, 158, 11, 0.6); }
+}
+.echo-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+.echo-status-dot.ready { background: #10b981; }
+.echo-status-dot.vague { background: #f59e0b; }
+.echo-status-dot.decompile { background: #ef4444; }
+.echo-pill-btn.vague-btn {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+.echo-pill-btn.vague-btn:hover {
+  background: #f59e0b;
+  color: #0b1324;
+}
 .echo-score-text {
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -724,6 +757,7 @@ Echo.ui = {
             <path d="M 24 86 L 50 86 L 50 92 L 104 92 L 104 110 L 24 110 Z" fill="#0ea5e9" />
           </svg>
         </div>
+        <span class="echo-status-dot ready"></span>
         <span class="echo-score-text">--</span>
         <button class="echo-pill-btn" type="button">Compile</button>
       </div>
@@ -808,6 +842,7 @@ Echo.ui = {
     `;
 
     Echo.ui.pill = Echo.ui.host.querySelector(".echo-pill");
+    Echo.ui.statusDotEl = Echo.ui.host.querySelector(".echo-status-dot");
     Echo.ui.stripEl = Echo.ui.host.querySelector(".echo-strip");
     Echo.ui.panel = Echo.ui.host.querySelector(".echo-panel");
     Echo.ui.scoreTextEl = Echo.ui.host.querySelector(".echo-score-text");
@@ -1080,6 +1115,26 @@ Echo.ui = {
     const current = Echo.detector.read(Echo.ui.input);
     if (!current || !current.trim()) return;
 
+    // Check triage status
+    const triage = (Echo.triage && Echo.triage.classify)
+      ? Echo.triage.classify(current)
+      : { status: "decompile" };
+
+    if (triage.status === "ready") {
+      Echo.ui.showToast("Prompt is already airtight and direct \u2713", false);
+      return;
+    }
+
+    if (triage.status === "vague" && triage.suggestion) {
+      // Sharpen immediately with option to undo
+      Echo.ui.previousText = current;
+      Echo.detector.write(Echo.ui.input, triage.suggestion);
+      Echo.ui.undoBtn.style.display = "inline-flex";
+      Echo.ui.showToast("Query sharpened \u2713", true);
+      Echo.ui.recordStat("fixesApplied");
+      return;
+    }
+
     if (Echo.ui.actionBtn) {
       Echo.ui.actionBtn.textContent = "Compiling...";
       Echo.ui.actionBtn.disabled = true;
@@ -1245,21 +1300,53 @@ Echo.ui = {
     }
     Echo.ui.show();
 
-    const grade = Echo.analyzer.grade(result.score);
-    Echo.ui.scoreTextEl.textContent = grade.label + " " + result.score;
-    Echo.ui.scoreTextEl.style.color = grade.color;
+    // 3-State Traffic-Light Cognitive Triage
+    const currentText = Echo.ui.input ? Echo.detector.read(Echo.ui.input) : "";
+    const triage = (Echo.triage && Echo.triage.classify)
+      ? Echo.triage.classify(currentText)
+      : { status: "decompile", badge: "Decompile" };
 
-    const canAutocorrect = result.autocorrect && result.autocorrect.changed;
-    Echo.ui.pillBtn.style.display = canAutocorrect ? "inline-flex" : "none";
-    Echo.ui.actionBanner.style.display = canAutocorrect ? "block" : "none";
+    // Update Pill styling based on triage state
+    Echo.ui.pill.classList.remove("echo-state-ready", "echo-state-vague", "echo-state-decompile");
+    Echo.ui.statusDotEl.className = "echo-status-dot " + triage.status;
 
-    // Render inline squiggly word-fix tags
+    if (triage.status === "ready") {
+      Echo.ui.pill.classList.add("echo-state-ready");
+      Echo.ui.scoreTextEl.textContent = "Ready \u2713";
+      Echo.ui.scoreTextEl.style.color = "#10b981";
+      Echo.ui.pillBtn.style.display = "none";
+      Echo.ui.actionBanner.style.display = "none";
+    } else if (triage.status === "vague") {
+      Echo.ui.pill.classList.add("echo-state-vague");
+      Echo.ui.scoreTextEl.textContent = "Clarify";
+      Echo.ui.scoreTextEl.style.color = "#fbbf24";
+      Echo.ui.pillBtn.textContent = "Sharpen";
+      Echo.ui.pillBtn.className = "echo-pill-btn vague-btn";
+      Echo.ui.pillBtn.style.display = "inline-flex";
+      Echo.ui.actionBanner.style.display = "block";
+      const actionTitle = Echo.ui.actionBanner.querySelector(".echo-action-title");
+      if (actionTitle) actionTitle.textContent = "Clarify Query";
+    } else {
+      // Red / Decompile
+      Echo.ui.pill.classList.add("echo-state-decompile");
+      const grade = Echo.analyzer.grade(result.score);
+      Echo.ui.scoreTextEl.textContent = grade.label + " " + result.score;
+      Echo.ui.scoreTextEl.style.color = grade.color;
+      Echo.ui.pillBtn.textContent = triage.intent === "text_transform" ? "Structure" : "Compile";
+      Echo.ui.pillBtn.className = "echo-pill-btn";
+      Echo.ui.pillBtn.style.display = "inline-flex";
+      Echo.ui.actionBanner.style.display = "block";
+      const actionTitle = Echo.ui.actionBanner.querySelector(".echo-action-title");
+      if (actionTitle) actionTitle.textContent = triage.intent === "text_transform" ? "Essay Payload" : "Prompt Architect";
+    }
+
+    // Render inline squiggly word-fix tags (Amber & Red states)
     if (Echo.ui.stripEl) {
       Echo.ui.stripEl.innerHTML = "";
       const wordIssues = (result.issues || []).filter(
         (i) => i.quickFix && i.quickFix.target && i.quickFix.replacement && !i.quickFix.append
       );
-      if (wordIssues.length > 0 && !Echo.ui.open) {
+      if (triage.status !== "ready" && wordIssues.length > 0 && !Echo.ui.open) {
         Echo.ui.stripEl.style.display = "flex";
         for (const wi of wordIssues.slice(0, 3)) {
           const tag = document.createElement("div");
