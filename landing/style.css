@@ -792,7 +792,14 @@ body::before {
   border-color: #fecdd3;
 }
 
-.score-chip.airtight {
+.score-chip.vague {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.score-chip.airtight,
+.score-chip.ready {
   background: #dcfce7;
   color: #15803d;
   border-color: #bbf7d0;
@@ -982,11 +989,23 @@ body::before {
   font-family: var(--font-main);
 }
 
+.feedback-alert.amber {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.feedback-alert.green {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
 .feedback-alert strong {
   font-family: var(--font-code);
   font-size: 11px;
   letter-spacing: 0.04em;
-  color: #881337;
+  color: inherit;
 }
 
 .preset-label {
