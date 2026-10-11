@@ -1,7 +1,7 @@
 var Echo = window.Echo = window.Echo || {};
 
 Echo.architect = (function () {
-  const FILLER_RE = /^(hey|hi|hello|please\s+)?(can\s+you\s+please\s+help\s+me|could\s+you\s+please\s+help\s+me|can\s+you\s+help\s+me|could\s+you\s+help\s+me|help\s+me\s+to|help\s+me|assist\s+me\s+with|assist\s+me|can\s+you\s+please|could\s+you\s+please|please\s+can\s+you|would\s+you\s+be\s+able\s+to|i\s+want\s+you\s+to|i\s+need\s+you\s+to|i\s+would\s+like\s+you\s+to|i'd\s+like\s+you\s+to|hey\s+can\s+you|hi\s+can\s+you|hello\s+can\s+you|can\s+you|could\s+you|so\s+here\s+is\s+a\s+draft\s+for|here\s+is\s+a\s+draft\s+for|here\s+is\s+my\s+draft\s+for|here\s+is\s+my\s+essay|here\s+is\s+a\s+draft)\s+(please\s+)?/i;
+  const FILLER_RE = /^(hey|hi|hello|please)?[\s,]+(can\s+you\s+please\s+help\s+me|could\s+you\s+please\s+help\s+me|can\s+you\s+help\s+me|could\s+you\s+help\s+me|help\s+me\s+to|help\s+me|assist\s+me\s+with|assist\s+me|can\s+you\s+please|could\s+you\s+please|please\s+can\s+you|would\s+you\s+be\s+able\s+to|i\s+want\s+you\s+to|i\s+need\s+you\s+to|i\s+need\s+to|i\s+want\s+to|i\s+would\s+like\s+you\s+to|i'd\s+like\s+you\s+to|hey\s+can\s+you|hi\s+can\s+you|hello\s+can\s+you|can\s+you|could\s+you|so\s+here\s+is\s+a\s+draft\s+for|here\s+is\s+a\s+draft\s+for|here\s+is\s+my\s+draft\s+for|here\s+is\s+my\s+essay|here\s+is\s+a\s+draft)\s+(please\s+)?/i;
 
   const INTENT_PATTERNS = {
     debug: /\b(bug|error|broken|crash|crashing|fails|failed|exception|not\s+working|cannot|cant|undefined|null|none|issue\s+with|traceback|syntax\s+error)\b/i,
@@ -190,41 +190,33 @@ ${suggestion}
     const extractedConstraints = extractNegativeConstraints(rawFull || subject);
     const extractedQuestions = extractQuestions(rawFull || subject);
 
-    if (extractedQuestions.length > 0 || extractedConstraints.length > 0) {
-      const tasksBlock = extractedQuestions.length > 0
-        ? `\n\n### Core Tasks & Questions\n${extractedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}`
-        : "";
+    const tasksBlock = extractedQuestions.length > 0
+      ? `\n\n### Core Tasks & Questions\n${extractedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}`
+      : "";
 
-      const constraintList = [
-        ...extractedConstraints,
-        "Keep explanations direct, actionable, and avoid conversational filler."
-      ];
-      const constraintsBlock = `\n\n### Constraints\n${constraintList.map((c) => `- ${c}`).join("\n")}`;
-
-      return `### Objective\n${subject}.${tasksBlock}${constraintsBlock}`;
-    }
+    const constraintList = [
+      ...extractedConstraints,
+      "Keep explanations direct, actionable, and avoid conversational filler."
+    ];
+    const constraintsBlock = `\n\n### Constraints\n${constraintList.map((c) => `- ${c}`).join("\n")}`;
 
     switch (intent) {
       case "debug":
         return `Act as a Senior Software Engineer. Debug and resolve the following issue:
 
 ### Objective
-${subject}.
+${subject}.${tasksBlock}
 
 ### Requirements
 1. Identify the root cause of the error or unexpected behavior.
 2. Provide the corrected code with clear inline explanations.
-3. Explain edge cases and verification steps to prevent this issue from recurring.
-
-### Constraints
-- Keep explanations direct and avoid unnecessary boilerplate.
-- Ensure the fix adheres to modern best practices.`;
+3. Explain edge cases and verification steps to prevent this issue from recurring.${constraintsBlock}`;
 
       case "refactor":
         return `Act as a Principal Engineer. Conduct a rigorous code refactoring:
 
 ### Objective
-${subject}.
+${subject}.${tasksBlock}
 
 ### Refactoring Goals
 1. Improve readability, maintainability, and architectural separation of concerns.
@@ -233,13 +225,13 @@ ${subject}.
 
 ### Deliverables
 - Before vs. After comparison highlighting key improvements.
-- Clean, production-ready code with type annotations and error handling.`;
+- Clean, production-ready code with type annotations and error handling.${constraintsBlock}`;
 
       case "code_feature":
         return `Act as a Senior Full-Stack Engineer. Implement the following technical feature:
 
 ### Objective
-${subject}.
+${subject}.${tasksBlock}
 
 ### Technical Specifications
 1. Provide clean, modular, and production-ready code.
@@ -248,13 +240,13 @@ ${subject}.
 
 ### Deliverables
 - Fully working implementation with all necessary imports and types.
-- Brief summary of key design choices and trade-offs.`;
+- Brief summary of key design choices and trade-offs.${constraintsBlock}`;
 
       case "architecture":
         return `Act as a Principal System Architect. Design a scalable technical architecture:
 
 ### Objective
-${subject}.
+${subject}.${tasksBlock}
 
 ### Architectural Requirements
 1. Component Boundaries: Detail the core modules, services, and data flows.
@@ -263,28 +255,23 @@ ${subject}.
 
 ### Deliverables
 - System architecture specification with clear component responsibilities.
-- Trade-off evaluation comparing the proposed solution against alternatives.`;
+- Trade-off evaluation comparing the proposed solution against alternatives.${constraintsBlock}`;
 
       case "explain":
         return `Act as a Principal Technical Educator. Explain the following concept with depth and precision:
 
 ### Concept to Explain
-${subject}.
+${subject}.${tasksBlock}
 
 ### Explanation Structure
 1. High-Level Summary: Explain the core concept directly in 2-3 sentences.
 2. Internal Mechanics: Detail how the system or concept works step by step.
 3. Practical Application: Provide a concrete, real-world example illustrating the concept in use.
-4. Edge Cases & Common Pitfalls: Highlight frequent misconceptions or performance gotchas.`;
+4. Edge Cases & Common Pitfalls: Highlight frequent misconceptions or performance gotchas.${constraintsBlock}`;
 
       default:
         return `### Objective
-${subject}.
-
-### Instructions
-1. Provide a comprehensive, structured response addressing the core requirements.
-2. Emphasize clarity, actionable insights, and practical depth.
-3. Highlight critical edge cases, assumptions, and practical recommendations.`;
+${subject}.${tasksBlock}${constraintsBlock}`;
     }
   }
 
