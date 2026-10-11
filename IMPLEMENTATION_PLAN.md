@@ -75,17 +75,17 @@
 ---
 
 ### Phase 3: Interactive Laboratory Updates (`landing/index.html`, `landing/script.js`)
-- [ ] **3.1 Diverse Preset Catalog:**
+- [x] **3.1 Diverse Preset Catalog:**
   - Add sample buttons representing all four cognitive states:
     1. *Factual (Green):* *"What is the third layer of the OSI model?"*
     2. *Vague (Amber):* *"what do you think the third layer of the osi model might be or something like that"*
     3. *Essay Paraphrase (Red):* Sociology assignment draft on social media algorithms with negative constraints.
     4. *Engineering Build (Red):* Barbershop appointment booking system with optimistic locking.
-- [ ] **3.2 Dynamic Laboratory Presentation:**
+- [x] **3.2 Dynamic Laboratory Presentation:**
   - Render the Green state with an affirmative badge: *"Prompt Ready ✓ (No compilation needed)"*.
   - Render Amber suggestions with one-click refinement previews.
   - Render Red decompilations with the syntax-highlighted contract or payload envelope.
-- [ ] **3.3 Synchronize Website:**
+- [x] **3.3 Synchronize Website:**
   - Mirror all changes from `Echo/landing/` to `echo-website/` repository and verify live deployment.
 
 ---
