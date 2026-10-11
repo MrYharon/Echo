@@ -3,7 +3,8 @@ var Echo = window.Echo = window.Echo || {};
 Echo.triage = {
   // Speculative hedges that trigger Amber state
   VAGUE_PATTERNS: [
-    /\b(what\s+do\s+you\s+think\s+(is|are|might\s+be|could\s+be))\b/i,
+    /\b(what\s+do\s+you\s+think\b.*?\b(is|are|might\s+be|could\s+be))\b/i,
+    /\b(what\s+do\s+you\s+think\b)/i,
     /\b(or\s+something\s+like\s+that|or\s+something|or\s+whatever|or\s+stuff)\b/i,
     /\b(might\s+be|could\s+be\s+like|kind\s+of|sort\s+of|i\s+guess|maybe|perhaps)\b/i,
     /\b(tell\s+me\s+about\s+(things|stuff|anything))\b/i,
@@ -50,7 +51,8 @@ Echo.triage = {
     if (isVague) {
       // Formulate a clean sharpened query suggestion
       let cleaned = raw
-        .replace(/\b(what\s+do\s+you\s+think\s+(the\s+)?)/i, "What is the ")
+        .replace(/\bwhat\s+do\s+you\s+think\s+(is\s+|are\s+)?/i, "What is ")
+        .replace(/\s+(is|are)\s*\?$/i, "?")
         .replace(/\b(might\s+be\s+or\s+something\s+like\s+that|or\s+something\s+like\s+that|or\s+something|or\s+whatever)\b/gi, "")
         .replace(/\b(kind\s+of|sort\s+of|i\s+guess|maybe)\b/gi, "")
         .replace(/\s+/g, " ")
