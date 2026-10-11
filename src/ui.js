@@ -9,108 +9,118 @@ Echo.ui = {
   open: false,
   lastResult: null,
   previousText: null,
+  activePreviewData: null,
+  currentMode: "structured",
 
   CSS: `
 .echo-host {
   position: fixed;
   z-index: 2147483647;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color-scheme: dark;
+  line-height: 1.45;
 }
+
+/* Floating Pill */
 .echo-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 10px 4px 6px;
-  border-radius: 9999px;
-  background: #0b1120;
-  color: #f8fafc;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 5px 11px 5px 7px;
+  border-radius: 6px;
+  background: #0b1324;
+  color: #fbfcfd;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(56, 189, 248, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px #1e293b;
   user-select: none;
   transition: all 0.15s ease;
 }
 .echo-pill:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(56, 189, 248, 0.5);
-  background: #0f172a;
+  background: #131e33;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px #0ea5e9;
 }
 .echo-pill-brand {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #38bdf8, #0284c7);
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.echo-pill-brand svg {
+  width: 18px;
+  height: 18px;
 }
 .echo-score-text {
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
 }
 .echo-pill-btn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(56, 189, 248, 0.15);
+  background: rgba(14, 165, 233, 0.12);
   color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  border-radius: 9999px;
-  padding: 2px 8px;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .echo-pill-btn:hover {
-  background: #38bdf8;
-  color: #082f49;
+  background: #0ea5e9;
+  color: #0b1324;
 }
+
+/* Inline Word Fix Strip */
 .echo-strip {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
   margin-top: 5px;
-  max-width: 320px;
+  max-width: 360px;
 }
 .echo-word-tag {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: #0b1120;
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  border-radius: 9999px;
-  padding: 3px 9px;
-  font-size: 11px;
+  gap: 6px;
+  background: #0b1324;
+  border: 1px solid #1e293b;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10.5px;
   color: #e2e8f0;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   transition: all 0.15s ease;
   user-select: none;
 }
 .echo-word-tag:hover {
-  background: #1e293b;
-  border-color: #38bdf8;
-  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+  background: #131e33;
+  border-color: #0ea5e9;
   transform: translateY(-1px);
 }
 .echo-word-target {
-  text-decoration: underline wavy #f59e0b 1.5px;
-  font-weight: 600;
-  color: #fbbf24;
+  text-decoration: line-through;
+  color: #f87171;
 }
 .echo-word-arrow {
   color: #64748b;
-  font-size: 10px;
+  font-size: 11px;
 }
 .echo-word-replacement {
   color: #38bdf8;
   font-weight: 700;
 }
+
+/* Toast */
 .echo-toast {
   position: absolute;
   bottom: calc(100% + 8px);
@@ -118,12 +128,13 @@ Echo.ui = {
   transform: translateX(-50%) translateY(6px);
   opacity: 0;
   pointer-events: none;
-  background: #0b1120;
+  background: #0b1324;
   color: #f8fafc;
-  border: 1px solid rgba(56, 189, 248, 0.4);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(56, 189, 248, 0.2);
-  border-radius: 8px;
-  padding: 6px 12px;
+  border: 1px solid #0ea5e9;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   font-weight: 600;
   display: flex;
@@ -145,29 +156,35 @@ Echo.ui = {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
-  border-radius: 4px;
-  padding: 2px 7px;
-  font-size: 10px;
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .echo-toast-undo:hover {
-  background: #38bdf8;
-  color: #082f49;
+  background: #0ea5e9;
+  color: #0b1324;
+  border-color: #0ea5e9;
 }
+
+/* Panel */
 .echo-panel {
   display: none;
   margin-top: 8px;
-  width: 340px;
+  width: 380px;
   max-height: 480px;
   overflow-y: auto;
-  background: #0b1120;
+  background: #0b1324;
   color: #e2e8f0;
-  border-radius: 14px;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(56, 189, 248, 0.2);
-  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid #1e293b;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  font-size: 12.5px;
   line-height: 1.45;
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #0b1324;
 }
 .echo-panel.echo-open {
   display: block;
@@ -177,10 +194,8 @@ Echo.ui = {
   align-items: center;
   justify-content: space-between;
   padding: 12px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: #0f172a;
-  border-top-left-radius: 14px;
-  border-top-right-radius: 14px;
+  border-bottom: 1px solid #1e293b;
+  background: #131e33;
 }
 .echo-brand-group {
   display: flex;
@@ -188,76 +203,86 @@ Echo.ui = {
   gap: 8px;
 }
 .echo-title {
-  font-weight: 700;
+  font-weight: 800;
   font-size: 13px;
-  color: #f8fafc;
+  letter-spacing: -0.01em;
+  color: #ffffff;
 }
 .echo-badge-sub {
-  font-size: 10px;
-  font-weight: 600;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(56, 189, 248, 0.12);
+  border-radius: 3px;
+  background: rgba(14, 165, 233, 0.15);
   color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  border: 1px solid rgba(14, 165, 233, 0.3);
 }
 .echo-close-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #8a99b0;
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 4px;
+  padding: 2px 6px;
+  border-radius: 3px;
   font-size: 14px;
   line-height: 1;
 }
 .echo-close-btn:hover {
-  color: #f8fafc;
+  color: #ffffff;
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* Action Banner */
 .echo-action-banner {
   padding: 12px 14px;
-  background: linear-gradient(180deg, rgba(56, 189, 248, 0.08), rgba(2, 132, 199, 0.04));
-  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
 }
 .echo-action-title {
-  font-weight: 600;
-  font-size: 12px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: #38bdf8;
   margin-bottom: 4px;
 }
 .echo-action-desc {
   font-size: 11px;
-  color: #94a3b8;
+  color: #8a99b0;
   margin-bottom: 8px;
   line-height: 1.4;
 }
 .echo-mode-pills {
   display: flex;
-  gap: 4px;
-  margin-bottom: 8px;
+  gap: 5px;
+  margin-bottom: 10px;
 }
 .echo-mode-pill {
-  padding: 2px 7px;
-  font-size: 10px;
-  font-weight: 600;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  color: #94a3b8;
+  padding: 3px 8px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  border: 1px solid #1e293b;
+  background: #0b1324;
+  color: #8a99b0;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .echo-mode-pill:hover {
-  color: #fff;
-  border-color: rgba(56, 189, 248, 0.3);
+  color: #ffffff;
+  border-color: #334155;
 }
 .echo-mode-pill.active {
-  background: rgba(56, 189, 248, 0.16);
+  background: #131e33;
   color: #38bdf8;
-  border-color: #38bdf8;
+  border-color: #0ea5e9;
 }
 .echo-action-controls {
   display: flex;
@@ -270,18 +295,20 @@ Echo.ui = {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: #38bdf8;
-  color: #082f49;
+  background: #0ea5e9;
+  color: #0b1324;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 7px 12px;
-  font-size: 12px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.04em;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .echo-btn-primary:hover {
-  background: #7dd3fc;
+  background: #38bdf8;
 }
 .echo-btn-secondary {
   display: inline-flex;
@@ -290,10 +317,11 @@ Echo.ui = {
   gap: 4px;
   background: rgba(255, 255, 255, 0.06);
   color: #cbd5e1;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
+  border: 1px solid #1e293b;
+  border-radius: 4px;
   padding: 7px 10px;
-  font-size: 11px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10.5px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -302,14 +330,16 @@ Echo.ui = {
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
 }
+
+/* Issues List */
 .echo-issue {
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(15, 23, 42, 0.4);
+  padding: 10px 14px;
+  border-bottom: 1px solid #1e293b;
+  background: #0b1324;
   transition: background 0.15s ease;
 }
 .echo-issue:hover {
-  background: rgba(15, 23, 42, 0.8);
+  background: #0f172a;
 }
 .echo-issue:last-child {
   border-bottom: none;
@@ -321,50 +351,47 @@ Echo.ui = {
   margin-bottom: 4px;
 }
 .echo-category-badge {
-  font-size: 9px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 2px 6px;
-  border-radius: 4px;
+  letter-spacing: 0.06em;
+  padding: 1px 5px;
+  border-radius: 3px;
 }
 .echo-cat-directiveness {
-  background: rgba(248, 113, 113, 0.15);
+  background: rgba(239, 68, 68, 0.15);
   color: #f87171;
-  border: 1px solid rgba(248, 113, 113, 0.25);
 }
 .echo-cat-clarity {
-  background: rgba(251, 191, 36, 0.15);
+  background: rgba(245, 158, 11, 0.15);
   color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.25);
 }
 .echo-cat-context {
-  background: rgba(96, 165, 250, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(96, 165, 250, 0.25);
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
 }
 .echo-cat-specifications {
-  background: rgba(52, 211, 153, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.25);
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
 }
 .echo-cat-structure {
-  background: rgba(192, 132, 252, 0.15);
+  background: rgba(168, 85, 247, 0.15);
   color: #c084fc;
-  border: 1px solid rgba(192, 132, 252, 0.25);
 }
 .echo-issue-name {
   font-weight: 700;
-  color: #f1f5f9;
-  font-size: 11px;
+  color: #ffffff;
+  font-size: 11.5px;
 }
 .echo-diff-box {
-  background: rgba(7, 13, 25, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  padding: 7px 10px;
-  margin: 6px 0 8px;
-  font-size: 11px;
+  background: #060911;
+  border: 1px solid #1e293b;
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin: 5px 0 6px;
+  font-size: 10.5px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 .echo-diff-row {
   display: flex;
@@ -375,10 +402,6 @@ Echo.ui = {
 .echo-diff-del {
   text-decoration: line-through;
   color: #f87171;
-  background: rgba(248, 113, 113, 0.12);
-  padding: 1px 5px;
-  border-radius: 3px;
-  font-family: ui-monospace, monospace;
 }
 .echo-diff-arrow {
   color: #64748b;
@@ -387,30 +410,22 @@ Echo.ui = {
 .echo-diff-ins {
   color: #38bdf8;
   font-weight: 700;
-  background: rgba(56, 189, 248, 0.12);
-  padding: 1px 5px;
-  border-radius: 3px;
-  font-family: ui-monospace, monospace;
 }
 .echo-diff-tag {
-  color: #64748b;
-  font-size: 10px;
+  color: #8a99b0;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
 }
 .echo-diff-ins-append {
-  color: #34d399;
+  color: #4ade80;
   font-weight: 600;
-  background: rgba(52, 211, 153, 0.12);
-  padding: 2px 6px;
-  border-radius: 3px;
-  line-height: 1.35;
 }
 .echo-issue-rationale {
   font-size: 11px;
-  color: #94a3b8;
+  color: #8a99b0;
   line-height: 1.4;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .echo-issue-footer {
   display: flex;
@@ -421,30 +436,35 @@ Echo.ui = {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: #38bdf8;
-  color: #082f49;
-  border: none;
-  border-radius: 5px;
-  padding: 4px 10px;
+  background: rgba(14, 165, 233, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  border-radius: 3px;
+  padding: 3px 8px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 .echo-fix-btn:hover {
-  background: #7dd3fc;
+  background: #0ea5e9;
+  color: #0b1324;
 }
+
+/* Preset Format Chips in Drawer */
 .echo-presets {
   padding: 10px 14px 12px;
-  background: #090e1a;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: #0f172a;
+  border-top: 1px solid #1e293b;
 }
 .echo-presets-title {
-  font-size: 10px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  color: #64748b;
-  letter-spacing: 0.04em;
+  color: #52617a;
+  letter-spacing: 0.08em;
   margin-bottom: 6px;
 }
 .echo-chip-group {
@@ -453,51 +473,228 @@ Echo.ui = {
   gap: 5px;
 }
 .echo-chip {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   color: #cbd5e1;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-  padding: 3px 8px;
-  font-size: 10px;
-  font-weight: 500;
+  border: 1px solid #1e293b;
+  border-radius: 3px;
+  padding: 3px 7px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .echo-chip:hover {
-  background: rgba(56, 189, 248, 0.15);
-  border-color: rgba(56, 189, 248, 0.4);
+  background: #131e33;
+  border-color: #0ea5e9;
   color: #38bdf8;
 }
+
+/* Empty / Optimal State */
 .echo-empty-state {
   display: none;
-  padding: 20px 14px;
+  padding: 24px 16px;
   text-align: center;
 }
 .echo-empty-state.echo-show {
   display: block;
 }
 .echo-empty-title {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-weight: 700;
-  color: #38bdf8;
-  font-size: 13px;
+  color: #4ade80;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   margin-bottom: 4px;
 }
 .echo-empty-desc {
-  font-size: 11px;
-  color: #94a3b8;
-  line-height: 1.4;
+  font-size: 11.5px;
+  color: #8a99b0;
+  line-height: 1.45;
 }
-.echo-footer {
-  padding: 8px 14px;
-  background: #070b14;
-  color: #64748b;
-  font-size: 10px;
+
+/* Live Diff & Preview Inspection Container */
+.echo-preview-view {
+  display: none;
+  padding: 12px 14px;
+  background: #0b1324;
+}
+.echo-preview-view.echo-active {
+  display: block;
+}
+.echo-preview-subhead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  border-bottom-left-radius: 14px;
-  border-bottom-right-radius: 14px;
+  margin-bottom: 8px;
+}
+.echo-preview-title {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+}
+.echo-preview-badge {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+.echo-diff-section {
+  margin-bottom: 10px;
+}
+.echo-diff-label {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #52617a;
+  margin-bottom: 4px;
+}
+.echo-diff-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.diff-chip-removed {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecdd3;
+  border-radius: 3px;
+  padding: 2px 7px;
+  text-decoration: line-through;
+}
+.diff-chip-promoted {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  color: #026aa2;
+  background: #e0f2fe;
+  border: 1px solid rgba(2, 106, 162, 0.3);
+  border-radius: 3px;
+  padding: 2px 7px;
+  font-weight: 700;
+}
+.echo-terminal-box {
+  background: #060911;
+  border: 1px solid #1e293b;
+  border-radius: 4px;
+  padding: 8px 10px;
+  max-height: 140px;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #fbfcfd;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+@keyframes echoScanlineSweep {
+  0% { transform: translateY(-100%); opacity: 0; }
+  35% { opacity: 0.8; }
+  100% { transform: translateY(220%); opacity: 0; }
+}
+.echo-terminal-box::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #38bdf8, #0ea5e9, transparent);
+  box-shadow: 0 0 10px #38bdf8;
+  opacity: 0.7;
+  animation: echoScanlineSweep 2s ease-in-out infinite;
+  pointer-events: none;
+}
+.echo-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.echo-btn-apply {
+  flex: 1;
+  background: #0ea5e9;
+  color: #0b1324;
+  border: none;
+  border-radius: 4px;
+  padding: 7px 12px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.echo-btn-apply:hover {
+  background: #38bdf8;
+}
+.echo-btn-discard {
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+  border: 1px solid #1e293b;
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.echo-btn-discard:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+.echo-btn-copy-contract {
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+  border: 1px solid #1e293b;
+  border-radius: 4px;
+  padding: 7px 9px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.echo-btn-copy-contract:hover {
+  background: #131e33;
+  color: #38bdf8;
+  border-color: #0ea5e9;
+}
+
+/* Footer */
+.echo-footer {
+  padding: 8px 14px;
+  background: #070b14;
+  color: #52617a;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #1e293b;
 }
 `,
 
@@ -519,44 +716,93 @@ Echo.ui = {
     Echo.ui.host.className = "echo-host";
     Echo.ui.host.innerHTML = `
       <div class="echo-pill">
-        <div class="echo-pill-brand">E</div>
+        <div class="echo-pill-brand">
+          <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="128" height="128" rx="8" fill="#131e33" />
+            <path d="M 24 24 L 104 24 L 104 42 L 50 42 L 50 48 L 24 48 Z" fill="#0ea5e9" />
+            <rect x="24" y="58" width="58" height="15" fill="#fbfcfd" />
+            <path d="M 24 86 L 50 86 L 50 92 L 104 92 L 104 110 L 24 110 Z" fill="#0ea5e9" />
+          </svg>
+        </div>
         <span class="echo-score-text">--</span>
-        <button class="echo-pill-btn" type="button">Auto-correct</button>
+        <button class="echo-pill-btn" type="button">Compile</button>
       </div>
+
       <div class="echo-strip" style="display:none;"></div>
+
       <div class="echo-panel">
         <div class="echo-panel-header">
           <div class="echo-brand-group">
+            <svg width="18" height="18" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="128" height="128" rx="8" fill="#131e33" />
+              <path d="M 24 24 L 104 24 L 104 42 L 50 42 L 50 48 L 24 48 Z" fill="#0ea5e9" />
+              <rect x="24" y="58" width="58" height="15" fill="#fbfcfd" />
+              <path d="M 24 86 L 50 86 L 50 92 L 104 92 L 104 110 L 24 110 Z" fill="#0ea5e9" />
+            </svg>
             <span class="echo-title">Echo</span>
-            <span class="echo-badge-sub">Prompt Coach</span>
+            <span class="echo-badge-sub">Prompt Compiler</span>
           </div>
-          <button class="echo-close-btn" type="button" aria-label="Close">x</button>
+          <button class="echo-close-btn" type="button" aria-label="Close">&times;</button>
         </div>
+
+        <!-- Mode Bar -->
         <div class="echo-action-banner">
           <div class="echo-action-title">Prompt Architect</div>
-          <div class="echo-action-desc">Transform raw drafts into production-ready prompts with clear constraints.</div>
+          <div class="echo-action-desc">Decompile conversational streams into structured, airtight prompt contracts.</div>
           <div class="echo-mode-pills">
             <button class="echo-mode-pill active" data-mode="structured" type="button">Structured</button>
             <button class="echo-mode-pill" data-mode="concise" type="button">Concise</button>
             <button class="echo-mode-pill" data-mode="deep_reasoning" type="button">Deep</button>
           </div>
           <div class="echo-action-controls">
-            <button class="echo-btn-primary" type="button">Auto-correct</button>
+            <button class="echo-btn-primary" type="button">Compile (Alt+E)</button>
             <button class="echo-btn-secondary" type="button" style="display:none;">Undo</button>
           </div>
         </div>
-        <div class="echo-empty-state">
-          <div class="echo-empty-title">Prompt Well Formatted</div>
-          <div class="echo-empty-desc">Your prompt contains direct instructions and clear context.</div>
+
+        <!-- Live Diff & Preview Inspection Container -->
+        <div class="echo-preview-view">
+          <div class="echo-preview-subhead">
+            <span class="echo-preview-title">Prompt Contract Preview</span>
+            <span class="echo-preview-badge">Preview First</span>
+          </div>
+
+          <div class="echo-diff-section echo-diff-fluff-wrap" style="display:none;">
+            <div class="echo-diff-label">Attention Filter (Purged Tokens)</div>
+            <div class="echo-diff-chips-wrap echo-diff-fluff-list"></div>
+          </div>
+
+          <div class="echo-diff-section echo-diff-bounds-wrap" style="display:none;">
+            <div class="echo-diff-label">Enforced Bounds (Hoisted)</div>
+            <div class="echo-diff-chips-wrap echo-diff-bounds-list"></div>
+          </div>
+
+          <div class="echo-diff-label">Synthesized Contract</div>
+          <div class="echo-terminal-box echo-preview-contract-text"></div>
+
+          <div class="echo-preview-actions">
+            <button class="echo-btn-apply" type="button">Apply Contract (Enter)</button>
+            <button class="echo-btn-discard" type="button">Discard (Esc)</button>
+            <button class="echo-btn-copy-contract" type="button">Copy</button>
+          </div>
         </div>
-        <div class="echo-body"></div>
-        <div class="echo-presets">
-          <div class="echo-presets-title">Quick Output Formats</div>
-          <div class="echo-chip-group"></div>
+
+        <!-- Standard Feedback / Issues View -->
+        <div class="echo-standard-view">
+          <div class="echo-empty-state">
+            <div class="echo-empty-title">Airtight Structure</div>
+            <div class="echo-empty-desc">Your prompt contains direct instructions, clean constraints, and high clarity.</div>
+          </div>
+          <div class="echo-body"></div>
+          <div class="echo-presets">
+            <div class="echo-presets-title">Quick Output Formats</div>
+            <div class="echo-chip-group"></div>
+          </div>
         </div>
+
         <div class="echo-footer">
-          <span>Alt+E to auto-correct</span>
-          <span>Local & Private</span>
+          <span>Alt+E to inspect diff</span>
+          <span>Local &bull; 100% Private</span>
         </div>
       </div>
     `;
@@ -573,6 +819,18 @@ Echo.ui = {
     Echo.ui.undoBtn = Echo.ui.host.querySelector(".echo-btn-secondary");
     Echo.ui.closeBtn = Echo.ui.host.querySelector(".echo-close-btn");
     Echo.ui.chipGroup = Echo.ui.host.querySelector(".echo-chip-group");
+
+    // Preview View elements
+    Echo.ui.previewView = Echo.ui.host.querySelector(".echo-preview-view");
+    Echo.ui.standardView = Echo.ui.host.querySelector(".echo-standard-view");
+    Echo.ui.previewContractText = Echo.ui.host.querySelector(".echo-preview-contract-text");
+    Echo.ui.btnApplyPreview = Echo.ui.host.querySelector(".echo-btn-apply");
+    Echo.ui.btnDiscardPreview = Echo.ui.host.querySelector(".echo-btn-discard");
+    Echo.ui.btnCopyContract = Echo.ui.host.querySelector(".echo-btn-copy-contract");
+    Echo.ui.diffFluffWrap = Echo.ui.host.querySelector(".echo-diff-fluff-wrap");
+    Echo.ui.diffFluffList = Echo.ui.host.querySelector(".echo-diff-fluff-list");
+    Echo.ui.diffBoundsWrap = Echo.ui.host.querySelector(".echo-diff-bounds-wrap");
+    Echo.ui.diffBoundsList = Echo.ui.host.querySelector(".echo-diff-bounds-list");
 
     // Populate quick format chips
     if (Echo.autocorrect && Echo.autocorrect.getQuickInserts) {
@@ -600,11 +858,14 @@ Echo.ui = {
         modePills.forEach((p) => p.classList.remove("active"));
         pill.classList.add("active");
         Echo.ui.currentMode = pill.dataset.mode;
+        // If preview is open, re-compile preview immediately
+        if (Echo.ui.previewView && Echo.ui.previewView.classList.contains("echo-active")) {
+          Echo.ui.triggerAutocorrect();
+        }
       });
     });
 
     Echo.ui.pill.addEventListener("click", (e) => {
-      // If clicked on the Auto-correct button inside pill
       if (e.target.closest(".echo-pill-btn")) {
         e.stopPropagation();
         Echo.ui.triggerAutocorrect();
@@ -629,9 +890,38 @@ Echo.ui = {
       Echo.ui.triggerUndo();
     });
 
+    // Preview Action Buttons
+    if (Echo.ui.btnApplyPreview) {
+      Echo.ui.btnApplyPreview.addEventListener("click", (e) => {
+        e.stopPropagation();
+        Echo.ui.applyActivePreview();
+      });
+    }
+
+    if (Echo.ui.btnDiscardPreview) {
+      Echo.ui.btnDiscardPreview.addEventListener("click", (e) => {
+        e.stopPropagation();
+        Echo.ui.discardActivePreview();
+      });
+    }
+
+    if (Echo.ui.btnCopyContract) {
+      Echo.ui.btnCopyContract.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (Echo.ui.activePreviewData && Echo.ui.activePreviewData.corrected) {
+          await navigator.clipboard.writeText(Echo.ui.activePreviewData.corrected);
+          Echo.ui.btnCopyContract.textContent = "Copied";
+          setTimeout(() => {
+            if (Echo.ui.btnCopyContract) Echo.ui.btnCopyContract.textContent = "Copy";
+          }, 1400);
+        }
+      });
+    }
+
     document.addEventListener("click", Echo.ui.onDocClick);
     window.addEventListener("resize", Echo.ui.position);
     window.addEventListener("scroll", Echo.ui.position, true);
+    window.addEventListener("keydown", Echo.ui.onGlobalKeyDown, true);
 
     document.body.appendChild(Echo.ui.host);
     Echo.ui.position();
@@ -644,6 +934,7 @@ Echo.ui = {
     document.removeEventListener("click", Echo.ui.onDocClick);
     window.removeEventListener("resize", Echo.ui.position);
     window.removeEventListener("scroll", Echo.ui.position, true);
+    window.removeEventListener("keydown", Echo.ui.onGlobalKeyDown, true);
     Echo.ui.host = null;
     Echo.ui.pill = null;
     Echo.ui.panel = null;
@@ -651,12 +942,58 @@ Echo.ui = {
     Echo.ui.open = false;
     Echo.ui.lastResult = null;
     Echo.ui.previousText = null;
+    Echo.ui.activePreviewData = null;
   },
 
   onDocClick(e) {
     if (Echo.ui.open && Echo.ui.host && !Echo.ui.host.contains(e.target)) {
       Echo.ui.close();
     }
+  },
+
+  onGlobalKeyDown(e) {
+    if (!Echo.ui.open || !Echo.ui.previewView || !Echo.ui.previewView.classList.contains("echo-active")) {
+      return;
+    }
+
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      Echo.ui.applyActivePreview();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      Echo.ui.discardActivePreview();
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      e.stopPropagation();
+      Echo.ui.cycleMode();
+    } else if (e.key === "1") {
+      e.preventDefault();
+      Echo.ui.setMode("structured");
+    } else if (e.key === "2") {
+      e.preventDefault();
+      Echo.ui.setMode("concise");
+    } else if (e.key === "3") {
+      e.preventDefault();
+      Echo.ui.setMode("deep_reasoning");
+    }
+  },
+
+  cycleMode() {
+    const modes = ["structured", "concise", "deep_reasoning"];
+    const idx = modes.indexOf(Echo.ui.currentMode || "structured");
+    const next = modes[(idx + 1) % modes.length];
+    Echo.ui.setMode(next);
+  },
+
+  setMode(mode) {
+    Echo.ui.currentMode = mode;
+    const modePills = Echo.ui.host.querySelectorAll(".echo-mode-pill");
+    modePills.forEach((p) => {
+      p.classList.toggle("active", p.dataset.mode === mode);
+    });
+    Echo.ui.triggerAutocorrect();
   },
 
   toggle() {
@@ -672,6 +1009,7 @@ Echo.ui = {
   close() {
     Echo.ui.open = false;
     Echo.ui.panel.classList.remove("echo-open");
+    Echo.ui.hideDiffPreview();
   },
 
   position() {
@@ -680,7 +1018,7 @@ Echo.ui = {
     const hostWidth = 140;
     let left = rect.right - hostWidth - 8;
     left = Math.max(8, Math.min(left, window.innerWidth - hostWidth - 8));
-    let top = rect.top - 42;
+    let top = rect.top - 44;
     if (top < 8) {
       top = rect.bottom + 8;
     }
@@ -714,7 +1052,7 @@ Echo.ui = {
     clearTimeout(Echo.ui.toastTimer);
     Echo.ui.toastTimer = setTimeout(() => {
       Echo.ui.hideToast();
-    }, 3500);
+    }, 5000);
   },
 
   hideToast() {
@@ -736,6 +1074,7 @@ Echo.ui = {
     } catch (e) {}
   },
 
+  /* Preview First Diff Inspection Execution */
   async triggerAutocorrect() {
     if (!Echo.ui.input) return;
     const current = Echo.detector.read(Echo.ui.input);
@@ -758,38 +1097,110 @@ Echo.ui = {
         autocorrect = Echo.autocorrect.correctFull(current, mode);
       }
 
-      if (!autocorrect || !autocorrect.changed) return;
+      if (!autocorrect) return;
 
-      Echo.ui.previousText = current;
-      Echo.detector.write(Echo.ui.input, autocorrect.corrected);
+      // Extract semantic changes
+      Echo.ui.activePreviewData = {
+        original: current,
+        corrected: autocorrect.corrected,
+        changes: autocorrect.changes || [],
+        changed: autocorrect.changed
+      };
 
-      if (Echo.ui.actionBtn) Echo.ui.actionBtn.textContent = "Compiled";
-      if (Echo.ui.pillBtn) Echo.ui.pillBtn.textContent = "Compiled";
-      if (Echo.ui.undoBtn) Echo.ui.undoBtn.style.display = "inline-flex";
-      Echo.ui.showToast("Prompt compiled", true);
-      Echo.ui.recordStat("promptsEnhanced");
-
-      if (Echo.db && Echo.db.addHistory) {
-        const initialScore = Echo.ui.lastResult ? Echo.ui.lastResult.score : 0;
-        const finalScore = Echo.analyzer ? Echo.analyzer.analyze(autocorrect.corrected).score : 100;
-        Echo.db.addHistory({
-          originalText: current,
-          correctedText: autocorrect.corrected,
-          initialScore: initialScore,
-          finalScore: finalScore,
-          platform: location.hostname || "web",
-          changes: autocorrect.changes || []
-        }).catch(() => {});
-      }
+      Echo.ui.showDiffPreview(Echo.ui.activePreviewData);
     } catch (err) {
-      console.warn("Echo enhance error:", err);
+      console.warn("Echo compile error:", err);
     } finally {
-      if (Echo.ui.actionBtn) Echo.ui.actionBtn.disabled = false;
-      setTimeout(() => {
-        if (Echo.ui.actionBtn) Echo.ui.actionBtn.textContent = "Auto-correct";
-        if (Echo.ui.pillBtn) Echo.ui.pillBtn.textContent = "Auto-correct";
-      }, 2000);
+      if (Echo.ui.actionBtn) {
+        Echo.ui.actionBtn.textContent = "Compile (Alt+E)";
+        Echo.ui.actionBtn.disabled = false;
+      }
+      if (Echo.ui.pillBtn) {
+        Echo.ui.pillBtn.textContent = "Compile";
+      }
     }
+  },
+
+  showDiffPreview(data) {
+    Echo.ui.openPanel();
+    if (!Echo.ui.previewView || !Echo.ui.standardView) return;
+
+    Echo.ui.previewView.classList.add("echo-active");
+    Echo.ui.standardView.style.display = "none";
+
+    // Set synthesized contract text
+    Echo.ui.previewContractText.textContent = data.corrected;
+
+    // Attention Filter: Purged tokens
+    const fluffChanges = (data.changes || []).filter((c) => c.type === "filler" || c.removed);
+    if (fluffChanges.length > 0) {
+      Echo.ui.diffFluffWrap.style.display = "block";
+      Echo.ui.diffFluffList.innerHTML = "";
+      for (const fc of fluffChanges) {
+        const chip = document.createElement("span");
+        chip.className = "diff-chip-removed";
+        chip.textContent = "\u00d7 " + (fc.removed || fc.original || "filler token");
+        Echo.ui.diffFluffList.appendChild(chip);
+      }
+    } else {
+      Echo.ui.diffFluffWrap.style.display = "none";
+    }
+
+    // Enforced Bounds: Hoisted negative rules or constraints
+    const boundChanges = (data.changes || []).filter((c) => c.type === "constraint" || c.rule);
+    if (boundChanges.length > 0) {
+      Echo.ui.diffBoundsWrap.style.display = "block";
+      Echo.ui.diffBoundsList.innerHTML = "";
+      for (const bc of boundChanges) {
+        const chip = document.createElement("span");
+        chip.className = "diff-chip-promoted";
+        chip.textContent = "\u2713 " + (bc.rule || bc.replacement || bc.title);
+        Echo.ui.diffBoundsList.appendChild(chip);
+      }
+    } else {
+      Echo.ui.diffBoundsWrap.style.display = "none";
+    }
+
+    Echo.ui.position();
+  },
+
+  hideDiffPreview() {
+    if (!Echo.ui.previewView || !Echo.ui.standardView) return;
+    Echo.ui.previewView.classList.remove("echo-active");
+    Echo.ui.standardView.style.display = "block";
+  },
+
+  applyActivePreview() {
+    if (!Echo.ui.activePreviewData || !Echo.ui.input) return;
+    const { original, corrected, changes } = Echo.ui.activePreviewData;
+
+    Echo.ui.previousText = original;
+    Echo.detector.write(Echo.ui.input, corrected);
+
+    if (Echo.ui.undoBtn) Echo.ui.undoBtn.style.display = "inline-flex";
+    Echo.ui.showToast("Prompt compiled \u2014 original backed up", true);
+    Echo.ui.recordStat("promptsEnhanced");
+
+    if (Echo.db && Echo.db.addHistory) {
+      const initialScore = Echo.ui.lastResult ? Echo.ui.lastResult.score : 0;
+      const finalScore = Echo.analyzer ? Echo.analyzer.analyze(corrected).score : 100;
+      Echo.db.addHistory({
+        originalText: original,
+        correctedText: corrected,
+        initialScore: initialScore,
+        finalScore: finalScore,
+        platform: location.hostname || "web",
+        changes: changes || []
+      }).catch(() => {});
+    }
+
+    Echo.ui.close();
+  },
+
+  discardActivePreview() {
+    Echo.ui.activePreviewData = null;
+    Echo.ui.hideDiffPreview();
+    Echo.ui.close();
   },
 
   triggerUndo() {
@@ -798,7 +1209,7 @@ Echo.ui = {
     Echo.ui.previousText = null;
     Echo.detector.write(Echo.ui.input, restoreText);
     Echo.ui.undoBtn.style.display = "none";
-    Echo.ui.showToast("Reverted original prompt", false);
+    Echo.ui.showToast("Reverted original draft", false);
   },
 
   applyIndividualFix(fix) {
@@ -838,11 +1249,8 @@ Echo.ui = {
     Echo.ui.scoreTextEl.textContent = grade.label + " " + result.score;
     Echo.ui.scoreTextEl.style.color = grade.color;
 
-    // Show/hide auto-correct action button on pill
     const canAutocorrect = result.autocorrect && result.autocorrect.changed;
     Echo.ui.pillBtn.style.display = canAutocorrect ? "inline-flex" : "none";
-
-    // Auto-correct banner visibility in drawer
     Echo.ui.actionBanner.style.display = canAutocorrect ? "block" : "none";
 
     // Render inline squiggly word-fix tags

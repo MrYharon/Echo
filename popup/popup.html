@@ -2,555 +2,903 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Echo - Prompt Coach</title>
+  <title>Echo &mdash; In-DOM AI Prompt Compiler</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0b1120;
-      --card-bg: #0f172a;
-      --surface: #1e293b;
-      --fg: #f8fafc;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --accent-deep: #0284c7;
-      --border: rgba(56, 189, 248, 0.16);
+      /* Echo Design System Tokens (from DESIGN.md) */
+      --primary: #131e33;
+      --primary-hover: #0b1324;
+      --accent-blue: #0284c7;
+      --accent-blue-text: #026aa2;
+      --accent-cyan: #0ea5e9;
+      --accent-cyan-glow: #38bdf8;
+      --neutral-bg: #fbfcfd;
+      --neutral-surface: #ffffff;
+      --neutral-subtle: #f4f6f9;
+      --ink-primary: #0b1324;
+      --ink-navy: #131e33;
+      --ink-muted: #52617a;
+      --ink-faint: #8a99b0;
+      --border-light: #e5e9f0;
+      --border-strong: #0b1324;
+      --semantic-success: #15803d;
+      --semantic-success-bg: #dcfce7;
+      --semantic-success-border: #bbf7d0;
+      --semantic-error: #9f1239;
+      --semantic-error-bg: #fff1f2;
+      --semantic-error-border: #fecdd3;
+      --semantic-chip-red: #b91c1c;
+      --semantic-chip-red-bg: #fee2e2;
+      --semantic-chip-blue-bg: #e0f2fe;
+      --terminal-bg: #0f172a;
+      --terminal-border: #1e293b;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      width: 340px;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      width: 384px;
+      max-height: 580px;
+      background: var(--neutral-bg);
+      color: var(--ink-primary);
+      font-family: var(--font-sans);
       font-size: 13px;
-      line-height: 1.4;
+      line-height: 1.5;
+      overflow-x: hidden;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--ink-faint) var(--neutral-subtle);
+      -webkit-font-smoothing: antialiased;
     }
+
+    body::-webkit-scrollbar {
+      width: 6px;
+    }
+    body::-webkit-scrollbar-track {
+      background: var(--neutral-bg);
+    }
+    body::-webkit-scrollbar-thumb {
+      background: var(--border-light);
+      border-radius: 3px;
+    }
+
+    /* Editorial Brand Header */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 16px;
-      background: var(--card-bg);
-      border-bottom: 1px solid var(--border);
+      padding: 13px 18px;
+      background: var(--primary);
+      color: #ffffff;
+      border-bottom: 1px solid var(--primary-hover);
     }
+
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
-    .logo {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      font-size: 15px;
-      color: #fff;
-      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-      box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
-    }
-    .title { font-weight: 700; font-size: 13px; color: #ffffff; }
-    .subtitle { color: var(--accent); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 
+    .brand-logo-svg {
+      width: 26px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+
+    .brand-kicker {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-cyan-glow);
+      margin-top: 2px;
+    }
+
+    .header-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: rgba(14, 165, 233, 0.15);
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      color: var(--accent-cyan-glow);
+      letter-spacing: 0.04em;
+    }
+
+    /* Minimalist Editorial Tabs with Inset Padding */
     .nav-tabs {
       display: flex;
-      background: #090e1a;
-      border-bottom: 1px solid var(--border);
+      padding: 0 12px;
+      background: var(--neutral-surface);
+      border-bottom: 1px solid var(--border-light);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
+
     .nav-tab {
       flex: 1;
       text-align: center;
-      padding: 8px 0;
+      padding: 11px 0;
+      font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
       cursor: pointer;
       border: none;
       background: transparent;
       border-bottom: 2px solid transparent;
-      transition: all 0.15s ease;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
+    .nav-tab:hover {
+      color: var(--ink-navy);
+      background: var(--neutral-subtle);
+    }
+
     .nav-tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-      background: rgba(56, 189, 248, 0.04);
+      color: var(--accent-blue-text);
+      border-bottom-color: var(--accent-blue-text);
+      background: #fafcff;
     }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Sandbox Styles */
+    /* Playground Workbench Container */
     .sandbox-box {
-      padding: 12px 16px;
+      padding: 16px 18px;
     }
+
     .sandbox-meta {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 8px;
-    }
-    .score-badge {
-      font-weight: 700;
-      font-size: 12px;
-      color: var(--accent);
-    }
-    .sandbox-textarea {
-      width: 100%;
-      height: 90px;
-      background: var(--surface);
-      color: var(--fg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 12px;
-      font-family: inherit;
-      resize: none;
-      outline: none;
-    }
-    .sandbox-textarea:focus {
-      border-color: var(--accent);
-    }
-    .sandbox-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    .btn-action {
-      background: var(--accent);
-      color: #082f49;
-      border: none;
-      border-radius: 6px;
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .btn-action:hover {
-      background: #7dd3fc;
-    }
-    .btn-subtle {
-      background: rgba(255, 255, 255, 0.06);
-      color: #cbd5e1;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .btn-subtle:hover {
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
+      margin-bottom: 12px;
     }
 
+    /* Exact Clarity Score Chip from DESIGN.md */
+    .score-chip-display {
+      font-family: var(--font-sans);
+      font-weight: 800;
+      font-size: 11px;
+      padding: 4px 11px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--semantic-chip-red-bg);
+      color: var(--semantic-chip-red);
+      transition: all 0.2s ease;
+    }
+
+    .score-chip-display.airtight {
+      background: var(--semantic-success-bg);
+      color: var(--semantic-success);
+    }
+
+    .issue-count-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink-muted);
+    }
+
+    /* Mode Pill Switcher with Tooltips */
     .mode-selector-row {
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
+
     .mode-label {
-      font-size: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      color: var(--muted);
+      color: var(--ink-muted);
+      letter-spacing: 0.08em;
     }
+
     .mode-pill {
-      padding: 3px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(255, 255, 255, 0.04);
-      color: #94a3b8;
-      font-size: 10px;
-      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 4px;
+      border: 1px solid var(--border-light);
+      background: var(--neutral-surface);
+      color: var(--ink-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
       cursor: pointer;
       transition: all 0.15s ease;
     }
+
     .mode-pill:hover {
-      color: #fff;
-      border-color: rgba(56, 189, 248, 0.3);
-    }
-    .mode-pill.active {
-      background: rgba(56, 189, 248, 0.16);
-      color: var(--accent);
-      border-color: var(--accent);
+      color: var(--ink-navy);
+      border-color: var(--ink-faint);
     }
 
-    .sandbox-feedback {
-      margin-top: 10px;
-      max-height: 140px;
-      overflow-y: auto;
+    .mode-pill.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
     }
-    .mini-issue {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 6px;
-      padding: 8px 10px;
-      margin-bottom: 6px;
+
+    /* Preset Chips from DESIGN.md */
+    .presets-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .preset-chip {
+      font-family: var(--font-mono);
       font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      background: var(--neutral-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      padding: 4px 9px;
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
     }
+
+    .preset-chip:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Human Thought Input Card */
+    .sandbox-textarea {
+      width: 100%;
+      height: 105px;
+      background: var(--neutral-surface);
+      color: var(--ink-primary);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      padding: 11px 13px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .sandbox-textarea:focus {
+      border-color: var(--accent-blue-text);
+      box-shadow: 0 0 0 1px var(--accent-blue-text);
+    }
+
+    /* Actions with Electric Cyan Compile Primary */
+    .sandbox-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn-action {
+      flex: 1;
+      background: var(--accent-cyan);
+      color: var(--ink-primary);
+      border: none;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-action:hover:not(:disabled) {
+      background: var(--accent-cyan-glow);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+    }
+
+    .btn-action:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-subtle {
+      background: var(--neutral-surface);
+      color: var(--ink-muted);
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      padding: 9px 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-subtle:hover {
+      background: var(--neutral-subtle);
+      color: var(--ink-navy);
+      border-color: var(--ink-faint);
+    }
+
+    /* Feedback & Issues Inspection */
+    .sandbox-feedback {
+      margin-top: 14px;
+      max-height: 180px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .mini-issue {
+      background: var(--neutral-surface);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
     .mini-issue-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
+
     .mini-issue-name {
       font-weight: 700;
-      color: #f1f5f9;
-      font-size: 11px;
+      color: var(--ink-navy);
+      font-size: 12px;
     }
+
     .mini-issue-cat {
-      font-size: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
       font-weight: 800;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 1px 5px;
+      padding: 1px 6px;
       border-radius: 3px;
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--accent);
+      background: var(--semantic-chip-blue-bg);
+      color: var(--accent-blue-text);
     }
+
+    /* Terminal Diff Container with Scanline */
     .mini-diff-box {
-      background: rgba(0, 0, 0, 0.35);
+      background: var(--terminal-bg);
+      border: 1px solid var(--terminal-border);
       border-radius: 4px;
-      padding: 4px 6px;
-      margin: 4px 0;
-      font-size: 10px;
-      font-family: ui-monospace, monospace;
+      padding: 7px 10px;
+      margin: 6px 0;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      line-height: 1.45;
+      color: #fbfcfd;
+      position: relative;
+      overflow: hidden;
     }
+
+    @keyframes scanlineSweep {
+      0% { transform: translateY(-100%); opacity: 0; }
+      40% { opacity: 0.8; }
+      100% { transform: translateY(200%); opacity: 0; }
+    }
+
+    .mini-diff-box::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan-glow), var(--accent-cyan), transparent);
+      opacity: 0.6;
+      animation: scanlineSweep 1.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
     .mini-diff-del {
       text-decoration: line-through;
       color: #f87171;
     }
+
     .mini-diff-ins {
-      color: var(--accent);
+      color: var(--accent-cyan-glow);
       font-weight: 700;
     }
+
     .mini-diff-append {
-      color: #34d399;
+      color: #4ade80;
       font-weight: 600;
     }
+
     .mini-issue-tip {
-      color: var(--muted);
-      font-size: 10px;
-      line-height: 1.35;
-    }
-    .mini-apply-btn {
-      background: rgba(56, 189, 248, 0.12);
-      color: var(--accent);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      border-radius: 4px;
-      padding: 2px 7px;
-      font-size: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 4px;
-      display: inline-block;
-    }
-    .mini-apply-btn:hover {
-      background: var(--accent);
-      color: #082f49;
-    }
-
-    /* Settings Styles */
-    .status-banner {
-      padding: 10px 16px;
-      background: rgba(56, 189, 248, 0.08);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      color: var(--ink-muted);
       font-size: 12px;
-      color: #cbd5e1;
+      line-height: 1.45;
     }
-    .status-banner span.key {
-      font-family: ui-monospace, monospace;
-      padding: 2px 6px;
-      background: rgba(255, 255, 255, 0.1);
+
+    .mini-apply-btn {
+      background: var(--neutral-subtle);
+      color: var(--accent-blue-text);
+      border: 1px solid var(--border-light);
       border-radius: 4px;
-      color: var(--accent);
-      font-weight: 600;
+      padding: 4px 9px;
+      font-family: var(--font-mono);
       font-size: 11px;
-    }
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
-      font-weight: 600;
-    }
-    .rules-header {
-      padding: 10px 16px 4px;
-      font-size: 10px;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: #64748b;
-    }
-    .rules { padding: 4px 0 8px; }
-    .rule-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 6px 16px;
-    }
-    .rule-row label { color: #cbd5e1; cursor: pointer; font-size: 12px; }
-
-    .footer {
-      padding: 10px 16px;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.4;
-      background: #070b14;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    .stats-row {
-      display: flex;
-      gap: 8px;
-      padding: 10px 16px 8px;
-      background: #090e1a;
-      border-bottom: 1px solid var(--border);
-    }
-    .stat-card {
-      flex: 1;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 7px 10px;
-      text-align: center;
-    }
-    .stat-num {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--accent);
-    }
-    .stat-label {
-      font-size: 9px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-top: 1px;
+      cursor: pointer;
+      margin-top: 6px;
+      display: inline-block;
+      transition: all 0.12s ease;
     }
 
-    /* History Styles */
+    .mini-apply-btn:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* History & Templates Cards */
     .history-controls {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 16px 6px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 12px 18px 8px;
+      border-bottom: 1px solid var(--border-light);
+      background: var(--neutral-surface);
     }
+
     .history-title {
+      font-family: var(--font-mono);
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--muted);
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
     }
+
     .btn-text {
       background: transparent;
       border: none;
-      color: #f87171;
+      color: var(--semantic-error);
+      font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      padding: 2px 4px;
-      border-radius: 4px;
+      padding: 2px 6px;
+      border-radius: 3px;
     }
+
     .btn-text:hover {
-      background: rgba(248, 113, 113, 0.1);
+      background: var(--semantic-error-bg);
     }
+
     .history-list {
-      max-height: 240px;
+      max-height: 320px;
       overflow-y: auto;
-      padding: 8px 16px;
+      padding: 12px 18px;
     }
+
     .history-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 9px 11px;
-      margin-bottom: 8px;
-      font-size: 11px;
+      background: var(--neutral-surface);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      padding: 11px 13px;
+      margin-bottom: 9px;
+      font-size: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
     }
+
     .history-card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 6px;
+      margin-bottom: 7px;
     }
+
     .history-platform-tag {
-      font-size: 9px;
+      font-family: var(--font-mono);
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      padding: 2px 5px;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.06);
-      color: #94a3b8;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: var(--neutral-subtle);
+      color: var(--ink-muted);
     }
+
     .history-score-diff {
+      font-family: var(--font-mono);
       font-weight: 700;
-      color: var(--accent);
+      color: var(--semantic-success);
       font-size: 11px;
     }
+
     .history-text {
-      color: #e2e8f0;
-      line-height: 1.35;
+      color: var(--ink-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
       margin-bottom: 8px;
       word-break: break-word;
     }
+
     .history-actions {
       display: flex;
       gap: 6px;
     }
+
     .btn-mini {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #cbd5e1;
-      border-radius: 4px;
-      padding: 3px 7px;
-      font-size: 10px;
+      background: var(--neutral-subtle);
+      border: 1px solid var(--border-light);
+      color: var(--ink-muted);
+      border-radius: 3px;
+      padding: 3px 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.12s ease;
     }
+
     .btn-mini:hover {
-      background: var(--accent);
-      color: #082f49;
-      border-color: var(--accent);
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
     }
+
     .history-empty {
-      padding: 24px 8px;
+      padding: 36px 12px;
       text-align: center;
-      color: var(--muted);
+      color: var(--ink-muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* Engine & Settings Panels */
+    .status-banner {
+      padding: 12px 18px;
+      background: var(--neutral-subtle);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--ink-navy);
+      font-weight: 600;
+    }
+
+    .status-banner span.key {
+      font-family: var(--font-mono);
+      padding: 3px 8px;
+      background: var(--neutral-surface);
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      color: var(--accent-blue-text);
+      font-weight: 700;
       font-size: 11px;
-      line-height: 1.4;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: var(--neutral-surface);
+      border-bottom: 1px solid var(--border-light);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .rules-header {
+      padding: 12px 18px 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+    }
+
+    .rules {
+      padding: 4px 0 10px;
+      background: var(--neutral-surface);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .rule-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 18px;
+    }
+
+    .rule-row label {
+      color: var(--ink-primary);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
     }
 
     input[type="checkbox"] {
-      accent-color: var(--accent);
+      accent-color: var(--accent-blue-text);
       width: 15px;
       height: 15px;
       cursor: pointer;
     }
+
+    .engine-panel {
+      padding: 14px 18px;
+      background: var(--neutral-surface);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .form-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      display: block;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .form-select, .form-input {
+      width: 100%;
+      background: var(--neutral-bg);
+      color: var(--ink-primary);
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.12s ease;
+    }
+
+    .form-select:focus, .form-input:focus {
+      border-color: var(--accent-blue-text);
+    }
+
+    /* Telemetry Bar (Integrated into Settings/Engine tab) */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+      margin-bottom: 10px;
+    }
+
+    .stat-card {
+      background: var(--neutral-surface);
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-num {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--ink-navy);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 3px;
+    }
+
+    .footer {
+      padding: 11px 18px;
+      color: var(--ink-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.4;
+      background: var(--neutral-subtle);
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+    }
   </style>
 </head>
 <body>
+  <!-- Header with Official Geometric Monogram Emblem -->
   <div class="header">
     <div class="brand">
-      <div class="logo">E</div>
-      <div>
-        <div class="title">Echo - Prompt Coach</div>
-        <div class="subtitle">Grammarly for AI</div>
+      <svg class="brand-logo-svg" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="128" height="128" rx="4" fill="#0b1324" />
+        <!-- Top Slab with stepped notch -->
+        <path d="M 24 24 L 104 24 L 104 42 L 50 42 L 50 48 L 24 48 Z" fill="#0ea5e9" />
+        <!-- Middle Floating Slab -->
+        <rect x="24" y="58" width="58" height="15" fill="#fbfcfd" />
+        <!-- Bottom Slab with mirror notch -->
+        <path d="M 24 86 L 50 86 L 50 92 L 104 92 L 104 110 L 24 110 Z" fill="#0ea5e9" />
+      </svg>
+      <div class="brand-text">
+        <span class="brand-title">ECHO</span>
+        <span class="brand-kicker">In-DOM Prompt Compiler</span>
       </div>
     </div>
+    <span class="header-badge">v0.2.0</span>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-num" id="stat-prompts">0</div>
-      <div class="stat-label">Prompts Enhanced</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="stat-fixes">0</div>
-      <div class="stat-label">Fixes Applied</div>
-    </div>
-  </div>
-
+  <!-- Navigation Tabs -->
   <div class="nav-tabs">
     <button class="nav-tab active" data-tab="sandbox">Playground</button>
     <button class="nav-tab" data-tab="history">History</button>
     <button class="nav-tab" data-tab="snippets">Templates</button>
-    <button class="nav-tab" data-tab="settings">Settings</button>
+    <button class="nav-tab" data-tab="settings">Engine</button>
   </div>
 
+  <!-- Playground Workbench Tab -->
   <div id="tab-sandbox" class="tab-content active">
     <div class="sandbox-box">
       <div class="sandbox-meta">
-        <span class="score-badge" id="sandbox-score">Ready</span>
-        <span style="font-size: 11px; color: var(--muted);" id="sandbox-count">0 issues</span>
+        <span class="score-chip-display" id="sandbox-score">Clarity: Ready</span>
+        <span class="issue-count-tag" id="sandbox-count">0 issues</span>
       </div>
+
+      <!-- Mode Selector with Tooltips -->
       <div class="mode-selector-row">
         <span class="mode-label">Mode</span>
-        <button class="mode-pill active" data-mode="structured" type="button">Structured</button>
-        <button class="mode-pill" data-mode="concise" type="button">Concise</button>
-        <button class="mode-pill" data-mode="deep_reasoning" type="button">Deep Reasoning</button>
+        <button class="mode-pill active" data-mode="structured" type="button" title="Structured: Numbered checklists, hoisted negative boundaries, and clean deliverables">Structured</button>
+        <button class="mode-pill" data-mode="concise" type="button" title="Concise: Direct prompt distillation, zero preamble, maximum signal">Concise</button>
+        <button class="mode-pill" data-mode="deep_reasoning" type="button" title="Deep Reasoning: Multi-step reasoning trace, trade-off analysis, and edge-case proofs">Deep</button>
       </div>
-      <textarea id="sandbox-input" class="sandbox-textarea" placeholder="Type or paste a prompt to test autocorrect..."></textarea>
+
+      <!-- Quick Format Preset Chips -->
+      <div class="presets-row">
+        <button class="preset-chip" type="button" data-preset="code">+ Code & comments</button>
+        <button class="preset-chip" type="button" data-preset="steps">+ Step-by-step</button>
+        <button class="preset-chip" type="button" data-preset="json">+ JSON output</button>
+        <button class="preset-chip" type="button" data-preset="summary">+ Bullet summary</button>
+      </div>
+
+      <!-- Textarea -->
+      <textarea id="sandbox-input" class="sandbox-textarea" placeholder="Paste or type a raw thought dump to test instant compilation..."></textarea>
+
+      <!-- Actions -->
       <div class="sandbox-actions">
-        <button id="sandbox-autocorrect" class="btn-action" type="button">Compile Prompt</button>
+        <button id="sandbox-autocorrect" class="btn-action" type="button">
+          <span>Compile Prompt</span>
+          <span style="opacity: 0.75; font-size: 11px;">(Alt+E)</span>
+        </button>
         <button id="sandbox-copy" class="btn-subtle" type="button">Copy</button>
         <button id="sandbox-clear" class="btn-subtle" type="button">Clear</button>
       </div>
+
+      <!-- Live Attention / Feedback Stream -->
       <div class="sandbox-feedback" id="sandbox-feedback"></div>
     </div>
   </div>
 
+  <!-- History Tab -->
   <div id="tab-history" class="tab-content">
     <div class="history-controls">
       <span class="history-title">Saved Prompts</span>
       <button id="btn-clear-history" class="btn-text" type="button">Clear All</button>
     </div>
     <div id="history-list" class="history-list">
-      <div class="history-empty">No prompts recorded yet. Enhancements on ChatGPT, Claude, and Gemini will appear here automatically.</div>
+      <div class="history-empty">No prompts recorded yet. Decompilations on ChatGPT, Claude, and Gemini will log here automatically.</div>
     </div>
   </div>
 
+  <!-- Templates Tab -->
   <div id="tab-snippets" class="tab-content">
     <div class="history-controls">
       <span class="history-title">Prompt Templates</span>
-      <button id="btn-toggle-new-snippet" class="btn-mini" type="button" style="color:var(--accent);">+ New</button>
+      <button id="btn-toggle-new-snippet" class="btn-mini" type="button" style="color:var(--accent-blue-text);">+ New</button>
     </div>
-    <div id="snippet-form" style="display:none; padding: 10px 16px; background: rgba(56, 189, 248, 0.05); border-bottom: 1px solid var(--border);">
-      <input id="snippet-title-input" type="text" placeholder="Template title (e.g. Code Review)" style="width:100%; padding:6px 8px; background:var(--surface); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:11px; margin-bottom:6px; outline:none;" />
-      <textarea id="snippet-content-input" placeholder="Template text with instructions and constraints..." style="width:100%; height:60px; padding:6px 8px; background:var(--surface); border:1px solid var(--border); border-radius:6px; color:#fff; font-size:11px; resize:none; margin-bottom:6px; outline:none; font-family:inherit;"></textarea>
+    <div id="snippet-form" style="display:none; padding: 12px 18px; background: var(--neutral-subtle); border-bottom: 1px solid var(--border-light);">
+      <input id="snippet-title-input" class="form-input" type="text" placeholder="Template title (e.g. Code Review)" style="margin-bottom:7px;" />
+      <textarea id="snippet-content-input" class="form-input" placeholder="Template text with instructions and constraints..." style="height:64px; resize:none; margin-bottom:8px;"></textarea>
       <div style="display:flex; gap:6px;">
-        <button id="btn-save-snippet" class="btn-action" type="button" style="padding:4px 10px; font-size:10px;">Save</button>
-        <button id="btn-cancel-snippet" class="btn-subtle" type="button" style="padding:4px 10px; font-size:10px;">Cancel</button>
+        <button id="btn-save-snippet" class="btn-action" type="button" style="padding:5px 12px; font-size:11px; flex:initial;">Save</button>
+        <button id="btn-cancel-snippet" class="btn-subtle" type="button" style="padding:5px 12px; font-size:11px;">Cancel</button>
       </div>
     </div>
     <div id="snippets-list" class="history-list"></div>
   </div>
 
+  <!-- Engine Settings Tab with Telemetry Integrated -->
   <div id="tab-settings" class="tab-content">
     <div class="status-banner">
-      <span>Auto-Correct Shortcut</span>
+      <span>In-DOM Hotkey</span>
       <span class="key">Alt+E</span>
     </div>
+
+    <!-- Telemetry Bar -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-prompts">0</div>
+        <div class="stat-label">Prompts Enhanced</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-fixes">0</div>
+        <div class="stat-label">Fixes Applied</div>
+      </div>
+    </div>
+
     <div class="toggle-row">
-      <span>Real-time Coaching</span>
+      <span>Real-time In-DOM Coaching</span>
       <input type="checkbox" id="enabled" />
     </div>
 
-    <div class="rules-header">AI Enhancement Engine</div>
-    <div style="padding: 10px 16px; border-bottom: 1px solid var(--border);">
-      <label style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px;">Provider</label>
-      <select id="ai-provider" style="width: 100%; background: var(--surface); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 11px; outline: none; margin-bottom: 8px;">
-        <option value="auto">Auto (API &gt; Chrome Nano &gt; Local)</option>
+    <div class="rules-header">Compilation Engine</div>
+    <div class="engine-panel">
+      <label class="form-label">Active Provider</label>
+      <select id="ai-provider" class="form-select" style="margin-bottom: 8px;">
+        <option value="auto">Auto (API &gt; Chrome Nano &gt; Local Architect)</option>
         <option value="gemini">Google Gemini (API Key)</option>
         <option value="openai">OpenAI / Compatible (API Key)</option>
         <option value="chrome_nano">Chrome On-Device (Gemini Nano)</option>
-        <option value="local_architect">Echo Local Architect (Offline)</option>
+        <option value="local_architect">Echo Local Architect (Offline Deterministic)</option>
       </select>
 
       <div id="gemini-key-wrap" style="margin-bottom: 8px;">
-        <label style="font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <label class="form-label" style="display: flex; justify-content: space-between;">
           <span>Gemini API Key</span>
-          <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent); text-decoration:none; font-size:10px;">Get free key &rarr;</a>
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent-blue-text); text-decoration:none;">Free Key &rarr;</a>
         </label>
-        <input type="password" id="gemini-key" placeholder="AIzaSy..." style="width: 100%; background: var(--surface); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 11px; outline: none;" />
+        <input type="password" id="gemini-key" class="form-input" placeholder="AIzaSy..." />
       </div>
 
       <div id="openai-key-wrap" style="margin-bottom: 8px; display: none;">
-        <label style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px;">OpenAI API Key</label>
-        <input type="password" id="openai-key" placeholder="sk-..." style="width: 100%; background: var(--surface); color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 11px; outline: none;" />
+        <label class="form-label">OpenAI API Key</label>
+        <input type="password" id="openai-key" class="form-input" placeholder="sk-..." />
       </div>
 
-      <div style="display:flex; align-items:center; gap:8px;">
-        <button id="btn-save-ai-settings" class="btn-action" type="button" style="padding: 5px 12px; font-size: 10px;">Save Engine</button>
-        <span id="ai-status-msg" style="font-size: 10px; color: var(--accent);"></span>
+      <div style="display:flex; align-items:center; gap:8px; margin-top: 6px;">
+        <button id="btn-save-ai-settings" class="btn-action" type="button" style="padding: 5px 12px; font-size: 11px; flex: initial;">Save Engine</button>
+        <span id="ai-status-msg" style="font-family: var(--font-mono); font-size: 11px; color: var(--semantic-success);"></span>
       </div>
     </div>
 
@@ -558,8 +906,10 @@
     <div class="rules" id="rules"></div>
   </div>
 
+  <!-- Footer -->
   <div class="footer">
-    Works locally on ChatGPT, Gemini, and Claude. 100% private.
+    <span>Local-first &bull; 100% Private</span>
+    <span>ChatGPT &bull; Claude &bull; Gemini</span>
   </div>
 
   <script src="../src/db.js"></script>

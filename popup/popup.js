@@ -62,8 +62,9 @@ function updateSandbox() {
   sandboxTimer = setTimeout(() => {
     const text = (sandboxInput.value || "").trim();
     if (!text) {
-      sandboxScore.textContent = "Ready";
-      sandboxScore.style.color = "var(--accent)";
+      sandboxScore.textContent = "Clarity: Ready";
+      sandboxScore.classList.remove("airtight");
+      sandboxScore.style.color = "";
       sandboxCount.textContent = "0 issues";
       sandboxFeedback.innerHTML = "";
       return;
@@ -73,8 +74,9 @@ function updateSandbox() {
     const res = window.Echo.analyzer.analyze(text);
     const grade = window.Echo.analyzer.grade(res.score);
 
-    sandboxScore.textContent = "Score: " + res.score + " (" + grade.label + ")";
-    sandboxScore.style.color = grade.color;
+    sandboxScore.textContent = "Clarity: " + res.score + "/100 (" + grade.label + ")";
+    sandboxScore.classList.toggle("airtight", res.score >= 85);
+    sandboxScore.style.color = "";
     sandboxCount.textContent = res.issues.length + (res.issues.length === 1 ? " issue" : " issues");
 
     sandboxFeedback.innerHTML = "";
@@ -147,6 +149,30 @@ modePills.forEach((pill) => {
   });
 });
 
+const PRESET_TEXTS = {
+  code: "Provide clean, production-ready code with inline comments and robust error handling.",
+  steps: "Break down the solution into clear, numbered step-by-step instructions.",
+  json: "Return output strictly as valid JSON with no conversational preamble or markdown wrapper.",
+  summary: "Format the key findings into a concise, high-signal bulleted summary."
+};
+
+const presetChips = document.querySelectorAll(".preset-chip");
+presetChips.forEach((chip) => {
+  chip.addEventListener("click", () => {
+    const key = chip.dataset.preset;
+    const insertText = PRESET_TEXTS[key];
+    if (!insertText || !sandboxInput) return;
+    const cur = (sandboxInput.value || "").trim();
+    if (cur) {
+      sandboxInput.value = cur + (cur.endsWith(".") ? " " : ". ") + insertText;
+    } else {
+      sandboxInput.value = insertText;
+    }
+    updateSandbox();
+    sandboxInput.focus();
+  });
+});
+
 if (btnAutocorrect) {
   btnAutocorrect.addEventListener("click", async () => {
     const text = (sandboxInput.value || "").trim();
@@ -182,15 +208,15 @@ if (btnAutocorrect) {
 
         btnAutocorrect.textContent = "Compiled";
       } else {
-        btnAutocorrect.textContent = "Compile Prompt";
+        btnAutocorrect.innerHTML = '<span>Compile Prompt</span> <span style="opacity: 0.75; font-size: 10px;">(Alt+E)</span>';
       }
     } catch (err) {
-      console.error("Autocorrect error:", err);
-      btnAutocorrect.textContent = "Auto-correct";
+      console.error("Compile error:", err);
+      btnAutocorrect.innerHTML = '<span>Compile Prompt</span> <span style="opacity: 0.75; font-size: 10px;">(Alt+E)</span>';
     } finally {
       btnAutocorrect.disabled = false;
       setTimeout(() => {
-        btnAutocorrect.textContent = "Auto-correct";
+        btnAutocorrect.innerHTML = '<span>Compile Prompt</span> <span style="opacity: 0.75; font-size: 10px;">(Alt+E)</span>';
       }, 1500);
     }
   });

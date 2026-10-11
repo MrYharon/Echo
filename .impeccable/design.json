@@ -1,20 +1,22 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-09T11:45:00Z",
+  "generatedAt": "2026-10-10T08:54:00Z",
   "title": "Design System: Echo",
   "extensions": {
     "colorMeta": {
-      "primary": { "role": "primary", "displayName": "Marine Navy", "canonical": "#131e33" },
-      "accent-blue": { "role": "secondary", "displayName": "Electric Blue", "canonical": "#0284c7" },
-      "accent-blue-text": { "role": "secondary", "displayName": "Accessible Ocean Blue", "canonical": "#026aa2" },
-      "accent-cyan": { "role": "tertiary", "displayName": "Resonance Cyan", "canonical": "#0ea5e9" },
-      "accent-cyan-glow": { "role": "tertiary", "displayName": "Laser Cyan Glow", "canonical": "#38bdf8" },
-      "neutral-bg": { "role": "neutral", "displayName": "Canvas Paper", "canonical": "#fbfcfd" },
-      "neutral-surface": { "role": "neutral", "displayName": "Gallery White", "canonical": "#ffffff" },
-      "ink-primary": { "role": "neutral", "displayName": "Deep Obsidian", "canonical": "#0b1324" },
-      "semantic-success": { "role": "semantic", "displayName": "Airtight Success", "canonical": "#15803d" },
-      "semantic-error": { "role": "semantic", "displayName": "Distraction Error", "canonical": "#9f1239" },
-      "terminal-bg": { "role": "surface", "displayName": "Terminal Slate", "canonical": "#0f172a" }
+      "primary": { "role": "primary", "displayName": "Marine Navy", "canonical": "#131e33", "tonalRamp": ["#070c14", "#0b1324", "#131e33", "#1b2a47", "#273b61", "#375080", "#526f9e", "#8da4c4"] },
+      "ink-primary": { "role": "neutral", "displayName": "Deep Obsidian", "canonical": "#0b1324", "tonalRamp": ["#03060a", "#070c17", "#0b1324", "#111c33", "#172542", "#22355c", "#384f80", "#637ba8"] },
+      "accent-blue": { "role": "secondary", "displayName": "Electric Blue", "canonical": "#0284c7", "tonalRamp": ["#01263d", "#01436b", "#026aa2", "#0284c7", "#38bdf8", "#7dd3fc", "#bae6fd", "#e0f2fe"] },
+      "accent-blue-text": { "role": "secondary", "displayName": "Accessible Ocean Blue", "canonical": "#026aa2", "tonalRamp": ["#011e30", "#013b5c", "#026aa2", "#0284c7", "#38bdf8", "#7dd3fc", "#bae6fd", "#e0f2fe"] },
+      "accent-cyan": { "role": "tertiary", "displayName": "Resonance Cyan", "canonical": "#0ea5e9", "tonalRamp": ["#022f42", "#025273", "#0284c7", "#0ea5e9", "#38bdf8", "#7dd3fc", "#bae6fd", "#f0f9ff"] },
+      "accent-cyan-glow": { "role": "tertiary", "displayName": "Laser Cyan Glow", "canonical": "#38bdf8", "tonalRamp": ["#033b52", "#076387", "#0ea5e9", "#38bdf8", "#7dd3fc", "#bae6fd", "#e0f2fe", "#f0f9ff"] },
+      "neutral-bg": { "role": "neutral", "displayName": "Canvas Paper", "canonical": "#fbfcfd", "tonalRamp": ["#111827", "#1f2937", "#374151", "#4b5563", "#9ca3af", "#d1d5db", "#f3f4f6", "#fbfcfd"] },
+      "neutral-surface": { "role": "neutral", "displayName": "Gallery White", "canonical": "#ffffff", "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#f1f5f9", "#ffffff"] },
+      "semantic-success": { "role": "semantic", "displayName": "Airtight Success", "canonical": "#15803d", "tonalRamp": ["#052e16", "#14532d", "#166534", "#15803d", "#16a34a", "#22c55e", "#4ade80", "#dcfce7"] },
+      "semantic-error": { "role": "semantic", "displayName": "Distraction Error", "canonical": "#9f1239", "tonalRamp": ["#4c0519", "#831843", "#9f1239", "#be123c", "#e11d48", "#f43f5e", "#fb7185", "#fff1f2"] },
+      "semantic-warning": { "role": "semantic", "displayName": "Clarity Diagnostic Warning", "canonical": "#fbbf24", "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fef3c7"] },
+      "semantic-structure": { "role": "semantic", "displayName": "Structure Alert", "canonical": "#c084fc", "tonalRamp": ["#3b0764", "#581c87", "#6b21a8", "#7e22ce", "#9333ea", "#a855f7", "#c084fc", "#f3e8ff"] },
+      "terminal-bg": { "role": "surface", "displayName": "Terminal Slate", "canonical": "#0f172a", "tonalRamp": ["#020617", "#090d16", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8"] }
     },
     "typographyMeta": {
       "display": { "displayName": "Display Hero", "purpose": "Hero oversized headlines" },
@@ -24,11 +26,13 @@
       "caption": { "displayName": "UI Caption", "purpose": "Secondary descriptions and navigation anchors" },
       "label": { "displayName": "Mono Label", "purpose": "Taxonomy kickers and step counters" },
       "micro": { "displayName": "Micro Spec", "purpose": "Inline code and technical alerts" },
-      "chip": { "displayName": "Chip Label", "purpose": "Compact status pills and score chips" }
+      "chip": { "displayName": "Chip Label", "purpose": "Compact status pills and score chips" },
+      "nano": { "displayName": "Nano Label", "purpose": "Compact keyboard shortcuts and in-DOM status badges" }
     },
     "shadows": [
       { "name": "surface-soft", "value": "0 10px 30px rgba(0, 0, 0, 0.03)", "purpose": "Subtle ambient lift for white cards" },
-      { "name": "sculpture-deep", "value": "0 24px 60px rgba(19, 30, 51, 0.25)", "purpose": "Deep projection for dark monogram card" }
+      { "name": "sculpture-deep", "value": "0 24px 60px rgba(19, 30, 51, 0.25)", "purpose": "Deep projection for dark monogram card" },
+      { "name": "overlay-popover", "value": "0 16px 40px rgba(0, 0, 0, 0.7)", "purpose": "Directional volumetric shadow for extension popover" }
     ],
     "motion": [
       { "name": "editorial-ease", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Smooth tactile response for links and sculpture" }
@@ -48,45 +52,90 @@
       "css": ".ds-text-action-link { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800; color: #131e33; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border-bottom: 2px solid #131e33; padding-bottom: 3px; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-text-action-link:hover { color: #0284c7; border-color: #0284c7; transform: translateX(4px); }"
     },
     {
-      "name": "Preset Chip",
+      "name": "Compile Action Button",
+      "kind": "button",
+      "refersTo": "btn-compile-primary",
+      "description": "Primary electric cyan compilation action button.",
+      "html": "<button class=\"ds-btn-compile\">Compile Prompt (Alt+E)</button>",
+      "css": ".ds-btn-compile { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; background: #0ea5e9; color: #0b1324; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; letter-spacing: 0.04em; transition: background 0.15s ease; } .ds-btn-compile:hover { background: #38bdf8; }"
+    },
+    {
+      "name": "In-DOM Compiler Pill",
+      "kind": "custom",
+      "refersTo": "badge-compiler",
+      "description": "Floating in-DOM badge injected near chat inputs.",
+      "html": "<div class=\"ds-compiler-pill\"><svg class=\"ds-pill-logo\" viewBox=\"0 0 128 128\"><rect width=\"128\" height=\"128\" rx=\"8\" fill=\"#131e33\"/><path d=\"M 24 24 L 104 24 L 104 42 L 50 42 L 50 48 L 24 48 Z\" fill=\"#0ea5e9\"/><rect x=\"24\" y=\"58\" width=\"58\" height=\"15\" fill=\"#ffffff\"/><path d=\"M 24 86 L 50 86 L 50 92 L 104 92 L 104 110 L 24 110 Z\" fill=\"#0ea5e9\"/></svg><span class=\"ds-pill-score\">Clarity 96</span><button class=\"ds-pill-btn\">Compile</button></div>",
+      "css": ".ds-compiler-pill { display: inline-flex; align-items: center; gap: 8px; padding: 5px 11px 5px 7px; border-radius: 6px; background: #0b1324; color: #fbfcfd; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; border: 1px solid #1e293b; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); cursor: pointer; transition: all 0.15s ease; } .ds-compiler-pill:hover { background: #131e33; border-color: #0ea5e9; } .ds-pill-logo { width: 18px; height: 18px; flex-shrink: 0; } .ds-pill-btn { background: rgba(14, 165, 233, 0.12); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.3); border-radius: 4px; padding: 2px 7px; font-family: inherit; font-size: 10px; font-weight: 700; cursor: pointer; } .ds-pill-btn:hover { background: #0ea5e9; color: #0b1324; }"
+    },
+    {
+      "name": "Attention Filter Diff Chip",
       "kind": "chip",
-      "refersTo": "btn-preset",
-      "description": "Quick prompt selector chip.",
-      "html": "<button class=\"ds-preset-btn\">Booking Engine</button>",
-      "css": ".ds-preset-btn { font-family: 'Plus Jakarta Sans', sans-serif; padding: 4px 10px; font-size: 11px; font-weight: 600; background: #f1f5f9; border: 1px solid #e5e9f0; color: #52617a; border-radius: 4px; cursor: pointer; transition: all 0.15s ease; } .ds-preset-btn:hover { background: #131e33; color: #ffffff; border-color: #131e33; transform: translateY(-2px); }"
+      "refersTo": "diff-chip-removed",
+      "description": "Purged conversational filler phrase chip with strikethrough.",
+      "html": "<span class=\"ds-diff-chip-removed\">&times; I mean you know</span>",
+      "css": ".ds-diff-chip-removed { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #f87171; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 3px; padding: 2px 6px; text-decoration: line-through; display: inline-flex; align-items: center; gap: 4px; }"
+    },
+    {
+      "name": "Enforced Bounds Chip",
+      "kind": "chip",
+      "refersTo": "diff-chip-promoted",
+      "description": "Hoisted negative constraint priority boundary chip.",
+      "html": "<span class=\"ds-diff-chip-promoted\">&check; Do NOT use external ORMs</span>",
+      "css": ".ds-diff-chip-promoted { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: #38bdf8; background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3); border-radius: 3px; padding: 2px 6px; display: inline-flex; align-items: center; gap: 4px; }"
     },
     {
       "name": "Clarity Score Chip (Airtight)",
       "kind": "chip",
       "refersTo": "chip-airtight",
-      "description": "Prompt clarity score status pill.",
+      "description": "Prompt clarity score status pill in optimal state.",
       "html": "<span class=\"ds-score-chip\">Clarity: 100/100 (Airtight)</span>",
-      "css": ".ds-score-chip { font-family: 'Plus Jakarta Sans', sans-serif; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; background: #dcfce7; color: #15803d; }"
+      "css": ".ds-score-chip { font-family: 'Plus Jakarta Sans', sans-serif; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; background: #dcfce7; color: #15803d; display: inline-flex; align-items: center; gap: 4px; }"
+    },
+    {
+      "name": "Preset Chip",
+      "kind": "chip",
+      "refersTo": "btn-preset",
+      "description": "Quick prompt constraint selector chip.",
+      "html": "<button class=\"ds-preset-btn\">+ Code & comments</button>",
+      "css": ".ds-preset-btn { font-family: 'JetBrains Mono', monospace; padding: 4px 10px; font-size: 10px; font-weight: 600; background: rgba(255, 255, 255, 0.04); border: 1px solid #1e293b; color: #8a99b0; border-radius: 3px; cursor: pointer; transition: all 0.15s ease; } .ds-preset-btn:hover { background: #131e33; color: #38bdf8; border-color: #0ea5e9; }"
+    },
+    {
+      "name": "Terminal Output Box",
+      "kind": "card",
+      "refersTo": "terminal-box",
+      "description": "Dark syntax highlighted output block for compiled contracts.",
+      "html": "<div class=\"ds-terminal-box\"># TASK SPECIFICATION\n1. Implement sub-second prompt tokenizer\n2. Hoist negative boundaries</div>",
+      "css": ".ds-terminal-box { font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5; background: #060911; border: 1px solid #1e293b; border-radius: 4px; padding: 10px 12px; color: #fbfcfd; white-space: pre-wrap; word-break: break-word; }"
     }
   ],
   "narrative": {
     "northStar": "The Acoustic Spec Sheet",
-    "overview": "Echo treats prompt engineering as precise compilation rather than casual chat. Swiss editorial clarity meets kinetic acoustic resonance.",
+    "overview": "Echo treats prompt engineering not as casual conversation, but as deterministic compilation. The visual language brings the rigor of Swiss editorial design into harmony with dynamic kinetic resonance: a gallery-grade light canvas contrasted against deep marine navy and sharp geometric architectural slabs.",
     "keyCharacteristics": [
       "High-contrast gallery canvas (#fbfcfd) paired with deep marine navy (#131e33)",
       "Editorial text hyperlinks rather than chunky button pills",
-      "Exact geometric 3-slab stepped monogram with sharp 90-degree right angles",
+      "Exact geometric 3-slab stepped monogram with sharp 90-degree right angles and zero connecting spine",
+      "Preview-first in-DOM compiler overlay with semantic Attention Filter and Enforced Bounds",
       "Kinetic acoustic soundwave ripples and 3D parallax tilt"
     ],
     "rules": [
-      { "name": "The 5% Cyan Rule", "body": "Resonance Cyan and Electric Blue are precision instruments, not wallpaper. They occupy less than 5% of any viewport surface.", "section": "colors" },
-      { "name": "The Strict Kicker Rule", "body": "Section kickers are always set in uppercase JetBrains Mono with 0.08em letter-spacing.", "section": "typography" },
+      { "name": "The 5% Cyan Rule", "body": "Resonance Cyan and Electric Blue are precision instruments, not wallpaper. They occupy less than 5% of any viewport surface to ensure compilation signals retain high attention priority.", "section": "colors" },
+      { "name": "The Contrast Floor Rule", "body": "All text elements strictly enforce WCAG AA minimum contrast floors: >= 4.5:1 for body and small bold text, and >= 3:1 for large display elements.", "section": "colors" },
+      { "name": "The Strict Kicker Rule", "body": "Section kickers are always set in uppercase JetBrains Mono with 0.08em letter-spacing and primary/accent coloration.", "section": "typography" },
       { "name": "The Tonal Layering Rule", "body": "Surfaces are separated by value contrast and 1px hairline rules, never by heavy black drop shadows.", "section": "elevation" }
     ],
     "dos": [
       "Do maintain clean gallery canvas (#fbfcfd / #ffffff) with deep marine navy (#131e33).",
       "Do preserve the exact 3-piece geometry of the stepped 'E' monogram.",
-      "Do pair Plus Jakarta Sans with JetBrains Mono."
+      "Do pair Plus Jakarta Sans with JetBrains Mono.",
+      "Do use the preview-first diff overlay before overwriting user input in browser chatboxes.",
+      "Do ensure prompt compilation happens in-DOM and in-browser with zero external latency or telemetry."
     ],
     "donts": [
       "Don't add generic SaaS boilerplate tropes: muddy glowing drop shadows or neon pill buttons.",
       "Don't connect the three slabs of the 'E' monogram with a vertical spine.",
-      "Don't use centered generic blog layouts."
+      "Don't use centered generic blog layouts.",
+      "Don't overwrite active chatbox text without staging the preview contract or providing an instant Undo mechanism."
     ]
   }
 }
