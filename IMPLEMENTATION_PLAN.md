@@ -44,17 +44,17 @@
 ## Phased Execution Roadmap
 
 ### Phase 1: Cognitive Triage Engine (`src/analyzer.js`)
-- [ ] **1.1 Intent Depth Classification:**
+- [x] **1.1 Intent Depth Classification:**
   - Classify input into one of four cognitive categories:
     1. `direct_query`: Crisp factual or conceptual questions (e.g., *"What is the third layer of the OSI model?"*).
     2. `vague_inquiry`: Speculative or ambiguous questions containing hedging (e.g., *"what do you think...", "or something like that", "maybe..."*).
     3. `text_transform`: Requests to edit, paraphrase, proofread, or rewrite existing prose or essays.
     4. `complex_build`: Multi-sentence task or engineering requests with buried constraints and deliverables.
-- [ ] **1.2 3-State Traffic-Light Output:**
+- [x] **1.2 3-State Traffic-Light Output:**
   - `status: "ready"` (Green): High clarity, direct intent. No compilation required.
   - `status: "vague"` (Amber): Speculative wording detected; needs focused sharpening.
   - `status: "decompile"` (Red): High cognitive load, buried negative boundaries, or unsegregated text payloads.
-- [ ] **1.3 Diagnostic Rationales:**
+- [x] **1.3 Diagnostic Rationales:**
   - Provide human-friendly explanations for why a prompt received its status (e.g., *"Prompt is direct and unambiguous"*, *"Speculative phrasing detected—model may provide hedged opinions instead of facts"*).
 
 ---
