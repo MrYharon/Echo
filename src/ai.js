@@ -17,6 +17,28 @@ Guidelines:
 3. Inject structured clarity: define the exact role/persona, explicit requirements, expected output format, and negative constraints (what to avoid).
 4. Return ONLY the rewritten prompt. Do NOT include any meta commentary, explanations, or introductory conversational filler like "Here is your improved prompt:".`,
 
+  COACH_SYSTEM_INSTRUCTION: `You are Echo Cognitive Prompt Coach.
+Your mission is to evaluate user prompts in real time, determine whether they will cause LLM hallucination, conversational stalling, or wasted round-trip turns, and coach the user to make them direct and airtight.
+
+EVALUATION RULES:
+1. "ready" (Score 85-100, Grade A): The prompt has a clear action verb AND a specific topic/payload. It can be answered in one turn without clarification.
+2. "incomplete" (Score 20-50, Grade D): Empty pings or conversational pleasantries without a task payload (e.g., "can you help me with something?", "can I ask a question?", "hello are you there?"). These waste an entire conversational turn.
+3. "vague" (Score 50-70, Grade C): Prompts with ambiguous pronouns, missing referents, or unspecified scope (e.g., "but what about the others?", "how does it work?", "tell me about stuff").
+4. "complex" (Score 60-80, Grade B/C): Multi-task prompts or text transformation requests (e.g., "rewrite this essay...") that need explicit constraints, tone, or format.
+
+Respond ONLY with a valid JSON object matching this schema, without code fences:
+{
+  "status": "ready" | "vague" | "incomplete" | "complex",
+  "score": 0-100,
+  "grade": "A" | "B" | "C" | "D",
+  "intent": "empty_ping" | "vague_inquiry" | "direct_query" | "text_transform" | "complex_build",
+  "critique": "Concise 1-2 sentence coaching advice explaining why this prompt succeeds or fails",
+  "completions": [
+    { "label": "+ short label", "insertText": " text to append" }
+  ],
+  "compiledContract": "Airtight rewritten prompt with clear directives and constraints"
+}`,
+
   async getSettings() {
     return new Promise((resolve) => {
       chrome.storage.local.get(
@@ -147,6 +169,74 @@ Produce the optimized prompt now:`;
     }
 
     return { text, provider: "raw" };
+  },
+
+  async evaluatePrompt(rawPrompt) {
+    const text = (rawPrompt || "").trim();
+    if (!text) return null;
+
+    const settings = await this.getSettings();
+
+    // 1. Try Chrome Nano if available
+    if (settings.provider === "chrome_nano" || settings.provider === "auto") {
+      try {
+        const nanoAvailable = await this.isChromeNanoAvailable();
+        if (nanoAvailable) {
+          const evalResult = await this.callChromeNanoCoach(text);
+          if (evalResult) return evalResult;
+        }
+      } catch (err) {
+        console.warn("Echo AI: Chrome Nano coach failed, checking cloud", err);
+      }
+    }
+
+    // 2. Try background service worker proxy (Gemini Flash / OpenAI)
+    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+      const apiKey = settings.provider === "openai" ? settings.openaiApiKey : (settings.geminiApiKey || "");
+      if (apiKey) {
+        try {
+          const res = await new Promise((resolve) => {
+            chrome.runtime.sendMessage(
+              {
+                type: "COACH_EVALUATE_PROMPT",
+                rawPrompt: text,
+                provider: settings.provider,
+                apiKey: apiKey,
+                customModel: settings.customModel
+              },
+              (response) => {
+                if (chrome.runtime.lastError || !response || !response.success) {
+                  resolve(null);
+                } else {
+                  resolve(response.evaluation);
+                }
+              }
+            );
+          });
+          if (res) return res;
+        } catch (err) {
+          console.warn("Echo AI: Cloud coach evaluation failed", err);
+        }
+      }
+    }
+
+    return null;
+  },
+
+  async callChromeNanoCoach(rawPrompt) {
+    if (!window.ai || !window.ai.languageModel) return null;
+    const session = await window.ai.languageModel.create({
+      systemPrompt: this.COACH_SYSTEM_INSTRUCTION
+    });
+    const prompt = `Evaluate this prompt for clarity and round-trip efficiency:\n"""${rawPrompt}"""`;
+    const response = await session.prompt(prompt);
+    session.destroy();
+    try {
+      const cleaned = (response || "").replace(/^```json/i, "").replace(/```$/i, "").trim();
+      return JSON.parse(cleaned);
+    } catch {
+      return null;
+    }
   },
 
   async callChromeNano(rawPrompt, mode) {

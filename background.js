@@ -118,8 +118,127 @@ async function callOpenAI(rawPrompt, mode, apiKey, customModel) {
   return (text || "").trim();
 }
 
+const COACH_SYSTEM_INSTRUCTION = `You are Echo Cognitive Prompt Coach.
+Your mission is to evaluate user prompts in real time, determine whether they will cause LLM hallucination, conversational stalling, or wasted round-trip turns, and coach the user to make them direct and airtight.
+
+EVALUATION RULES:
+1. "ready" (Score 85-100, Grade A): The prompt has a clear action verb AND a specific topic/payload. It can be answered in one turn without clarification.
+2. "incomplete" (Score 20-50, Grade D): Empty pings or conversational pleasantries without a task payload (e.g., "can you help me with something?", "can I ask a question?", "hello are you there?"). These waste an entire conversational turn.
+3. "vague" (Score 50-70, Grade C): Prompts with ambiguous pronouns, missing referents, or unspecified scope (e.g., "but what about the others?", "how does it work?", "tell me about stuff").
+4. "complex" (Score 60-80, Grade B/C): Multi-task prompts or text transformation requests (e.g., "rewrite this essay...") that need explicit constraints, tone, or format.
+
+Respond ONLY with a valid JSON object matching this schema, without code fences:
+{
+  "status": "ready" | "vague" | "incomplete" | "complex",
+  "score": 0-100,
+  "grade": "A" | "B" | "C" | "D",
+  "intent": "empty_ping" | "vague_inquiry" | "direct_query" | "text_transform" | "complex_build",
+  "critique": "Concise 1-2 sentence coaching advice explaining why this prompt succeeds or fails",
+  "completions": [
+    { "label": "+ short label", "insertText": " text to append" }
+  ],
+  "compiledContract": "Airtight rewritten prompt with clear directives and constraints"
+}`;
+
+async function callGeminiCoach(rawPrompt, apiKey, customModel) {
+  const model = customModel || "gemini-1.5-flash";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      systemInstruction: {
+        parts: [{ text: COACH_SYSTEM_INSTRUCTION }]
+      },
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: `Evaluate this prompt for clarity and round-trip efficiency:\n"""${rawPrompt}"""` }]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 1000,
+        responseMimeType: "application/json"
+      }
+    })
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Gemini Coach error (${res.status}): ${errText}`);
+  }
+
+  const data = await res.json();
+  const text = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text;
+  return JSON.parse(text);
+}
+
+async function callOpenAICoach(rawPrompt, apiKey, customModel) {
+  const model = customModel || "gpt-4o-mini";
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: model,
+      temperature: 0.1,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: COACH_SYSTEM_INSTRUCTION },
+        { role: "user", content: `Evaluate this prompt for clarity and round-trip efficiency:\n"""${rawPrompt}"""` }
+      ]
+    })
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`OpenAI Coach error (${res.status}): ${errText}`);
+  }
+
+  const data = await res.json();
+  const text = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  return JSON.parse(text);
+}
+
 // Runtime message router
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === "COACH_EVALUATE_PROMPT") {
+    const { rawPrompt, provider = "auto", apiKey, customModel } = request;
+    const cacheKey = `coach:${provider}:${rawPrompt.trim().toLowerCase()}`;
+
+    if (promptCache.has(cacheKey)) {
+      sendResponse({ success: true, evaluation: promptCache.get(cacheKey), cached: true });
+      return true;
+    }
+
+    (async () => {
+      try {
+        let evaluation = null;
+        if (apiKey && (provider === "gemini" || provider === "auto")) {
+          evaluation = await callGeminiCoach(rawPrompt, apiKey, customModel);
+        } else if (apiKey && provider === "openai") {
+          evaluation = await callOpenAICoach(rawPrompt, apiKey, customModel);
+        }
+
+        if (evaluation) {
+          promptCache.set(cacheKey, evaluation);
+          sendResponse({ success: true, evaluation });
+        } else {
+          sendResponse({ success: false, error: "No API key configured for AI evaluation" });
+        }
+      } catch (err) {
+        console.error("Echo Coach Error:", err);
+        sendResponse({ success: false, error: err.message || "Evaluation failed" });
+      }
+    })();
+
+    return true;
+  }
+
   if (request.type === "ENHANCE_PROMPT") {
     const { rawPrompt, mode = "structured", provider = "auto", apiKey, customModel } = request;
 
