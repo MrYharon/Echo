@@ -296,6 +296,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Sample prompt selection
   sampleButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
+      sampleButtons.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
       const key = btn.dataset.sample;
       if (PROMPT_SAMPLES[key]) {
         inputText.value = PROMPT_SAMPLES[key];
