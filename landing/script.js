@@ -273,9 +273,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let streamTimer = null;
 
   const PROMPT_SAMPLES = {
-    booking: `hey I need to build a barbershop appointment booking system with stripe integration and calendar sync but don't use nextjs or tailwind we want raw fastify and vanilla js and make sure two people can't double book the same barber slot at the same second so use optimistic locking or postgres transactions and don't write generic mock code give me the actual db schema and route handler`,
-    react: `look I have this react component that re-renders 50 times whenever the user types in a search box and it lags the whole browser don't just tell me to use useMemo tell me exactly where the state should live and don't introduce external redux or zustand keep it clean react hooks`,
-    postgres: `we have a postgres database with 15 million audit log rows and our query checking user activity between two timestamps is taking 8 seconds and locking workers don't suggest upgrading the hardware explain the b-tree index strategy and explain analyze breakdown`
+    factual: `What is the third layer of the OSI model?`,
+    vague: `what do you think the third layer of the osi model might be or something like that`,
+    essay: `Paraphrase this essay draft about urban sociology and make it sound more academic: Urban spaces create isolation even though thousands of people are around every day. People walk past each other without saying hi because of sensory overload. Don't use super pretentious words and keep it grounded.`,
+    booking: `hey I need to build a barbershop appointment booking system with stripe integration and calendar sync but don't use nextjs or tailwind we want raw fastify and vanilla js and make sure two people can't double book the same barber slot at the same second so use optimistic locking or postgres transactions and don't write generic mock code give me the actual db schema and route handler`
   };
 
   // Mode switching
@@ -317,54 +318,82 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (!window.Echo || !window.Echo.analyzer) return;
-    const analysis = window.Echo.analyzer.analyze(raw);
+    // Cognitive Triage Classification
+    const triage = (window.Echo && window.Echo.triage)
+      ? window.Echo.triage.classify(raw)
+      : { status: "decompile", rationale: "Standard compilation recommended." };
+
+    const analyzer = (window.Echo && window.Echo.analyzer)
+      ? window.Echo.analyzer.analyze(raw)
+      : { score: 50 };
 
     if (clarityBefore) {
-      clarityBefore.textContent = `Clarity: ${analysis.score}/100 (${analysis.score < 60 ? "Messy" : "Fair"})`;
-      clarityBefore.className = analysis.score >= 70 ? "score-chip airtight" : "score-chip messy";
+      if (triage.status === "ready") {
+        clarityBefore.textContent = "Clarity: 100/100 (Direct)";
+        clarityBefore.className = "score-chip ready";
+      } else if (triage.status === "vague") {
+        clarityBefore.textContent = `Clarity: ${Math.min(analyzer.score, 65)}/100 (Vague)`;
+        clarityBefore.className = "score-chip vague";
+      } else {
+        clarityBefore.textContent = `Clarity: ${analyzer.score}/100 (Complex)`;
+        clarityBefore.className = "score-chip messy";
+      }
     }
 
     if (diagDrawer) {
       diagDrawer.innerHTML = "";
-      if (analysis.issues && analysis.issues.length > 0) {
-        analysis.issues.slice(0, 3).forEach((issue) => {
-          const item = document.createElement("div");
-          item.className = "feedback-alert";
-          item.innerHTML = `
-            <strong>[${issue.category || "FLAG"}]</strong> ${issue.rationale || issue.tip || issue.message}
-          `;
-          diagDrawer.appendChild(item);
-        });
+      if (triage.status === "ready") {
+        diagDrawer.innerHTML = `
+          <div class="feedback-alert green">
+            <strong>[DIRECT QUERY]</strong> ${triage.rationale} Prompt is airtight and needs no compilation.
+          </div>
+        `;
+      } else if (triage.status === "vague") {
+        diagDrawer.innerHTML = `
+          <div class="feedback-alert amber">
+            <strong>[VAGUE INQUIRY]</strong> ${triage.rationale}
+            ${triage.suggestion ? `<div style="margin-top:6px; font-weight:600;">Recommended Query: <em>"${triage.suggestion}"</em></div>` : ""}
+          </div>
+        `;
       } else {
-        diagDrawer.innerHTML = '<div class="diag-success-notice">No attention-diluting distraction vectors detected.</div>';
+        // Red / Decompile
+        const alertType = triage.intent === "text_transform" ? "ESSAY / DRAFT PAYLOAD" : "COMPLEX SPECIFICATION";
+        diagDrawer.innerHTML = `
+          <div class="feedback-alert">
+            <strong>[${alertType}]</strong> ${triage.rationale}
+          </div>
+        `;
       }
     }
   }
 
   // Smooth score counter animation
-  function animateScoreCounter(targetScore) {
+  function animateScoreCounter(targetScore, status = "decompile") {
     if (!clarityAfter) return;
+    let label = "100/100 (Airtight)";
+    let chipClass = "score-chip airtight";
+
+    if (status === "ready") {
+      label = "100/100 (Prompt Ready \u2713)";
+      chipClass = "score-chip ready pulse-ping";
+    } else if (status === "vague") {
+      label = "100/100 (Query Clarified \u2713)";
+      chipClass = "score-chip ready pulse-ping";
+    } else {
+      label = "100/100 (Compiled Contract \u2713)";
+      chipClass = "score-chip airtight pulse-ping";
+    }
+
     if (prefersReducedMotion) {
-      clarityAfter.textContent = `Clarity: ${targetScore}/100 (Airtight)`;
-      clarityAfter.className = "score-chip airtight";
+      clarityAfter.textContent = `Clarity: ${label}`;
+      clarityAfter.className = chipClass.replace(" pulse-ping", "");
       return;
     }
-    let current = 40;
-    const step = () => {
-      current += Math.ceil((targetScore - current) * 0.25);
-      if (current >= targetScore) {
-        clarityAfter.textContent = `Clarity: ${targetScore}/100 (Airtight)`;
-        clarityAfter.className = "score-chip airtight pulse-ping";
-        setTimeout(() => {
-          clarityAfter.classList.remove("pulse-ping");
-        }, 800);
-      } else {
-        clarityAfter.textContent = `Clarity: ${current}/100`;
-        requestAnimationFrame(step);
-      }
-    };
-    requestAnimationFrame(step);
+    clarityAfter.textContent = `Clarity: ${label}`;
+    clarityAfter.className = chipClass;
+    setTimeout(() => {
+      clarityAfter.classList.remove("pulse-ping");
+    }, 800);
   }
 
   function formatTerminalLine(line) {
@@ -455,7 +484,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    animateScoreCounter(100);
+    animateScoreCounter(100, transformed.status);
   }
 
   if (inputText) {
