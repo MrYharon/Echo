@@ -91,15 +91,15 @@
 ---
 
 ### Phase 4: In-DOM Extension Ambient Pill (`src/content.js`, `src/popup.js`)
-- [ ] **4.1 Passive Ambient Indicator:**
+- [x] **4.1 Passive Ambient Indicator:**
   - Display a discrete, non-distracting status indicator (Green dot, Amber pulse, Red badge) directly in the active chatbox of ChatGPT, Claude, and Gemini.
-- [ ] **4.2 Subtle Interaction Flyout:**
+- [x] **4.2 Subtle Interaction Flyout:**
   - Hover or click opens a minimal card:
-    - If Green: Confirms readiness.
-    - If Amber: Offers one-click refined alternatives.
-    - If Red: Offers one-click prompt compilation.
-- [ ] **4.3 Shortcut Integration:**
-  - Pressing `Alt+E` invokes the optimal action immediately based on the prompt's cognitive status.
+    - If Green: Confirms readiness (`Prompt Ready ✓`).
+    - If Amber: Offers one-click refined query sharpening (`Sharpen`).
+    - If Red: Offers one-click prompt compilation (`Compile` or `Structure`).
+- [x] **4.3 Shortcut Integration:**
+  - Pressing `Alt+E` invokes the optimal action immediately based on the prompt's cognitive status (affirms Green, sharpens Amber, compiles Red).
 
 ---
 
