@@ -190,10 +190,11 @@ Echo.rules = {
       "build", "develop", "provide", "implement", "what", "how", "why",
       "who", "when", "where", "which", "is", "are", "can", "could", "paraphrase"
     ]),
-    PREFIXES: /\b(please|can you|could you|could i|can i|hey|hi|hello|i want you to|i need you to|so|well)\b/i,
+    PREFIXES: /^\s*(please|can you|could you|could i|can i|hey|hi|hello|i want you to|i need you to|so|well)\b\s*/i,
     check(text, triage) {
       if (triage && triage.status === "ready") return null;
       if (text.length < 12) return null;
+      if (!Echo.rules.actionVerb.PREFIXES.test(text)) return null;
       const stripped = text.replace(Echo.rules.actionVerb.PREFIXES, "").trim();
       const firstWord = stripped.split(/\s+/)[0];
       if (firstWord && !Echo.rules.actionVerb.VERBS.has(firstWord.toLowerCase())) {
