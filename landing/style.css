@@ -825,7 +825,8 @@ body::before {
   transition: all 0.15s ease;
 }
 
-.preset-btn:hover {
+.preset-btn:hover,
+.preset-btn.active {
   background: var(--ink-navy);
   color: #ffffff;
   border-color: var(--ink-navy);
