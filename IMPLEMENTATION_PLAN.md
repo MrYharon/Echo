@@ -60,16 +60,16 @@
 ---
 
 ### Phase 2: Universal Intent Envelope Compiler (`src/architect.js`)
-- [ ] **2.1 Pass-Through Mode (Green Prompts):**
+- [x] **2.1 Pass-Through Mode (Green Prompts):**
   - Return the prompt cleanly untouched, confirming that no restructuring is needed.
-- [ ] **2.2 Query Clarifier Mode (Amber Prompts):**
+- [x] **2.2 Query Clarifier Mode (Amber Prompts):**
   - Strip speculative hedges and formulate a crisp, definitive inquiry.
   - Provide targeted refinement angles (e.g., *Direct Definition* vs. *Deep Conceptual Breakdown*).
-- [ ] **2.3 Payload & Transform Mode (Red Prose / Essay Prompts):**
+- [x] **2.3 Payload & Transform Mode (Red Prose / Essay Prompts):**
   - Isolate the source draft inside delimited quotes (`Source Draft: """..."""`).
   - Extract user-specified constraints (e.g., *"academic tone"*, *"no pretentious words"*, *"smooth flow"*).
   - Explicitly direct the LLM on editorial role (Academic Editor), register, and retention of original thesis.
-- [ ] **2.4 Spec Decompilation Mode (Red Engineering / Build Prompts):**
+- [x] **2.4 Spec Decompilation Mode (Red Engineering / Build Prompts):**
   - Maintain Echo's battle-tested architectural contract compiler for code generation, schema design, and technical features.
 
 ---
