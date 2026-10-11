@@ -1119,8 +1119,9 @@ Echo.ui = {
 
     const rect = Echo.ui.input.getBoundingClientRect();
     const panelWidth = 380;
-    let left = rect.right - panelWidth;
-    left = Math.max(12, Math.min(left, window.innerWidth - panelWidth - 12));
+    const pillWidth = 150;
+    let left = Echo.ui.open ? (rect.right - panelWidth) : (rect.right - pillWidth - 12);
+    left = Math.max(12, Math.min(left, window.innerWidth - (Echo.ui.open ? panelWidth : pillWidth) - 12));
 
     let top = rect.top - 46;
     if (Echo.ui.open) {
@@ -1377,9 +1378,11 @@ Echo.ui = {
 
     // 3-State Traffic-Light Cognitive Triage
     const currentText = Echo.ui.input ? Echo.detector.read(Echo.ui.input) : "";
-    const triage = (Echo.triage && Echo.triage.classify)
-      ? Echo.triage.classify(currentText)
-      : { status: "decompile", badge: "Decompile" };
+    const triage = (result && result.triage)
+      ? result.triage
+      : ((Echo.triage && Echo.triage.classify)
+          ? Echo.triage.classify(currentText)
+          : { status: "decompile", badge: "Decompile" });
 
     // Update Pill styling based on triage state
     Echo.ui.pill.classList.remove("echo-state-ready", "echo-state-vague", "echo-state-decompile");
@@ -1393,12 +1396,12 @@ Echo.ui = {
       if (Echo.ui.badgeSub) Echo.ui.badgeSub.textContent = "Ready";
     } else if (triage.status === "vague") {
       Echo.ui.pill.classList.add("echo-state-vague");
-      Echo.ui.scoreTextEl.textContent = "Clarify";
+      Echo.ui.scoreTextEl.textContent = triage.intent === "empty_ping" ? "Ping" : "Clarify";
       Echo.ui.scoreTextEl.style.color = "#b45309";
       Echo.ui.pillBtn.textContent = "Sharpen";
       Echo.ui.pillBtn.className = "echo-pill-btn vague-btn";
       Echo.ui.pillBtn.style.display = "inline-flex";
-      if (Echo.ui.badgeSub) Echo.ui.badgeSub.textContent = "Clarify";
+      if (Echo.ui.badgeSub) Echo.ui.badgeSub.textContent = triage.intent === "empty_ping" ? "Incomplete" : "Clarify";
     } else {
       Echo.ui.pill.classList.add("echo-state-decompile");
       const grade = Echo.analyzer.grade(result.score);
@@ -1411,6 +1414,43 @@ Echo.ui = {
     }
 
     Echo.ui.bodyEl.innerHTML = "";
+
+    // Render interactive thought completion chips if provided by AI or triage
+    if (triage.completions && triage.completions.length > 0) {
+      const compWrap = document.createElement("div");
+      compWrap.className = "echo-issue";
+      compWrap.style.background = "#f0f9ff";
+      compWrap.style.border = "1px solid #bae6fd";
+      compWrap.style.borderRadius = "8px";
+      compWrap.style.margin = "8px 14px";
+      compWrap.innerHTML = `
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#0284c7;text-transform:uppercase;margin-bottom:6px;">
+          Complete Your Task:
+        </div>
+        <div style="font-size:11.5px;color:#0369a1;margin-bottom:8px;">
+          ${Echo.detector.escapeHtml(triage.rationale || "State what you need directly in this prompt to save a back-and-forth round trip.")}
+        </div>
+        <div class="echo-comp-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      `;
+      const chipsContainer = compWrap.querySelector(".echo-comp-chips");
+      for (const comp of triage.completions) {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "echo-chip";
+        chip.style.background = "#ffffff";
+        chip.style.borderColor = "#0284c7";
+        chip.style.color = "#0284c7";
+        chip.style.fontWeight = "700";
+        chip.textContent = comp.label;
+        chip.addEventListener("click", (e) => {
+          e.stopPropagation();
+          Echo.ui.appendConstraint(comp.insertText || comp.text);
+        });
+        chipsContainer.appendChild(chip);
+      }
+      Echo.ui.bodyEl.appendChild(compWrap);
+    }
+
     const hasIssues = result.issues && result.issues.length > 0;
 
     if (hasIssues && triage.status !== "ready") {

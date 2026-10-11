@@ -17,14 +17,58 @@
     debounceTimer = setTimeout(runAnalyze, 400);
   }
 
-  function runAnalyze() {
+  let currentAnalysisId = 0;
+
+  async function runAnalyze() {
     if (!settings || !settings.enabled) return;
     if (!Echo.detector.isConnected(currentInput)) return;
     const text = Echo.detector.read(currentInput);
     if (text === lastText) return;
     lastText = text;
-    const result = Echo.analyzer.analyze(text, settings.rules);
-    Echo.ui.update(result);
+
+    const analysisId = ++currentAnalysisId;
+
+    // 1. Instant local triage (0ms immediate feedback)
+    const localResult = Echo.analyzer.analyze(text, settings.rules);
+    Echo.ui.update(localResult);
+
+    // 2. Pure AI Coach evaluation (asynchronous deep semantic evaluation)
+    if (Echo.ai && Echo.ai.evaluatePrompt && text.trim().length >= 8) {
+      try {
+        const aiEvaluation = await Echo.ai.evaluatePrompt(text);
+        if (analysisId !== currentAnalysisId) return; // Stale request, user continued typing
+
+        if (aiEvaluation) {
+          const aiResult = {
+            score: aiEvaluation.score != null ? aiEvaluation.score : localResult.score,
+            triage: {
+              status: aiEvaluation.status || localResult.triage.status,
+              intent: aiEvaluation.intent || localResult.triage.intent,
+              badge: aiEvaluation.status === "ready" ? "Prompt Ready ✓" : (aiEvaluation.intent || "AI Coach"),
+              color: aiEvaluation.status === "ready" ? "#15803d" : (aiEvaluation.status === "vague" ? "#b45309" : "#0284c7"),
+              rationale: aiEvaluation.critique || localResult.triage.rationale,
+              suggestion: aiEvaluation.compiledContract || localResult.triage.suggestion,
+              completions: aiEvaluation.completions || localResult.triage.completions || []
+            },
+            issues: [
+              {
+                ruleId: "aiCoachCritique",
+                ruleName: "AI Coach Critique",
+                category: "AI EVALUATION",
+                rationale: aiEvaluation.critique,
+                severity: aiEvaluation.status === "ready" ? "info" : "warning",
+                message: aiEvaluation.critique
+              }
+            ],
+            empty: false,
+            text: text
+          };
+          Echo.ui.update(aiResult);
+        }
+      } catch (err) {
+        console.warn("Echo AI Coach evaluation error:", err);
+      }
+    }
   }
 
   function handleKeyDown(e) {
