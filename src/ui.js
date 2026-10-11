@@ -12,13 +12,26 @@ Echo.ui = {
   activePreviewData: null,
   currentMode: "structured",
 
+  // Dragging state
+  userDragged: false,
+  isDragging: false,
+  dragStartX: 0,
+  dragStartY: 0,
+  panelStartX: 0,
+  panelStartY: 0,
+
   CSS: `
 .echo-host {
   position: fixed;
   z-index: 2147483647;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color-scheme: dark;
+  color-scheme: light;
   line-height: 1.45;
+}
+
+.echo-host.echo-is-dragging {
+  user-select: none;
+  cursor: grabbing !important;
 }
 
 /* Floating Pill */
@@ -26,21 +39,22 @@ Echo.ui = {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 11px 5px 7px;
-  border-radius: 6px;
-  background: #0b1324;
-  color: #fbfcfd;
+  padding: 5px 12px 5px 8px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0b1324;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px #1e293b;
+  box-shadow: 0 4px 16px rgba(11, 19, 36, 0.08), 0 1px 3px rgba(11, 19, 36, 0.04), 0 0 0 1px #e2e8f0;
   user-select: none;
-  transition: all 0.15s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .echo-pill:hover {
-  background: #131e33;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px #0ea5e9;
+  background: #f8fafc;
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.14), 0 0 0 1px #0284c7;
+  transform: translateY(-1px);
 }
 .echo-pill-brand {
   display: flex;
@@ -53,20 +67,21 @@ Echo.ui = {
 .echo-pill-brand svg {
   width: 18px;
   height: 18px;
+  border-radius: 4px;
 }
 .echo-pill.echo-state-ready {
-  border-left: 3px solid #10b981;
+  border-left: 3px solid #15803d;
 }
 .echo-pill.echo-state-vague {
   border-left: 3px solid #f59e0b;
   animation: echoPulseAmber 2.5s infinite;
 }
 .echo-pill.echo-state-decompile {
-  border-left: 3px solid #ef4444;
+  border-left: 3px solid #0284c7;
 }
 @keyframes echoPulseAmber {
-  0%, 100% { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px #1e293b; }
-  50% { box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25), 0 0 0 1px rgba(245, 158, 11, 0.6); }
+  0%, 100% { box-shadow: 0 4px 16px rgba(11, 19, 36, 0.08), 0 0 0 1px #e2e8f0; }
+  50% { box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2), 0 0 0 1px rgba(245, 158, 11, 0.6); }
 }
 .echo-status-dot {
   width: 6px;
@@ -75,31 +90,24 @@ Echo.ui = {
   margin-right: 2px;
   flex-shrink: 0;
 }
-.echo-status-dot.ready { background: #10b981; }
+.echo-status-dot.ready { background: #15803d; }
 .echo-status-dot.vague { background: #f59e0b; }
-.echo-status-dot.decompile { background: #ef4444; }
-.echo-pill-btn.vague-btn {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border-color: rgba(245, 158, 11, 0.35);
-}
-.echo-pill-btn.vague-btn:hover {
-  background: #f59e0b;
-  color: #0b1324;
-}
+.echo-status-dot.decompile { background: #0284c7; }
+
 .echo-score-text {
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.01em;
+  color: #0b1324;
 }
 .echo-pill-btn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(14, 165, 233, 0.12);
-  color: #38bdf8;
-  border: 1px solid rgba(14, 165, 233, 0.3);
-  border-radius: 4px;
-  padding: 2px 7px;
+  background: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  border-radius: 5px;
+  padding: 2px 8px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   font-weight: 700;
@@ -107,53 +115,22 @@ Echo.ui = {
   transition: all 0.15s ease;
 }
 .echo-pill-btn:hover {
-  background: #0ea5e9;
-  color: #0b1324;
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+.echo-pill-btn.vague-btn {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fde68a;
+}
+.echo-pill-btn.vague-btn:hover {
+  background: #f59e0b;
+  color: #ffffff;
+  border-color: #f59e0b;
 }
 
-/* Inline Word Fix Strip */
-.echo-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 5px;
-  max-width: 360px;
-}
-.echo-word-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #0b1324;
-  border: 1px solid #1e293b;
-  border-radius: 4px;
-  padding: 3px 8px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 10.5px;
-  color: #e2e8f0;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-  transition: all 0.15s ease;
-  user-select: none;
-}
-.echo-word-tag:hover {
-  background: #131e33;
-  border-color: #0ea5e9;
-  transform: translateY(-1px);
-}
-.echo-word-target {
-  text-decoration: line-through;
-  color: #f87171;
-}
-.echo-word-arrow {
-  color: #64748b;
-  font-size: 11px;
-}
-.echo-word-replacement {
-  color: #38bdf8;
-  font-weight: 700;
-}
-
-/* Toast */
+/* Toast Notification */
 .echo-toast {
   position: absolute;
   bottom: calc(100% + 8px);
@@ -161,12 +138,12 @@ Echo.ui = {
   transform: translateX(-50%) translateY(6px);
   opacity: 0;
   pointer-events: none;
-  background: #0b1324;
-  color: #f8fafc;
-  border: 1px solid #0ea5e9;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-  border-radius: 6px;
-  padding: 7px 14px;
+  background: #ffffff;
+  color: #0b1324;
+  border: 1px solid #0284c7;
+  box-shadow: 0 12px 32px rgba(11, 19, 36, 0.16);
+  border-radius: 8px;
+  padding: 8px 14px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   font-weight: 600;
@@ -183,13 +160,14 @@ Echo.ui = {
   pointer-events: auto;
 }
 .echo-toast-msg {
-  color: #38bdf8;
+  color: #0284c7;
+  font-weight: 700;
 }
 .echo-toast-undo {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border-radius: 3px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  border-radius: 4px;
   padding: 2px 8px;
   font-size: 11px;
   font-weight: 700;
@@ -197,38 +175,47 @@ Echo.ui = {
   transition: all 0.15s ease;
 }
 .echo-toast-undo:hover {
-  background: #0ea5e9;
-  color: #0b1324;
-  border-color: #0ea5e9;
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
 }
 
-/* Panel */
+/* Panel Modal */
 .echo-panel {
   display: none;
   margin-top: 8px;
   width: 380px;
   max-height: 480px;
   overflow-y: auto;
-  background: #0b1324;
-  color: #e2e8f0;
-  border-radius: 8px;
-  border: 1px solid #1e293b;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  background: #ffffff;
+  color: #0b1324;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 48px rgba(11, 19, 36, 0.14), 0 2px 8px rgba(11, 19, 36, 0.04);
   font-size: 12.5px;
   line-height: 1.45;
   scrollbar-width: thin;
-  scrollbar-color: #334155 #0b1324;
+  scrollbar-color: #cbd5e1 #f8fafc;
 }
 .echo-panel.echo-open {
   display: block;
 }
+
+/* Draggable Header */
 .echo-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
-  border-bottom: 1px solid #1e293b;
-  background: #131e33;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  cursor: grab;
+  user-select: none;
+}
+.echo-panel-header:active {
+  cursor: grabbing;
 }
 .echo-brand-group {
   display: flex;
@@ -237,151 +224,118 @@ Echo.ui = {
 }
 .echo-title {
   font-weight: 800;
-  font-size: 13px;
-  letter-spacing: -0.01em;
-  color: #ffffff;
+  font-size: 13.5px;
+  letter-spacing: -0.02em;
+  color: #0b1324;
 }
 .echo-badge-sub {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   padding: 2px 6px;
-  border-radius: 3px;
-  background: rgba(14, 165, 233, 0.15);
-  color: #38bdf8;
-  border: 1px solid rgba(14, 165, 233, 0.3);
+  border-radius: 4px;
+  background: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.2);
+}
+.echo-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.echo-drag-hint {
+  display: inline-flex;
+  align-items: center;
+  color: #94a3b8;
+  font-size: 13px;
+  letter-spacing: -1px;
+  cursor: grab;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+.echo-drag-hint:hover {
+  color: #0284c7;
 }
 .echo-close-btn {
   background: transparent;
   border: none;
-  color: #8a99b0;
+  color: #64748b;
   cursor: pointer;
   padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 14px;
+  border-radius: 4px;
+  font-size: 15px;
   line-height: 1;
+  transition: all 0.15s ease;
 }
 .echo-close-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
+  color: #0b1324;
+  background: #e2e8f0;
 }
 
-/* Action Banner */
-.echo-action-banner {
-  padding: 12px 14px;
-  background: #0f172a;
-  border-bottom: 1px solid #1e293b;
-}
-.echo-action-title {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-weight: 700;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #38bdf8;
-  margin-bottom: 4px;
-}
-.echo-action-desc {
-  font-size: 11px;
-  color: #8a99b0;
-  margin-bottom: 8px;
-  line-height: 1.4;
+/* Mode Bar (Docked under Header) */
+.echo-mode-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
 }
 .echo-mode-pills {
   display: flex;
-  gap: 5px;
-  margin-bottom: 10px;
+  gap: 4px;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 6px;
+  width: 100%;
 }
 .echo-mode-pill {
-  padding: 3px 8px;
+  flex: 1;
+  padding: 4px 8px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
+  text-align: center;
   border-radius: 4px;
-  border: 1px solid #1e293b;
-  background: #0b1324;
-  color: #8a99b0;
+  border: none;
+  background: transparent;
+  color: #52617a;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .echo-mode-pill:hover {
-  color: #ffffff;
-  border-color: #334155;
+  color: #0b1324;
 }
 .echo-mode-pill.active {
-  background: #131e33;
-  color: #38bdf8;
-  border-color: #0ea5e9;
-}
-.echo-action-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.echo-btn-primary {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: #0ea5e9;
-  color: #0b1324;
-  border: none;
-  border-radius: 4px;
-  padding: 7px 12px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.echo-btn-primary:hover {
-  background: #38bdf8;
-}
-.echo-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #cbd5e1;
-  border: 1px solid #1e293b;
-  border-radius: 4px;
-  padding: 7px 10px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 10.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.echo-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  background: #ffffff;
+  color: #0284c7;
+  font-weight: 800;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-/* Issues List */
+/* Standard Issues / Review View */
+.echo-standard-view {
+  background: #ffffff;
+}
 .echo-issue {
   padding: 10px 14px;
-  border-bottom: 1px solid #1e293b;
-  background: #0b1324;
+  border-bottom: 1px solid #f1f5f9;
+  background: #ffffff;
   transition: background 0.15s ease;
 }
 .echo-issue:hover {
-  background: #0f172a;
-}
-.echo-issue:last-child {
-  border-bottom: none;
+  background: #fafcff;
 }
 .echo-issue-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 .echo-category-badge {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -389,41 +343,41 @@ Echo.ui = {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  padding: 1px 5px;
-  border-radius: 3px;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 .echo-cat-directiveness {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  background: #fee2e2;
+  color: #b91c1c;
 }
 .echo-cat-clarity {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
+  background: #fef3c7;
+  color: #b45309;
 }
 .echo-cat-context {
-  background: rgba(56, 189, 248, 0.15);
-  color: #38bdf8;
+  background: #e0f2fe;
+  color: #0284c7;
 }
 .echo-cat-specifications {
-  background: rgba(34, 197, 94, 0.15);
-  color: #4ade80;
+  background: #dcfce7;
+  color: #15803d;
 }
 .echo-cat-structure {
-  background: rgba(168, 85, 247, 0.15);
-  color: #c084fc;
+  background: #f3e8ff;
+  color: #7e22ce;
 }
 .echo-issue-name {
   font-weight: 700;
-  color: #ffffff;
-  font-size: 11.5px;
+  color: #0b1324;
+  font-size: 12px;
 }
 .echo-diff-box {
-  background: #060911;
-  border: 1px solid #1e293b;
-  border-radius: 4px;
-  padding: 6px 8px;
-  margin: 5px 0 6px;
-  font-size: 10.5px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 6px 0;
+  font-size: 11px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 .echo-diff-row {
@@ -434,30 +388,30 @@ Echo.ui = {
 }
 .echo-diff-del {
   text-decoration: line-through;
-  color: #f87171;
+  color: #dc2626;
 }
 .echo-diff-arrow {
-  color: #64748b;
+  color: #94a3b8;
   font-size: 11px;
 }
 .echo-diff-ins {
-  color: #38bdf8;
+  color: #0284c7;
   font-weight: 700;
 }
 .echo-diff-tag {
-  color: #8a99b0;
+  color: #52617a;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
 }
 .echo-diff-ins-append {
-  color: #4ade80;
+  color: #15803d;
   font-weight: 600;
 }
 .echo-issue-rationale {
   font-size: 11px;
-  color: #8a99b0;
-  line-height: 1.4;
+  color: #52617a;
+  line-height: 1.45;
   margin-bottom: 6px;
 }
 .echo-issue-footer {
@@ -469,10 +423,10 @@ Echo.ui = {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(14, 165, 233, 0.12);
-  color: #38bdf8;
-  border: 1px solid rgba(14, 165, 233, 0.3);
-  border-radius: 3px;
+  background: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  border-radius: 4px;
   padding: 3px 8px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
@@ -481,15 +435,64 @@ Echo.ui = {
   transition: all 0.12s ease;
 }
 .echo-fix-btn:hover {
-  background: #0ea5e9;
+  background: #0284c7;
+  color: #ffffff;
+}
+
+/* Primary Action Bar in Review Mode */
+.echo-review-action-row {
+  padding: 10px 14px;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  gap: 8px;
+}
+.echo-btn-compile-main {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.echo-btn-compile-main:hover {
+  background: #0369a1;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+}
+.echo-btn-undo-main {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #52617a;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.echo-btn-undo-main:hover {
+  background: #f8fafc;
   color: #0b1324;
 }
 
-/* Preset Format Chips in Drawer */
+/* Preset Format Chips */
 .echo-presets {
   padding: 10px 14px 12px;
-  background: #0f172a;
-  border-top: 1px solid #1e293b;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
 }
 .echo-presets-title {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -506,11 +509,11 @@ Echo.ui = {
   gap: 5px;
 }
 .echo-chip {
-  background: rgba(255, 255, 255, 0.04);
-  color: #cbd5e1;
-  border: 1px solid #1e293b;
-  border-radius: 3px;
-  padding: 3px 7px;
+  background: #ffffff;
+  color: #52617a;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 3px 8px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   font-weight: 600;
@@ -518,9 +521,9 @@ Echo.ui = {
   transition: all 0.15s ease;
 }
 .echo-chip:hover {
-  background: #131e33;
-  border-color: #0ea5e9;
-  color: #38bdf8;
+  background: #e0f2fe;
+  border-color: #0284c7;
+  color: #0284c7;
 }
 
 /* Empty / Optimal State */
@@ -535,23 +538,23 @@ Echo.ui = {
 .echo-empty-title {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-weight: 700;
-  color: #4ade80;
-  font-size: 12px;
+  color: #15803d;
+  font-size: 12.5px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 4px;
 }
 .echo-empty-desc {
-  font-size: 11.5px;
-  color: #8a99b0;
-  line-height: 1.45;
+  font-size: 12px;
+  color: #52617a;
+  line-height: 1.5;
 }
 
-/* Live Diff & Preview Inspection Container */
+/* Live Diff & Contract Preview Inspection View */
 .echo-preview-view {
   display: none;
   padding: 12px 14px;
-  background: #0b1324;
+  background: #ffffff;
 }
 .echo-preview-view.echo-active {
   display: block;
@@ -565,20 +568,10 @@ Echo.ui = {
 .echo-preview-title {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #38bdf8;
-}
-.echo-preview-badge {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 1px 5px;
-  border-radius: 3px;
-  background: rgba(14, 165, 233, 0.15);
-  color: #38bdf8;
-  border: 1px solid rgba(14, 165, 233, 0.3);
+  color: #0284c7;
 }
 .echo-diff-section {
   margin-bottom: 10px;
@@ -603,10 +596,10 @@ Echo.ui = {
   gap: 4px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
-  color: #b91c1c;
+  color: #991b1b;
   background: #fee2e2;
   border: 1px solid #fecdd3;
-  border-radius: 3px;
+  border-radius: 4px;
   padding: 2px 7px;
   text-decoration: line-through;
 }
@@ -616,48 +609,41 @@ Echo.ui = {
   gap: 4px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
-  color: #026aa2;
+  color: #0369a1;
   background: #e0f2fe;
-  border: 1px solid rgba(2, 106, 162, 0.3);
-  border-radius: 3px;
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  border-radius: 4px;
   padding: 2px 7px;
   font-weight: 700;
 }
+
+/* Contract Code Box */
 .echo-terminal-box {
-  background: #060911;
-  border: 1px solid #1e293b;
-  border-radius: 4px;
-  padding: 8px 10px;
-  max-height: 140px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 9px 12px;
+  max-height: 150px;
   overflow-y: auto;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 11.5px;
   line-height: 1.5;
-  color: #fbfcfd;
+  color: #0b1324;
   white-space: pre-wrap;
   word-break: break-word;
   margin-bottom: 10px;
   position: relative;
-  overflow: hidden;
 }
-@keyframes echoScanlineSweep {
-  0% { transform: translateY(-100%); opacity: 0; }
-  35% { opacity: 0.8; }
-  100% { transform: translateY(220%); opacity: 0; }
-}
-.echo-terminal-box::after {
+.echo-terminal-box::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #38bdf8, #0ea5e9, transparent);
-  box-shadow: 0 0 10px #38bdf8;
-  opacity: 0.7;
-  animation: echoScanlineSweep 2s ease-in-out infinite;
-  pointer-events: none;
+  background: linear-gradient(90deg, #0284c7, #38bdf8, #0ea5e9);
 }
+
 .echo-preview-actions {
   display: flex;
   align-items: center;
@@ -665,69 +651,73 @@ Echo.ui = {
 }
 .echo-btn-apply {
   flex: 1;
-  background: #0ea5e9;
-  color: #0b1324;
+  background: #0284c7;
+  color: #ffffff;
   border: none;
-  border-radius: 4px;
-  padding: 7px 12px;
+  border-radius: 6px;
+  padding: 8px 12px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
 }
 .echo-btn-apply:hover {
-  background: #38bdf8;
+  background: #0369a1;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
 }
 .echo-btn-discard {
-  background: rgba(255, 255, 255, 0.06);
-  color: #cbd5e1;
-  border: 1px solid #1e293b;
-  border-radius: 4px;
-  padding: 7px 10px;
+  background: #ffffff;
+  color: #52617a;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 10px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
 }
 .echo-btn-discard:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  background: #f8fafc;
+  color: #0b1324;
+  border-color: #cbd5e1;
 }
 .echo-btn-copy-contract {
-  background: rgba(255, 255, 255, 0.06);
-  color: #cbd5e1;
-  border: 1px solid #1e293b;
-  border-radius: 4px;
-  padding: 7px 9px;
+  background: #ffffff;
+  color: #52617a;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 10px;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
 }
 .echo-btn-copy-contract:hover {
-  background: #131e33;
-  color: #38bdf8;
-  border-color: #0ea5e9;
+  background: #e0f2fe;
+  color: #0284c7;
+  border-color: #0284c7;
 }
 
 /* Footer */
 .echo-footer {
   padding: 8px 14px;
-  background: #070b14;
-  color: #52617a;
+  background: #f8fafc;
+  color: #64748b;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid #e2e8f0;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 `,
 
@@ -751,10 +741,13 @@ Echo.ui = {
       <div class="echo-pill">
         <div class="echo-pill-brand">
           <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="128" height="128" rx="8" fill="#131e33" />
-            <path d="M 24 24 L 104 24 L 104 42 L 50 42 L 50 48 L 24 48 Z" fill="#0ea5e9" />
-            <rect x="24" y="58" width="58" height="15" fill="#fbfcfd" />
-            <path d="M 24 86 L 50 86 L 50 92 L 104 92 L 104 110 L 24 110 Z" fill="#0ea5e9" />
+            <rect width="128" height="128" rx="28" fill="#131e33" />
+            <path d="M 0 35 Q 35 15, 65 30 T 128 20" fill="none" stroke="#223b6b" stroke-width="2" opacity="0.4" />
+            <path d="M 0 65 Q 40 45, 75 60 T 128 50" fill="none" stroke="#223b6b" stroke-width="2" opacity="0.3" />
+            <path d="M 0 95 Q 30 75, 70 90 T 128 80" fill="none" stroke="#223b6b" stroke-width="2" opacity="0.4" />
+            <path d="M 28 26 L 100 26 L 100 40 L 49 40 L 49 45 L 28 45 Z" fill="#ffffff" />
+            <rect x="28" y="57" width="52" height="14" fill="#ffffff" />
+            <path d="M 28 83 L 49 83 L 49 88 L 100 88 L 100 102 L 28 102 Z" fill="#ffffff" />
           </svg>
         </div>
         <span class="echo-status-dot ready"></span>
@@ -762,52 +755,49 @@ Echo.ui = {
         <button class="echo-pill-btn" type="button">Compile</button>
       </div>
 
-      <div class="echo-strip" style="display:none;"></div>
-
       <div class="echo-panel">
-        <div class="echo-panel-header">
+        <div class="echo-panel-header" title="Drag to move pop-up">
           <div class="echo-brand-group">
-            <svg width="18" height="18" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="128" height="128" rx="8" fill="#131e33" />
-              <path d="M 24 24 L 104 24 L 104 42 L 50 42 L 50 48 L 24 48 Z" fill="#0ea5e9" />
-              <rect x="24" y="58" width="58" height="15" fill="#fbfcfd" />
-              <path d="M 24 86 L 50 86 L 50 92 L 104 92 L 104 110 L 24 110 Z" fill="#0ea5e9" />
+            <svg width="20" height="20" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="128" height="128" rx="28" fill="#131e33" />
+              <path d="M 0 35 Q 35 15, 65 30 T 128 20" fill="none" stroke="#223b6b" stroke-width="2" opacity="0.4" />
+              <path d="M 0 65 Q 40 45, 75 60 T 128 50" fill="none" stroke="#223b6b" stroke-width="2" opacity="0.3" />
+              <path d="M 0 95 Q 30 75, 70 90 T 128 80" fill="none" stroke="#223b6b" stroke-width="2" opacity="0.4" />
+              <path d="M 28 26 L 100 26 L 100 40 L 49 40 L 49 45 L 28 45 Z" fill="#ffffff" />
+              <rect x="28" y="57" width="52" height="14" fill="#ffffff" />
+              <path d="M 28 83 L 49 83 L 49 88 L 100 88 L 100 102 L 28 102 Z" fill="#ffffff" />
             </svg>
             <span class="echo-title">Echo</span>
-            <span class="echo-badge-sub">Prompt Compiler</span>
+            <span class="echo-badge-sub">Compiler</span>
           </div>
-          <button class="echo-close-btn" type="button" aria-label="Close">&times;</button>
+          <div class="echo-header-controls">
+            <span class="echo-drag-hint" title="Drag to reposition">⋮⋮</span>
+            <button class="echo-close-btn" type="button" aria-label="Close">&times;</button>
+          </div>
         </div>
 
         <!-- Mode Bar -->
-        <div class="echo-action-banner">
-          <div class="echo-action-title">Prompt Architect</div>
-          <div class="echo-action-desc">Decompile conversational streams into structured, airtight prompt contracts.</div>
+        <div class="echo-mode-bar">
           <div class="echo-mode-pills">
             <button class="echo-mode-pill active" data-mode="structured" type="button">Structured</button>
             <button class="echo-mode-pill" data-mode="concise" type="button">Concise</button>
             <button class="echo-mode-pill" data-mode="deep_reasoning" type="button">Deep</button>
           </div>
-          <div class="echo-action-controls">
-            <button class="echo-btn-primary" type="button">Compile (Alt+E)</button>
-            <button class="echo-btn-secondary" type="button" style="display:none;">Undo</button>
-          </div>
         </div>
 
-        <!-- Live Diff & Preview Inspection Container -->
+        <!-- Live Contract Preview View -->
         <div class="echo-preview-view">
           <div class="echo-preview-subhead">
-            <span class="echo-preview-title">Prompt Contract Preview</span>
-            <span class="echo-preview-badge">Preview First</span>
+            <span class="echo-preview-title">Compiled Prompt Contract</span>
           </div>
 
           <div class="echo-diff-section echo-diff-fluff-wrap" style="display:none;">
-            <div class="echo-diff-label">Attention Filter (Purged Tokens)</div>
+            <div class="echo-diff-label">Purged Filler Tokens</div>
             <div class="echo-diff-chips-wrap echo-diff-fluff-list"></div>
           </div>
 
           <div class="echo-diff-section echo-diff-bounds-wrap" style="display:none;">
-            <div class="echo-diff-label">Enforced Bounds (Hoisted)</div>
+            <div class="echo-diff-label">Enforced Bounds</div>
             <div class="echo-diff-chips-wrap echo-diff-bounds-list"></div>
           </div>
 
@@ -815,19 +805,23 @@ Echo.ui = {
           <div class="echo-terminal-box echo-preview-contract-text"></div>
 
           <div class="echo-preview-actions">
-            <button class="echo-btn-apply" type="button">Apply Contract (Enter)</button>
-            <button class="echo-btn-discard" type="button">Discard (Esc)</button>
+            <button class="echo-btn-apply" type="button">Apply to Chat (Enter)</button>
+            <button class="echo-btn-discard" type="button">Back (Esc)</button>
             <button class="echo-btn-copy-contract" type="button">Copy</button>
           </div>
         </div>
 
-        <!-- Standard Feedback / Issues View -->
+        <!-- Standard Review / Issues View -->
         <div class="echo-standard-view">
           <div class="echo-empty-state">
-            <div class="echo-empty-title">Airtight Structure</div>
-            <div class="echo-empty-desc">Your prompt contains direct instructions, clean constraints, and high clarity.</div>
+            <div class="echo-empty-title">Airtight Prompt &check;</div>
+            <div class="echo-empty-desc">Your prompt contains direct instructions and clean specifications. Ready to send.</div>
           </div>
           <div class="echo-body"></div>
+          <div class="echo-review-action-row">
+            <button class="echo-btn-compile-main" type="button">Compile Contract (Alt+E)</button>
+            <button class="echo-btn-undo-main" type="button" style="display:none;">Undo</button>
+          </div>
           <div class="echo-presets">
             <div class="echo-presets-title">Quick Output Formats</div>
             <div class="echo-chip-group"></div>
@@ -835,7 +829,7 @@ Echo.ui = {
         </div>
 
         <div class="echo-footer">
-          <span>Alt+E to inspect diff</span>
+          <span>Alt+E to compile</span>
           <span>Local &bull; 100% Private</span>
         </div>
       </div>
@@ -843,15 +837,15 @@ Echo.ui = {
 
     Echo.ui.pill = Echo.ui.host.querySelector(".echo-pill");
     Echo.ui.statusDotEl = Echo.ui.host.querySelector(".echo-status-dot");
-    Echo.ui.stripEl = Echo.ui.host.querySelector(".echo-strip");
     Echo.ui.panel = Echo.ui.host.querySelector(".echo-panel");
+    Echo.ui.panelHeader = Echo.ui.host.querySelector(".echo-panel-header");
+    Echo.ui.badgeSub = Echo.ui.host.querySelector(".echo-badge-sub");
     Echo.ui.scoreTextEl = Echo.ui.host.querySelector(".echo-score-text");
     Echo.ui.pillBtn = Echo.ui.host.querySelector(".echo-pill-btn");
     Echo.ui.bodyEl = Echo.ui.host.querySelector(".echo-body");
     Echo.ui.emptyEl = Echo.ui.host.querySelector(".echo-empty-state");
-    Echo.ui.actionBanner = Echo.ui.host.querySelector(".echo-action-banner");
-    Echo.ui.actionBtn = Echo.ui.host.querySelector(".echo-btn-primary");
-    Echo.ui.undoBtn = Echo.ui.host.querySelector(".echo-btn-secondary");
+    Echo.ui.actionBtn = Echo.ui.host.querySelector(".echo-btn-compile-main");
+    Echo.ui.undoBtn = Echo.ui.host.querySelector(".echo-btn-undo-main");
     Echo.ui.closeBtn = Echo.ui.host.querySelector(".echo-close-btn");
     Echo.ui.chipGroup = Echo.ui.host.querySelector(".echo-chip-group");
 
@@ -866,6 +860,10 @@ Echo.ui = {
     Echo.ui.diffFluffList = Echo.ui.host.querySelector(".echo-diff-fluff-list");
     Echo.ui.diffBoundsWrap = Echo.ui.host.querySelector(".echo-diff-bounds-wrap");
     Echo.ui.diffBoundsList = Echo.ui.host.querySelector(".echo-diff-bounds-list");
+
+    // Draggable header listeners
+    Echo.ui.panelHeader.addEventListener("mousedown", Echo.ui.onDragStart);
+    Echo.ui.panelHeader.addEventListener("touchstart", Echo.ui.onDragStart, { passive: false });
 
     // Populate quick format chips
     if (Echo.autocorrect && Echo.autocorrect.getQuickInserts) {
@@ -893,7 +891,7 @@ Echo.ui = {
         modePills.forEach((p) => p.classList.remove("active"));
         pill.classList.add("active");
         Echo.ui.currentMode = pill.dataset.mode;
-        // If preview is open, re-compile preview immediately
+        // If preview is active, immediately recompile preview
         if (Echo.ui.previewView && Echo.ui.previewView.classList.contains("echo-active")) {
           Echo.ui.triggerAutocorrect();
         }
@@ -944,11 +942,15 @@ Echo.ui = {
       Echo.ui.btnCopyContract.addEventListener("click", async (e) => {
         e.stopPropagation();
         if (Echo.ui.activePreviewData && Echo.ui.activePreviewData.corrected) {
-          await navigator.clipboard.writeText(Echo.ui.activePreviewData.corrected);
-          Echo.ui.btnCopyContract.textContent = "Copied";
-          setTimeout(() => {
-            if (Echo.ui.btnCopyContract) Echo.ui.btnCopyContract.textContent = "Copy";
-          }, 1400);
+          try {
+            await navigator.clipboard.writeText(Echo.ui.activePreviewData.corrected);
+            Echo.ui.btnCopyContract.textContent = "Copied \u2713";
+            setTimeout(() => {
+              if (Echo.ui.btnCopyContract) Echo.ui.btnCopyContract.textContent = "Copy";
+            }, 1400);
+          } catch (err) {
+            console.warn("Echo copy failed:", err);
+          }
         }
       });
     }
@@ -970,6 +972,8 @@ Echo.ui = {
     window.removeEventListener("resize", Echo.ui.position);
     window.removeEventListener("scroll", Echo.ui.position, true);
     window.removeEventListener("keydown", Echo.ui.onGlobalKeyDown, true);
+    Echo.ui.onDragEnd();
+
     Echo.ui.host = null;
     Echo.ui.pill = null;
     Echo.ui.panel = null;
@@ -978,6 +982,66 @@ Echo.ui = {
     Echo.ui.lastResult = null;
     Echo.ui.previousText = null;
     Echo.ui.activePreviewData = null;
+    Echo.ui.userDragged = false;
+  },
+
+  /* Dragging handlers */
+  onDragStart(e) {
+    if (e.target.closest("button") || e.target.closest(".echo-close-btn")) {
+      return;
+    }
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    Echo.ui.isDragging = true;
+    Echo.ui.dragStartX = clientX;
+    Echo.ui.dragStartY = clientY;
+
+    const rect = Echo.ui.host.getBoundingClientRect();
+    Echo.ui.panelStartX = rect.left;
+    Echo.ui.panelStartY = rect.top;
+
+    Echo.ui.host.classList.add("echo-is-dragging");
+
+    window.addEventListener("mousemove", Echo.ui.onDragMove, { passive: false });
+    window.addEventListener("mouseup", Echo.ui.onDragEnd);
+    window.addEventListener("touchmove", Echo.ui.onDragMove, { passive: false });
+    window.addEventListener("touchend", Echo.ui.onDragEnd);
+  },
+
+  onDragMove(e) {
+    if (!Echo.ui.isDragging || !Echo.ui.host) return;
+    if (e.cancelable) e.preventDefault();
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    const dx = clientX - Echo.ui.dragStartX;
+    const dy = clientY - Echo.ui.dragStartY;
+
+    let newLeft = Echo.ui.panelStartX + dx;
+    let newTop = Echo.ui.panelStartY + dy;
+
+    const hostW = Echo.ui.host.offsetWidth || 380;
+    const hostH = Echo.ui.host.offsetHeight || 300;
+
+    newLeft = Math.max(8, Math.min(newLeft, window.innerWidth - hostW - 8));
+    newTop = Math.max(8, Math.min(newTop, window.innerHeight - hostH - 8));
+
+    Echo.ui.host.style.left = newLeft + "px";
+    Echo.ui.host.style.top = newTop + "px";
+    Echo.ui.userDragged = true;
+  },
+
+  onDragEnd() {
+    Echo.ui.isDragging = false;
+    if (Echo.ui.host) {
+      Echo.ui.host.classList.remove("echo-is-dragging");
+    }
+    window.removeEventListener("mousemove", Echo.ui.onDragMove);
+    window.removeEventListener("mouseup", Echo.ui.onDragEnd);
+    window.removeEventListener("touchmove", Echo.ui.onDragMove);
+    window.removeEventListener("touchend", Echo.ui.onDragEnd);
   },
 
   onDocClick(e) {
@@ -987,31 +1051,33 @@ Echo.ui = {
   },
 
   onGlobalKeyDown(e) {
-    if (!Echo.ui.open || !Echo.ui.previewView || !Echo.ui.previewView.classList.contains("echo-active")) {
-      return;
-    }
+    if (!Echo.ui.open) return;
 
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      e.stopPropagation();
-      Echo.ui.applyActivePreview();
+    if (Echo.ui.previewView && Echo.ui.previewView.classList.contains("echo-active")) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        Echo.ui.applyActivePreview();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        Echo.ui.discardActivePreview();
+      } else if (e.key === "Tab") {
+        e.preventDefault();
+        e.stopPropagation();
+        Echo.ui.cycleMode();
+      } else if (e.key === "1") {
+        e.preventDefault();
+        Echo.ui.setMode("structured");
+      } else if (e.key === "2") {
+        e.preventDefault();
+        Echo.ui.setMode("concise");
+      } else if (e.key === "3") {
+        e.preventDefault();
+        Echo.ui.setMode("deep_reasoning");
+      }
     } else if (e.key === "Escape") {
-      e.preventDefault();
-      e.stopPropagation();
-      Echo.ui.discardActivePreview();
-    } else if (e.key === "Tab") {
-      e.preventDefault();
-      e.stopPropagation();
-      Echo.ui.cycleMode();
-    } else if (e.key === "1") {
-      e.preventDefault();
-      Echo.ui.setMode("structured");
-    } else if (e.key === "2") {
-      e.preventDefault();
-      Echo.ui.setMode("concise");
-    } else if (e.key === "3") {
-      e.preventDefault();
-      Echo.ui.setMode("deep_reasoning");
+      Echo.ui.close();
     }
   },
 
@@ -1049,14 +1115,26 @@ Echo.ui = {
 
   position() {
     if (!Echo.ui.host || !Echo.ui.input) return;
+    if (Echo.ui.userDragged) return; // Keep user's manually dragged position
+
     const rect = Echo.ui.input.getBoundingClientRect();
-    const hostWidth = 140;
-    let left = rect.right - hostWidth - 8;
-    left = Math.max(8, Math.min(left, window.innerWidth - hostWidth - 8));
-    let top = rect.top - 44;
-    if (top < 8) {
+    const panelWidth = 380;
+    let left = rect.right - panelWidth;
+    left = Math.max(12, Math.min(left, window.innerWidth - panelWidth - 12));
+
+    let top = rect.top - 46;
+    if (Echo.ui.open) {
+      const estimatedHeight = 360;
+      if (rect.top - estimatedHeight - 12 > 0) {
+        top = rect.top - estimatedHeight - 12;
+      } else {
+        top = rect.bottom + 12;
+      }
+    } else if (top < 8) {
       top = rect.bottom + 8;
     }
+    top = Math.max(8, Math.min(top, window.innerHeight - 60));
+
     Echo.ui.host.style.left = left + "px";
     Echo.ui.host.style.top = top + "px";
   },
@@ -1087,7 +1165,7 @@ Echo.ui = {
     clearTimeout(Echo.ui.toastTimer);
     Echo.ui.toastTimer = setTimeout(() => {
       Echo.ui.hideToast();
-    }, 5000);
+    }, 4500);
   },
 
   hideToast() {
@@ -1109,7 +1187,7 @@ Echo.ui = {
     } catch (e) {}
   },
 
-  /* Preview First Diff Inspection Execution */
+  /* Preview First Diff Execution */
   async triggerAutocorrect() {
     if (!Echo.ui.input) return;
     const current = Echo.detector.read(Echo.ui.input);
@@ -1126,10 +1204,9 @@ Echo.ui = {
     }
 
     if (triage.status === "vague" && triage.suggestion) {
-      // Sharpen immediately with option to undo
       Echo.ui.previousText = current;
       Echo.detector.write(Echo.ui.input, triage.suggestion);
-      Echo.ui.undoBtn.style.display = "inline-flex";
+      if (Echo.ui.undoBtn) Echo.ui.undoBtn.style.display = "inline-flex";
       Echo.ui.showToast("Query sharpened \u2713", true);
       Echo.ui.recordStat("fixesApplied");
       return;
@@ -1154,7 +1231,6 @@ Echo.ui = {
 
       if (!autocorrect) return;
 
-      // Extract semantic changes
       Echo.ui.activePreviewData = {
         original: current,
         corrected: autocorrect.corrected,
@@ -1167,7 +1243,7 @@ Echo.ui = {
       console.warn("Echo compile error:", err);
     } finally {
       if (Echo.ui.actionBtn) {
-        Echo.ui.actionBtn.textContent = "Compile (Alt+E)";
+        Echo.ui.actionBtn.textContent = "Compile Contract (Alt+E)";
         Echo.ui.actionBtn.disabled = false;
       }
       if (Echo.ui.pillBtn) {
@@ -1183,10 +1259,10 @@ Echo.ui = {
     Echo.ui.previewView.classList.add("echo-active");
     Echo.ui.standardView.style.display = "none";
 
-    // Set synthesized contract text
+    // Set contract text
     Echo.ui.previewContractText.textContent = data.corrected;
 
-    // Attention Filter: Purged tokens
+    // Purged tokens
     const fluffChanges = (data.changes || []).filter((c) => c.type === "filler" || c.removed);
     if (fluffChanges.length > 0) {
       Echo.ui.diffFluffWrap.style.display = "block";
@@ -1201,7 +1277,7 @@ Echo.ui = {
       Echo.ui.diffFluffWrap.style.display = "none";
     }
 
-    // Enforced Bounds: Hoisted negative rules or constraints
+    // Enforced Bounds
     const boundChanges = (data.changes || []).filter((c) => c.type === "constraint" || c.rule);
     if (boundChanges.length > 0) {
       Echo.ui.diffBoundsWrap.style.display = "block";
@@ -1255,7 +1331,6 @@ Echo.ui = {
   discardActivePreview() {
     Echo.ui.activePreviewData = null;
     Echo.ui.hideDiffPreview();
-    Echo.ui.close();
   },
 
   triggerUndo() {
@@ -1263,7 +1338,7 @@ Echo.ui = {
     const restoreText = Echo.ui.previousText;
     Echo.ui.previousText = null;
     Echo.detector.write(Echo.ui.input, restoreText);
-    Echo.ui.undoBtn.style.display = "none";
+    if (Echo.ui.undoBtn) Echo.ui.undoBtn.style.display = "none";
     Echo.ui.showToast("Reverted original draft", false);
   },
 
@@ -1276,8 +1351,8 @@ Echo.ui = {
     } else if (fix.target && fix.replacement != null) {
       Echo.detector.replaceText(Echo.ui.input, fix.target, fix.replacement);
     }
-    Echo.ui.undoBtn.style.display = "inline-flex";
-    Echo.ui.showToast("Fix applied", true);
+    if (Echo.ui.undoBtn) Echo.ui.undoBtn.style.display = "inline-flex";
+    Echo.ui.showToast("Fix applied \u2713", true);
     Echo.ui.recordStat("fixesApplied");
   },
 
@@ -1285,8 +1360,8 @@ Echo.ui = {
     if (!Echo.ui.input || !text) return;
     Echo.ui.previousText = Echo.detector.read(Echo.ui.input);
     Echo.detector.append(Echo.ui.input, text);
-    Echo.ui.undoBtn.style.display = "inline-flex";
-    Echo.ui.showToast("Output format added", true);
+    if (Echo.ui.undoBtn) Echo.ui.undoBtn.style.display = "inline-flex";
+    Echo.ui.showToast("Output format added \u2713", true);
     Echo.ui.recordStat("fixesApplied");
   },
 
@@ -1313,65 +1388,32 @@ Echo.ui = {
     if (triage.status === "ready") {
       Echo.ui.pill.classList.add("echo-state-ready");
       Echo.ui.scoreTextEl.textContent = "Ready \u2713";
-      Echo.ui.scoreTextEl.style.color = "#10b981";
+      Echo.ui.scoreTextEl.style.color = "#15803d";
       Echo.ui.pillBtn.style.display = "none";
-      Echo.ui.actionBanner.style.display = "none";
+      if (Echo.ui.badgeSub) Echo.ui.badgeSub.textContent = "Ready";
     } else if (triage.status === "vague") {
       Echo.ui.pill.classList.add("echo-state-vague");
       Echo.ui.scoreTextEl.textContent = "Clarify";
-      Echo.ui.scoreTextEl.style.color = "#fbbf24";
+      Echo.ui.scoreTextEl.style.color = "#b45309";
       Echo.ui.pillBtn.textContent = "Sharpen";
       Echo.ui.pillBtn.className = "echo-pill-btn vague-btn";
       Echo.ui.pillBtn.style.display = "inline-flex";
-      Echo.ui.actionBanner.style.display = "block";
-      const actionTitle = Echo.ui.actionBanner.querySelector(".echo-action-title");
-      if (actionTitle) actionTitle.textContent = "Clarify Query";
+      if (Echo.ui.badgeSub) Echo.ui.badgeSub.textContent = "Clarify";
     } else {
-      // Red / Decompile
       Echo.ui.pill.classList.add("echo-state-decompile");
       const grade = Echo.analyzer.grade(result.score);
       Echo.ui.scoreTextEl.textContent = grade.label + " " + result.score;
-      Echo.ui.scoreTextEl.style.color = grade.color;
+      Echo.ui.scoreTextEl.style.color = "#0284c7";
       Echo.ui.pillBtn.textContent = triage.intent === "text_transform" ? "Structure" : "Compile";
       Echo.ui.pillBtn.className = "echo-pill-btn";
       Echo.ui.pillBtn.style.display = "inline-flex";
-      Echo.ui.actionBanner.style.display = "block";
-      const actionTitle = Echo.ui.actionBanner.querySelector(".echo-action-title");
-      if (actionTitle) actionTitle.textContent = triage.intent === "text_transform" ? "Essay Payload" : "Prompt Architect";
-    }
-
-    // Render inline squiggly word-fix tags (Amber & Red states)
-    if (Echo.ui.stripEl) {
-      Echo.ui.stripEl.innerHTML = "";
-      const wordIssues = (result.issues || []).filter(
-        (i) => i.quickFix && i.quickFix.target && i.quickFix.replacement && !i.quickFix.append
-      );
-      if (triage.status !== "ready" && wordIssues.length > 0 && !Echo.ui.open) {
-        Echo.ui.stripEl.style.display = "flex";
-        for (const wi of wordIssues.slice(0, 3)) {
-          const tag = document.createElement("div");
-          tag.className = "echo-word-tag";
-          tag.title = "Click to replace '" + wi.quickFix.target + "' with '" + wi.quickFix.replacement.trim() + "'";
-          tag.innerHTML = `
-            <span class="echo-word-target">${Echo.detector.escapeHtml(wi.quickFix.target)}</span>
-            <span class="echo-word-arrow">&rarr;</span>
-            <span class="echo-word-replacement">${Echo.detector.escapeHtml(wi.quickFix.replacement.trim())}</span>
-          `;
-          tag.addEventListener("click", (e) => {
-            e.stopPropagation();
-            Echo.ui.applyIndividualFix(wi.quickFix);
-          });
-          Echo.ui.stripEl.appendChild(tag);
-        }
-      } else {
-        Echo.ui.stripEl.style.display = "none";
-      }
+      if (Echo.ui.badgeSub) Echo.ui.badgeSub.textContent = "Compiler";
     }
 
     Echo.ui.bodyEl.innerHTML = "";
     const hasIssues = result.issues && result.issues.length > 0;
 
-    if (hasIssues) {
+    if (hasIssues && triage.status !== "ready") {
       Echo.ui.emptyEl.classList.remove("echo-show");
       for (const issue of result.issues) {
         const el = document.createElement("div");
