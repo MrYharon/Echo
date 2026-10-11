@@ -1,6 +1,14 @@
 var Echo = window.Echo = window.Echo || {};
 
 Echo.triage = {
+  // Empty pings without task payload that waste an entire conversational turn
+  EMPTY_PINGS: [
+    /^\s*(can|could)\s+you\s+help\s+(me\s+)?(with\s+(something|anything|a\s+problem|stuff)|please)?\s*\??$/i,
+    /^\s*(can|could|may)\s+i\s+ask\s+(you\s+)?(a\s+question|something|anything)\s*\??$/i,
+    /^\s*(quick\s+question|are\s+you\s+there|help\s+me|help\s+please)\s*\??$/i,
+    /^\s*(hello|hi|hey)\s*(there|bot|ai)?\s*[\.,!\?]*$/i
+  ],
+
   // Speculative hedges that trigger Amber state
   VAGUE_PATTERNS: [
     /\b(what\s+do\s+you\s+think\b.*?\b(is|are|might\s+be|could\s+be))\b/i,
@@ -8,7 +16,8 @@ Echo.triage = {
     /\b(or\s+something\s+like\s+that|or\s+something|or\s+whatever|or\s+stuff)\b/i,
     /\b(might\s+be|could\s+be\s+like|kind\s+of|sort\s+of|i\s+guess|maybe|perhaps)\b/i,
     /\b(tell\s+me\s+about\s+(things|stuff|anything))\b/i,
-    /\b(give\s+me\s+some\s+(stuff|things|thoughts|ideas))\b/i
+    /\b(give\s+me\s+some\s+(stuff|things|thoughts|ideas))\b/i,
+    /^\s*(but|and|so)?\s*what\s+about\s+(the\s+others|them|it|that|this)\s*\??$/i
   ],
 
   // Text transform / Paraphrase patterns that trigger Red Transform state
@@ -19,8 +28,8 @@ Echo.triage = {
     /\b(turn\s+this\s+into|convert\s+this\s+draft)\b/i
   ],
 
-  // Direct interrogative inquiry prefixes that qualify for Green state
-  DIRECT_QUERY_RE: /^(what|which|how|why|who|when|where|is|are|can|could|define|explain|list|describe|does|do)\b/i,
+  // Direct interrogative inquiry prefixes that qualify for Green state (requiring substantive payload)
+  DIRECT_QUERY_RE: /^(what|which|how|why|who|when|where|define|explain|list|describe|compare)\b/i,
 
   classify(text) {
     const raw = (text || "").trim();
@@ -34,7 +43,25 @@ Echo.triage = {
       };
     }
 
-    // 1. Check for Text Transformation / Paraphrase Intent (Red - Transform)
+    // 1. Check for Empty Conversational Pings (Amber - Incomplete Task)
+    const isEmptyPing = this.EMPTY_PINGS.some((re) => re.test(raw));
+    if (isEmptyPing) {
+      return {
+        status: "vague",
+        intent: "empty_ping",
+        badge: "Incomplete Task",
+        color: "#b45309",
+        rationale: "Conversational ping detected with no task. State what you need directly in this prompt to avoid wasting an AI round-trip turn.",
+        suggestion: "Can you help me with [debug my code / write an email / explain a concept]?",
+        completions: [
+          { label: "+ debug code", insertText: " debug an error in my code" },
+          { label: "+ write email", insertText: " draft a professional email" },
+          { label: "+ explain concept", insertText: " explain this concept" }
+        ]
+      };
+    }
+
+    // 2. Check for Text Transformation / Paraphrase Intent (Red - Transform)
     const isTransform = this.TRANSFORM_PATTERNS.some((re) => re.test(raw));
     if (isTransform) {
       return {
@@ -46,18 +73,23 @@ Echo.triage = {
       };
     }
 
-    // 2. Check for Vague / Speculative Inquiries (Amber - Clarify)
+    // 3. Check for Vague / Speculative Inquiries (Amber - Clarify)
     const isVague = this.VAGUE_PATTERNS.some((re) => re.test(raw));
     if (isVague) {
       // Formulate a clean sharpened query suggestion
-      let cleaned = raw
-        .replace(/\bwhat\s+do\s+you\s+think\s+(is\s+|are\s+)?/i, "What is ")
-        .replace(/\s+(is|are)\s*\?$/i, "?")
-        .replace(/\b(might\s+be\s+or\s+something\s+like\s+that|or\s+something\s+like\s+that|or\s+something|or\s+whatever)\b/gi, "")
-        .replace(/\b(kind\s+of|sort\s+of|i\s+guess|maybe)\b/gi, "")
-        .replace(/\s+/g, " ")
-        .trim();
-      if (!cleaned.endsWith("?")) cleaned += "?";
+      let cleaned = raw;
+      if (/what\s+about/i.test(raw)) {
+        cleaned = "Compare the remaining options against the current subject on their key differences, advantages, and drawbacks.";
+      } else {
+        cleaned = raw
+          .replace(/\bwhat\s+do\s+you\s+think\s+(is\s+|are\s+)?/i, "What is ")
+          .replace(/\s+(is|are)\s*\?$/i, "?")
+          .replace(/\b(might\s+be\s+or\s+something\s+like\s+that|or\s+something\s+like\s+that|or\s+something|or\s+whatever)\b/gi, "")
+          .replace(/\b(kind\s+of|sort\s+of|i\s+guess|maybe)\b/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (!cleaned.endsWith("?")) cleaned += "?";
+      }
 
       return {
         status: "vague",
@@ -69,12 +101,13 @@ Echo.triage = {
       };
     }
 
-    // 3. Check for Direct, Airtight Questions (Green - Pass-Through)
+    // 4. Check for Direct, Airtight Questions (Green - Pass-Through)
     const isDirect = this.DIRECT_QUERY_RE.test(raw);
     const hasNegativeConstraints = /\b(don't|do\s+not|never|no\s+(third-party|libraries|code|orms))\b/i.test(raw);
     const wordCount = raw.split(/\s+/).length;
+    const hasContent = !/\b(something|anything|stuff|things?)\b/i.test(raw);
 
-    if (isDirect && !hasNegativeConstraints && wordCount < 30) {
+    if (isDirect && !hasNegativeConstraints && wordCount >= 3 && wordCount < 30 && hasContent) {
       return {
         status: "ready",
         intent: "direct_query",
