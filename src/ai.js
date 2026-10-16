@@ -136,16 +136,13 @@ Produce the optimized prompt now:`;
 
     const settings = await this.getSettings();
 
-    // 1. Delegate to Background Service Worker (bypasses all webpage CSP headers)
+    // 1. Delegate to Background Service Worker (uses in-code API key from config.local.js)
     if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
-      const apiKey = settings.provider === "openai" ? settings.openaiApiKey : (settings.geminiApiKey || "");
-      if (apiKey) {
-        try {
-          const bgResult = await this.callBackgroundWorker(text, mode, settings.provider, apiKey, settings.customModel);
-          if (bgResult) return { text: bgResult, provider: settings.provider };
-        } catch (err) {
-          console.warn("Echo AI: Background proxy failed, checking local options", err);
-        }
+      try {
+        const bgResult = await this.callBackgroundWorker(text, mode, settings.provider, settings.geminiApiKey, settings.customModel);
+        if (bgResult) return { text: bgResult, provider: "gemini" };
+      } catch (err) {
+        console.warn("Echo AI: Background proxy failed", err);
       }
     }
 
@@ -178,7 +175,7 @@ Produce the optimized prompt now:`;
     const settings = await this.getSettings();
 
     // 1. Try Chrome Nano if available
-    if (settings.provider === "chrome_nano" || settings.provider === "auto") {
+    if (settings.provider === "chrome_nano") {
       try {
         const nanoAvailable = await this.isChromeNanoAvailable();
         if (nanoAvailable) {
@@ -190,33 +187,30 @@ Produce the optimized prompt now:`;
       }
     }
 
-    // 2. Try background service worker proxy (Gemini Flash / OpenAI)
+    // 2. Delegate to background service worker proxy (uses in-code config key)
     if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
-      const apiKey = settings.provider === "openai" ? settings.openaiApiKey : (settings.geminiApiKey || "");
-      if (apiKey) {
-        try {
-          const res = await new Promise((resolve) => {
-            chrome.runtime.sendMessage(
-              {
-                type: "COACH_EVALUATE_PROMPT",
-                rawPrompt: text,
-                provider: settings.provider,
-                apiKey: apiKey,
-                customModel: settings.customModel
-              },
-              (response) => {
-                if (chrome.runtime.lastError || !response || !response.success) {
-                  resolve(null);
-                } else {
-                  resolve(response.evaluation);
-                }
+      try {
+        const res = await new Promise((resolve) => {
+          chrome.runtime.sendMessage(
+            {
+              type: "COACH_EVALUATE_PROMPT",
+              rawPrompt: text,
+              provider: settings.provider,
+              apiKey: settings.geminiApiKey,
+              customModel: settings.customModel
+            },
+            (response) => {
+              if (chrome.runtime.lastError || !response || !response.success) {
+                resolve(null);
+              } else {
+                resolve(response.evaluation);
               }
-            );
-          });
-          if (res) return res;
-        } catch (err) {
-          console.warn("Echo AI: Cloud coach evaluation failed", err);
-        }
+            }
+          );
+        });
+        if (res) return res;
+      } catch (err) {
+        console.warn("Echo AI: Cloud coach evaluation failed", err);
       }
     }
 
