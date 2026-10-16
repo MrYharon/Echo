@@ -1,6 +1,24 @@
 // Echo - Background Service Worker (Manifest V3)
 // Handles external API requests without webpage CSP restrictions and listens for global commands.
 
+try {
+  importScripts("src/config.local.js");
+} catch (e) {
+  try {
+    importScripts("src/config.example.js");
+  } catch (err) {}
+}
+
+function getActiveConfig() {
+  const cfg = (typeof Echo !== "undefined" && Echo.config) ? Echo.config : {};
+  return {
+    apiKey: cfg.GEMINI_API_KEY || "",
+    openaiKey: cfg.OPENAI_API_KEY || "",
+    model: cfg.MODEL || "gemini-flash-lite-latest",
+    provider: cfg.PROVIDER || "gemini"
+  };
+}
+
 const SYSTEM_COMPILER_INSTRUCTION = `You are Echo's Master Prompt Compiler.
 Your sole job is to transform raw, unstructured human thought dumps and prompts into high-performance, unambiguous prompts for LLMs.
 
@@ -53,8 +71,10 @@ Decompile and synthesize the optimized prompt now:`;
 }
 
 async function callGemini(rawPrompt, mode, apiKey, customModel) {
-  const model = customModel || "gemini-1.5-flash";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const activeCfg = getActiveConfig();
+  const effectiveKey = apiKey || activeCfg.apiKey;
+  const model = customModel || activeCfg.model || "gemini-flash-lite-latest";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(effectiveKey)}`;
   const userPrompt = buildMetaPrompt(rawPrompt, mode);
 
   const res = await fetch(url, {
@@ -89,6 +109,8 @@ async function callGemini(rawPrompt, mode, apiKey, customModel) {
 }
 
 async function callOpenAI(rawPrompt, mode, apiKey, customModel) {
+  const activeCfg = getActiveConfig();
+  const effectiveKey = apiKey || activeCfg.openaiKey;
   const model = customModel || "gpt-4o-mini";
   const userPrompt = buildMetaPrompt(rawPrompt, mode);
 
@@ -96,7 +118,7 @@ async function callOpenAI(rawPrompt, mode, apiKey, customModel) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`
+      Authorization: `Bearer ${effectiveKey}`
     },
     body: JSON.stringify({
       model: model,
@@ -141,8 +163,10 @@ Respond ONLY with a valid JSON object matching this schema, without code fences:
 }`;
 
 async function callGeminiCoach(rawPrompt, apiKey, customModel) {
-  const model = customModel || "gemini-1.5-flash";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const activeCfg = getActiveConfig();
+  const effectiveKey = apiKey || activeCfg.apiKey;
+  const model = customModel || activeCfg.model || "gemini-flash-lite-latest";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(effectiveKey)}`;
 
   const res = await fetch(url, {
     method: "POST",
@@ -176,12 +200,14 @@ async function callGeminiCoach(rawPrompt, apiKey, customModel) {
 }
 
 async function callOpenAICoach(rawPrompt, apiKey, customModel) {
+  const activeCfg = getActiveConfig();
+  const effectiveKey = apiKey || activeCfg.openaiKey;
   const model = customModel || "gpt-4o-mini";
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`
+      Authorization: `Bearer ${effectiveKey}`
     },
     body: JSON.stringify({
       model: model,
@@ -207,8 +233,11 @@ async function callOpenAICoach(rawPrompt, apiKey, customModel) {
 // Runtime message router
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "COACH_EVALUATE_PROMPT") {
-    const { rawPrompt, provider = "auto", apiKey, customModel } = request;
-    const cacheKey = `coach:${provider}:${rawPrompt.trim().toLowerCase()}`;
+    const activeCfg = getActiveConfig();
+    const effectiveKey = request.apiKey || activeCfg.apiKey;
+    const effectiveModel = request.customModel || activeCfg.model;
+    const effectiveProvider = (!request.provider || request.provider === "auto") ? activeCfg.provider : request.provider;
+    const cacheKey = `coach:${effectiveProvider}:${request.rawPrompt.trim().toLowerCase()}`;
 
     if (promptCache.has(cacheKey)) {
       sendResponse({ success: true, evaluation: promptCache.get(cacheKey), cached: true });
@@ -218,10 +247,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     (async () => {
       try {
         let evaluation = null;
-        if (apiKey && (provider === "gemini" || provider === "auto")) {
-          evaluation = await callGeminiCoach(rawPrompt, apiKey, customModel);
-        } else if (apiKey && provider === "openai") {
-          evaluation = await callOpenAICoach(rawPrompt, apiKey, customModel);
+        if (effectiveKey && (effectiveProvider === "gemini" || effectiveProvider === "auto")) {
+          evaluation = await callGeminiCoach(request.rawPrompt, effectiveKey, effectiveModel);
+        } else if (effectiveKey && effectiveProvider === "openai") {
+          evaluation = await callOpenAICoach(request.rawPrompt, effectiveKey, effectiveModel);
         }
 
         if (evaluation) {
@@ -240,12 +269,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.type === "ENHANCE_PROMPT") {
-    const { rawPrompt, mode = "structured", provider = "auto", apiKey, customModel } = request;
+    const { rawPrompt, mode = "structured" } = request;
+    const activeCfg = getActiveConfig();
+    const effectiveKey = request.apiKey || (activeCfg.provider === "openai" ? activeCfg.openaiKey : activeCfg.apiKey);
+    const effectiveModel = request.customModel || activeCfg.model;
+    const effectiveProvider = (!request.provider || request.provider === "auto") ? activeCfg.provider : request.provider;
 
     // Check cache
-    const cacheKey = `${mode}:${provider}:${rawPrompt.trim().toLowerCase()}`;
+    const cacheKey = `${mode}:${effectiveProvider}:${rawPrompt.trim().toLowerCase()}`;
     if (promptCache.has(cacheKey)) {
-      sendResponse({ success: true, text: promptCache.get(cacheKey), cached: true, provider });
+      sendResponse({ success: true, text: promptCache.get(cacheKey), cached: true, provider: effectiveProvider });
       return true;
     }
 
@@ -253,15 +286,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       try {
         let enhancedText = null;
 
-        if (apiKey && (provider === "gemini" || provider === "auto")) {
-          enhancedText = await callGemini(rawPrompt, mode, apiKey, customModel);
-        } else if (apiKey && provider === "openai") {
-          enhancedText = await callOpenAI(rawPrompt, mode, apiKey, customModel);
+        if (effectiveKey && (effectiveProvider === "gemini" || effectiveProvider === "auto")) {
+          enhancedText = await callGemini(rawPrompt, mode, effectiveKey, effectiveModel);
+        } else if (effectiveKey && effectiveProvider === "openai") {
+          enhancedText = await callOpenAI(rawPrompt, mode, effectiveKey, effectiveModel);
         }
 
         if (enhancedText) {
           promptCache.set(cacheKey, enhancedText);
-          sendResponse({ success: true, text: enhancedText, provider });
+          sendResponse({ success: true, text: enhancedText, provider: effectiveProvider });
         } else {
           sendResponse({ success: false, error: "No provider or API key available" });
         }

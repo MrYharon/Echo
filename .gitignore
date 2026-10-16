@@ -5,3 +5,6 @@ node_modules/
 .claude/
 .gemini/
 .opencode/
+src/config.local.js
+*.local.js
+.env*
