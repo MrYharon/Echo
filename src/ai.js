@@ -103,6 +103,7 @@ Produce the optimized prompt now:`;
   async callBackgroundWorker(rawPrompt, mode, provider, apiKey, customModel) {
     return new Promise((resolve) => {
       try {
+        console.log("Echo AI: Sending ENHANCE_PROMPT to background worker...");
         chrome.runtime.sendMessage(
           {
             type: "ENHANCE_PROMPT",
@@ -114,17 +115,21 @@ Produce the optimized prompt now:`;
           },
           (res) => {
             if (chrome.runtime.lastError) {
+              console.warn("Echo AI: chrome.runtime.lastError:", chrome.runtime.lastError.message);
               resolve(null);
               return;
             }
             if (res && res.success && res.text) {
+              console.log("Echo AI: Received compiled prompt from background worker (" + (res.provider || "gemini") + ")");
               resolve(res.text);
             } else {
+              console.warn("Echo AI: Background worker returned error:", res ? res.error : "No response");
               resolve(null);
             }
           }
         );
-      } catch {
+      } catch (err) {
+        console.error("Echo AI: Exception during sendMessage:", err);
         resolve(null);
       }
     });

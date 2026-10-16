@@ -2,15 +2,26 @@
 // Handles external API requests without webpage CSP restrictions and listens for global commands.
 
 try {
-  importScripts("src/config.local.js");
-} catch (e) {
+  importScripts(chrome.runtime.getURL("src/config.local.js"));
+  console.log("Echo Service Worker: Loaded src/config.local.js successfully");
+} catch (e1) {
   try {
-    importScripts("src/config.example.js");
-  } catch (err) {}
+    importScripts("src/config.local.js");
+    console.log("Echo Service Worker: Loaded src/config.local.js via relative path");
+  } catch (e2) {
+    try {
+      importScripts(chrome.runtime.getURL("src/config.example.js"));
+    } catch (e3) {
+      try {
+        importScripts("src/config.example.js");
+      } catch (e4) {}
+    }
+  }
 }
 
 function getActiveConfig() {
-  const cfg = (typeof Echo !== "undefined" && Echo.config) ? Echo.config : {};
+  const root = (typeof globalThis !== "undefined" ? globalThis : (typeof self !== "undefined" ? self : (typeof window !== "undefined" ? window : {})));
+  const cfg = (root.Echo && root.Echo.config) ? root.Echo.config : ((typeof Echo !== "undefined" && Echo.config) ? Echo.config : {});
   return {
     apiKey: cfg.GEMINI_API_KEY || "",
     openaiKey: cfg.OPENAI_API_KEY || "",
@@ -236,7 +247,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const activeCfg = getActiveConfig();
     const effectiveKey = request.apiKey || activeCfg.apiKey;
     const effectiveModel = request.customModel || activeCfg.model;
-    const effectiveProvider = (!request.provider || request.provider === "auto") ? activeCfg.provider : request.provider;
+    const effectiveProvider = (!request.provider || request.provider === "auto" || request.provider === "local_architect") ? (activeCfg.provider || "gemini") : request.provider;
     const cacheKey = `coach:${effectiveProvider}:${request.rawPrompt.trim().toLowerCase()}`;
 
     if (promptCache.has(cacheKey)) {
@@ -246,6 +257,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     (async () => {
       try {
+        console.log("Echo Background: Evaluating prompt with provider:", effectiveProvider);
         let evaluation = null;
         if (effectiveKey && (effectiveProvider === "gemini" || effectiveProvider === "auto")) {
           evaluation = await callGeminiCoach(request.rawPrompt, effectiveKey, effectiveModel);
@@ -273,17 +285,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const activeCfg = getActiveConfig();
     const effectiveKey = request.apiKey || (activeCfg.provider === "openai" ? activeCfg.openaiKey : activeCfg.apiKey);
     const effectiveModel = request.customModel || activeCfg.model;
-    const effectiveProvider = (!request.provider || request.provider === "auto") ? activeCfg.provider : request.provider;
+    const effectiveProvider = (!request.provider || request.provider === "auto" || request.provider === "local_architect") ? (activeCfg.provider || "gemini") : request.provider;
 
     // Check cache
     const cacheKey = `${mode}:${effectiveProvider}:${rawPrompt.trim().toLowerCase()}`;
     if (promptCache.has(cacheKey)) {
+      console.log("Echo Background: Returning cached compilation");
       sendResponse({ success: true, text: promptCache.get(cacheKey), cached: true, provider: effectiveProvider });
       return true;
     }
 
     (async () => {
       try {
+        console.log("Echo Background: Compiling prompt with provider:", effectiveProvider, "model:", effectiveModel);
         let enhancedText = null;
 
         if (effectiveKey && (effectiveProvider === "gemini" || effectiveProvider === "auto")) {
@@ -293,9 +307,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
 
         if (enhancedText) {
+          console.log("Echo Background: Successfully compiled prompt with", effectiveProvider);
           promptCache.set(cacheKey, enhancedText);
           sendResponse({ success: true, text: enhancedText, provider: effectiveProvider });
         } else {
+          console.warn("Echo Background: No provider or API key available (effectiveKey present:", !!effectiveKey, ")");
           sendResponse({ success: false, error: "No provider or API key available" });
         }
       } catch (err) {

@@ -5,9 +5,9 @@ Echo.architect = (function () {
 
   const INTENT_PATTERNS = {
     debug: /\b(bug|error|broken|crash|crashing|fails|failed|exception|not\s+working|cannot|cant|undefined|null|none|issue\s+with|traceback|syntax\s+error)\b/i,
-    refactor: /\b(refactor|clean\s+up|optimize|optimization|performance|speed\s+up|simplify|code\s+review|audit|review\s+code)\b/i,
-    code_feature: /\b(code|script|implement|build|develop|create|write\s+a\s+(python|js|javascript|typescript|react|sql|api|function|class|component|endpoint|service|scraper))\b/i,
-    architecture: /\b(architecture|system\s+design|database\s+schema|data\s+model|microservice|scale|scaling|infrastructure)\b/i,
+    refactor: /\b(refactor\s+code|refactor|clean\s+up\s+code|code\s+review|audit\s+code|review\s+code)\b/i,
+    code_feature: /\b(programming|codebase|algorithm|regex|sql\s+query|api\s+endpoint|function\s+implementation|write\s+a\s+(python|js|javascript|typescript|react|sql|api|scraper)\s+script|write\s+code\s+for)\b/i,
+    architecture: /\b(software\s+architecture|system\s+design|database\s+schema|data\s+model|microservice\s+architecture|cloud\s+infrastructure)\b/i,
     explain: /\b(explain|how\s+does|how\s+to|what\s+is|understand|difference\s+between|vs|compare|comparison|pros\s+and\s+cons|overview)\b/i,
     writing: /\b(email|letter|article|blog|essay|copy|headline|tagline|memo|proposal|pitch|outreach|newsletter|paraphrase|rewrite)\b/i
   };
